@@ -276,7 +276,7 @@ function nrm(s){return String(s).toLowerCase().replace(/[^\p{L}\p{N}]/gu,'')}
 function same(x,y){x=nrm(x);y=nrm(y);return !!x&&!!y&&(x.indexOf(y)>-1||y.indexOf(x)>-1)}
 function cap(s){return String(s).replace(/(^|[\s\-\/])(\p{L})/gu,function(m,p,c){return p+c.toUpperCase()})}
 var JUNK=/seen live|favou?rite|albums? i own|owned|spotify|under \d+ listeners|^\d{4}s?$|^\d0s$|my |love|check out|male|female/i;
-function gs(d){var l=[].concat(d.genres||[],d.tags||[]),seen={};return l.slice().sort(function(x,y){return (y.count||0)-(x.count||0)}).map(function(x){return x.name}).filter(function(x){var k=nrm(x);if(!x||JUNK.test(x)||seen[k])return false;seen[k]=1;return true}).slice(0,10).map(cap)}
+function gs(d){var l=[].concat(d.genres||[],d.tags||[]),seen={};return l.slice().sort(function(x,y){return (y.count||0)-(x.count||0)}).map(function(x){return x.name}).filter(function(x){var k=nrm(x);if(!x||JUNK.test(x)||seen[k])return false;seen[k]=1;return true}).slice(0,20).map(cap)}
 function aid(d){var c=(d['artist-credit']||[])[0];return c&&c.artist?c.artist.id:''}
 function pickM(d){return {g:gs(d),d:d['first-release-date']||'',l:'',id:d.id,ai:aid(d)}}
 function esq(s){return String(s).replace(/[+\-!(){}\[\]^"~*?:\\\/&|]/g,'\\$&')}
@@ -413,7 +413,7 @@ function lfKey(){return LF.k||DEF_LFKEY}
 function saveLF(){try{localStorage.setItem('digz-lfm',JSON.stringify(LF))}catch(e){}}
 function lf(m,p){var u='https://ws.audioscrobbler.com/2.0/?format=json&api_key='+encodeURIComponent(lfKey())+'&method='+m+'&'+Object.keys(p).map(function(x){return x+'='+encodeURIComponent(p[x])}).join('&');
 return fetch(u).then(function(r){return r.json()}).catch(function(){return jsonp(u)})}
-function tg(l){return [].concat(l||[]).map(function(x){return x.name}).filter(function(x){return x&&!JUNK.test(x)}).slice(0,8)}
+function tg(l){return [].concat(l||[]).map(function(x){return x.name}).filter(function(x){return x&&!JUNK.test(x)}).slice(0,15)}
 async function loadL(k){if(!lfKey()||!LF.u||LC[k]||!S.a[k]||lq[k])return;lq[k]=1;var a=S.a[k];
 try{var d=await lf('album.getinfo',{artist:a.ar,album:a.al,autocorrect:1,username:LF.u}),i=d.album,g=i?tg((i.tags||{}).tag):[];
 if(!g.length){var t=await lf('artist.gettoptags',{artist:a.ar,autocorrect:1});g=tg((t.toptags||{}).tag)}
