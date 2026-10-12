@@ -251,6 +251,16 @@ textarea#nt{min-height:96px;resize:vertical}
 #nav .sbx button{width:34px;height:34px}
 body{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
 #toast{bottom:92px}
+
+#chips{margin-top:8px;gap:5px}
+#chips button{padding:5px 10px;font-size:12px;gap:5px}
+#chips button svg{width:13px;height:13px}
+#chips #ob{padding:5px 9px}
+#chips #ob svg{width:16px;height:16px}
+
+#chips{gap:6px;margin-top:10px}
+#chips button{flex:1 1 auto;justify-content:center;padding:8px 6px;font-size:12.5px;min-width:0}
+#chips #ob{flex:0 0 auto;padding:8px 12px}
 </style>
 <script>
 /* Tema: modo claro/oscuro y color. Se aplica antes de pintar para evitar parpadeos */
@@ -887,7 +897,7 @@ e.innerHTML=SV.map(function(s,i){return '<button data-sv="'+i+'" class="'+(s.on?
 [].forEach.call(e.querySelectorAll('[data-sv]'),function(b){b.onclick=function(){var s=SV[b.dataset.sv];s.on=!s.on;saveSV();b.className=s.on?'on':''}});
 var c=$('svc');if(c){c.innerHTML=SV.map(function(s,i){return s.c?'<div class="sv"><span>'+esc(s.n)+'</span><button data-sd="'+i+'">✕</button></div>':''}).join('');
 [].forEach.call(c.querySelectorAll('[data-sd]'),function(b){b.onclick=function(){SV.splice(+b.dataset.sd,1);saveSV();svList()}})}}
-var APPV='2026-10-12 · q';
+var APPV='2026-10-12 · s';
 var DZC=[['#1db954','Verde'],['#2f80ff','Azul'],['#8b5cf6','Violeta'],['#ec4899','Rosa'],['#f97316','Naranja'],['#ef4444','Rojo'],['#14b8a6','Turquesa'],['#eab308','Amarillo']];
 function themeUI(){var t=dzLoad(),tm=$('tm'),tc=$('tc');if(!tm||!tc)return;
 function draw(){tm.innerHTML=[['sys','Sistema',DI.sys],['light','Claro',DI.sun],['dark','Oscuro',DI.moon]].map(function(m){return '<button data-m="'+m[0]+'" class="'+(t.m==m[0]?'on':'')+'">'+m[2]+m[1]+'</button>'}).join('');
