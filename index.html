@@ -92,19 +92,19 @@ button.p{background:var(--ac);border-color:var(--ac);color:#fff;font-weight:600}
 .lk a{border:1px solid var(--bd);border-radius:99px;padding:6px 12px;font-size:13px;color:var(--tx);text-decoration:none;background:var(--card)}
 .lk a.d{border-color:var(--ac)}
 .tk{border-top:1px solid var(--bd)}
-.tr1{display:flex;gap:8px;align-items:center;padding:8px 2px;font-size:13.5px;border-bottom:1px solid var(--bd);cursor:pointer}
+.tr1{display:flex;gap:6px;align-items:center;min-height:50px;padding:4px 2px;font-size:13.5px;border-bottom:1px solid var(--bd);cursor:pointer}
 .tr1 .n{width:20px;text-align:right;color:var(--mut);flex:none;font-size:12px}
-.tr1 .nm{flex:1;min-width:0}
+.tr1 .nm{flex:1;min-width:0;padding-right:14px;line-height:1.25}
 .tr1 .rv{color:var(--st);font-size:13px;font-weight:600}
 .tr1 .rv2{display:block;color:var(--st);font-size:13px;font-weight:700;margin-top:2px;line-height:1.2}
 .tr1 .tfh{color:var(--mut);display:flex;align-items:center;justify-content:center;width:36px;height:36px;margin-right:-8px;flex:none;cursor:pointer}
 .tr1 .tfh svg{width:20px;height:20px;display:block}
 .tr1 .tfh.on{color:#ff4d6d}
-.tr1 .du{color:var(--mut);font-size:12px;flex:none}
-.tr1 .tfw{display:flex;flex-direction:column;align-items:center;justify-content:center;width:34px;flex:none;margin-right:-6px}
-.tr1 .tfw .tfh{margin:0;width:34px;height:28px}
-.tr1 .tfw .tfh svg{width:18px;height:18px}
-.tr1 .rv3{color:var(--st);font-size:10.5px;font-weight:700;line-height:1;margin-top:-1px}
+.tr1 .du{color:var(--mut);font-size:12px;flex:none;width:34px;text-align:right;font-variant-numeric:tabular-nums}
+.tr1 .tfw{display:flex;flex-direction:column;align-items:center;justify-content:center;width:34px;height:40px;flex:none;margin-right:-4px}
+.tr1 .tfw .tfh{margin:0;width:34px;height:22px}
+.tr1 .tfw .tfh svg{width:17px;height:17px}
+.tr1 .rv3{color:var(--st);font-size:10px;font-weight:700;line-height:1;margin-top:1px}
 .tp{padding:12px 6px 16px;background:var(--card);border-bottom:1px solid var(--bd);text-align:center}
 .tp .lk{justify-content:center;margin-top:10px}
 .wk p{margin:4px 0 10px;font-size:14px}
@@ -126,6 +126,10 @@ input[type=checkbox]{width:auto;padding:0}
 #toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:9px 16px;border-radius:99px;font-size:13px;z-index:20;display:none;max-width:90%}
 .ic{width:22px;height:22px;display:block;margin:auto}
 .btns .shb{flex:none;width:54px;padding:0}
+.sa{display:flex;align-items:center;justify-content:space-between;padding:14px 4px;border-top:1px solid var(--bd);border-bottom:1px solid var(--bd);cursor:pointer;margin-top:22px;font-weight:700;font-size:15px}
+.sa .ch{color:var(--mut);font-size:20px;transition:transform .2s}
+.sa.open .ch{transform:rotate(90deg)}
+.src2{font-size:12px;color:var(--mut);text-decoration:none}
 .vm{background:none;border:0;padding:0;color:var(--ac);font-weight:600;text-decoration:underline;display:inline;font-size:inherit;cursor:pointer}
 .wk .src{font-size:12px;color:var(--mut);text-decoration:none}
 details>summary+*{margin-top:10px}
@@ -646,8 +650,8 @@ if(hast){tl='<div class="tk">'+m.t.map(function(t,i){var s=t[1]||0,r=(a.tr||{})[
 if(ui.tk===i)row+='<div class="tp">'+stars(r||0,'trr','data-i="'+i+'"',1)+'</div>';
 return row}).join('')+'</div>'}
 else tl=ldg?'<div class="h" style="padding:18px 0">Buscando canciones…</div>':'<div class="h" style="padding:18px 0 10px">No encontré la lista de canciones de este álbum.</div><button data-a="rt">Reintentar</button>';
-var al=w&&w.al,sr=al||(w&&w.ar),dt=sr?sr.t:'',ex=!!ui.wx.al,
-desc=dt?'<div class="ds'+(ex?' open':'')+'">'+esc(dt)+'</div>'+((dt.length>140||(al&&w.ar))?'<button class="vm" data-a="wx" data-w="al">'+(ex?'Ver menos':'Ver más')+'</button>':'')+(ex&&al&&w.ar?'<div class="ds open" style="margin-top:10px"><b>Artista</b><br>'+esc(w.ar.t)+'</div>':'')+(ex&&sr.u?' <a class="src" href="'+esc(sr.u)+'" target="_blank" rel="noopener">· Fuente</a>':''):(w?'':'<div class="h" style="margin-top:6px">Buscando descripción…</div>');
+var al=w&&w.al,dt=al?al.t:'',ex=!!ui.wx.al,bf=dt?cutT(dt.split('\n')[0],300):'',more=dt.length>bf.length+30,
+desc=dt?'<div class="ds open">'+esc(ex?dt:bf)+'</div>'+(more?'<button class="vm" data-a="wx" data-w="al">'+(ex?'Ver menos':'Ver más')+'</button>':'')+(ex&&al.u?' <a class="src2" href="'+esc(al.u)+'" target="_blank" rel="noopener">· Fuente</a>':''):(w?'':'<div class="h" style="margin-top:6px">Buscando descripción…</div>');
 var TB=[['tk','Canciones'],['cr','Críticas'],['ge','Géneros'],['bi','Mi nota']],tb=ui.tab||'tk',body='';
 if(tb=='tk')body=tl;
 else if(tb=='cr'){var CRK=['metacritic','aoty','rym','pitchfork','allmusic'],CRL=AL.filter(function(x){return CRK.indexOf(x[1])>-1}),INF=AL.filter(function(x){return CRK.indexOf(x[1])<0});
@@ -659,6 +663,7 @@ else{var avg=tv.length?tv.reduce(function(p,c){return p+c},0)/tv.length:0;body='
 var rc=RC[k],rcs='';
 function rrow(t,l,j){return l&&l.length?'<div class="sc2">'+t+'</div><div class="hs">'+l.map(function(x,i){var c=hue(x.al+x.ar);return '<div class="tl" data-a="rco" data-j="'+j+'" data-i="'+i+'"><div class="cv" style="background:linear-gradient(145deg,hsl('+c+',50%,42%),hsl('+((c+50)%360)+',55%,20%))"><span>'+esc(ini(x.al))+'</span>'+(x.img?'<img loading="lazy" alt="" src="'+esc(x.img)+'" onerror="this.remove()">':'')+'</div><div class="t">'+esc(x.al)+'</div><div class="a">'+esc(x.ar)+'</div></div>'}).join('')+'</div>':''}
 if(rc)rcs=rrow('Más de '+esc(a.ar),rc.more,'more')+rrow('Quizá te guste',rc.sim,'sim');
+var wa=w&&w.ar,asec=(tb=='tk'&&wa)?'<div class="sa'+(ui.wx.ar?' open':'')+'" data-a="wx" data-w="ar"><span>Sobre el artista · '+esc(a.ar)+'</span><span class="ch">›</span></div>'+(ui.wx.ar?'<div class="ds open" style="margin:12px 2px 0">'+esc(wa.t)+'</div>'+(wa.u?'<a class="src2" href="'+esc(wa.u)+'" target="_blank" rel="noopener" style="display:inline-block;margin:6px 2px 0">· Fuente</a>':''):''):'';
 var en=SV.filter(function(q){return q.on}),lst='<div class="lo" data-a="lst"><div class="pf">'+en.slice(0,7).map(function(q){return '<span style="background:'+(BR[q.n]||['#666'])[0]+'">'+pic(q.n)+'</span>'}).join('')+'</div><span class="lt">Escuchar en…</span><span class="ch">›</span></div>',
 lsh=ui.ls?lsheet(a,k,m,en):'',
 cvu=cvs(a,500);
@@ -669,7 +674,7 @@ var h='<div class="hero"><div class="hbg">'+(cvu?'<img alt="" src="'+esc(cvu)+'"
 +'<div class="btns"><button class="p" data-a="done">'+(a.done?'✓ Escuchado':'Marcar escuchado')+'</button><button data-a="fav" class="hb'+(a.fav?' on':'')+'" aria-label="Favorito">'+ICHT+'</button><button data-a="shm" class="shb" aria-label="Compartir">'+ICSH+'</button></div>'
 
 +'<div class="tabs">'+TB.map(function(q){return '<button data-a="tab" data-v="'+q[0]+'" class="'+(tb==q[0]?'on':'')+'">'+q[1]+'</button>'}).join('')+'</div>'
-+body+rcs+lst+lsh;
++body+asec+rcs+lst+lsh;
 show(h);$('x').onclick=closeSheet;$('sh').scrollTop=sc}
 function closeSheet(){var b=ui.back;if(b)artistPage(b);else hide()}
 var SD=null;
@@ -710,7 +715,7 @@ e.innerHTML=SV.map(function(s,i){return '<button data-sv="'+i+'" class="'+(s.on?
 [].forEach.call(e.querySelectorAll('[data-sv]'),function(b){b.onclick=function(){var s=SV[b.dataset.sv];s.on=!s.on;saveSV();b.className=s.on?'on':''}});
 var c=$('svc');if(c){c.innerHTML=SV.map(function(s,i){return s.c?'<div class="sv"><span>'+esc(s.n)+'</span><button data-sd="'+i+'">✕</button></div>':''}).join('');
 [].forEach.call(c.querySelectorAll('[data-sd]'),function(b){b.onclick=function(){SV.splice(+b.dataset.sd,1);saveSV();svList()}})}}
-var APPV='2026-10-12 · e';
+var APPV='2026-10-12 · f';
 function settings(){cur=null;var conn=LF.u&&lfKey();
 show('<div class="hd"><div class="t">Ajustes</div><button id="x">✕</button></div>'
 +'<div class="card"><b>Last.fm</b><div class="h" id="lfs">'+(conn?'✓ Conectado como '+esc(LF.u):'Sin conectar. Solo necesitas tu usuario.')+'</div><input id="lu" placeholder="Tu usuario de Last.fm" autocapitalize="off" autocomplete="off">'
