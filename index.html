@@ -759,7 +759,9 @@ if(t.dataset.t=='ar'){artistPage(t.dataset.g);return}
 if(t.dataset.t){ui.o={t:t.dataset.t,n:t.dataset.g};ui.lim=120;render();window.scrollTo(0,0);return}
 if(t.dataset.k)sheet(t.dataset.k)};
 render();obUpd();
-try{if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){})}catch(e){}
+try{if('serviceWorker' in navigator){var SWV='digz-sw-v3';
+if(localStorage.getItem(SWV)!='1'){navigator.serviceWorker.getRegistrations().then(function(rs){return Promise.all(rs.map(function(r){return r.unregister()}))}).then(function(){return window.caches?caches.keys().then(function(ks){return Promise.all(ks.map(function(k){return caches.delete(k)}))}):0}).then(function(){try{localStorage.setItem(SWV,'1')}catch(e){}return navigator.serviceWorker.register('sw.js')}).catch(function(){})}
+else navigator.serviceWorker.register('sw.js').catch(function(){})}}catch(e){}
 </script>
 </body>
 </html>
