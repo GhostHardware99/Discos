@@ -1,5 +1,5 @@
 /* Service worker — cambia VERSION cada vez que subas un index.html nuevo */
-var VERSION = 'v4-2026-10-12';
+var VERSION = 'v5-2026-10-12';
 var CACHE = 'app-' + VERSION;
 var CORE = ['./', 'index.html'];
 
