@@ -1,5 +1,5 @@
 /* Service worker — cambia VERSION cada vez que subas un index.html nuevo */
-var VERSION = 'v3-2026-10-12';
+var VERSION = 'v4-2026-10-12';
 var CACHE = 'app-' + VERSION;
 var CORE = ['./', 'index.html'];
 
@@ -10,7 +10,6 @@ self.addEventListener('install', function (e) {
       .then(function () { return self.skipWaiting(); })
   );
 });
-
 self.addEventListener('activate', function (e) {
   e.waitUntil(
     caches.keys()
@@ -25,7 +24,6 @@ self.addEventListener('activate', function (e) {
 self.addEventListener('message', function (e) {
   if (e.data === 'SKIP_WAITING') self.skipWaiting();
 });
-
 self.addEventListener('fetch', function (e) {
   var req = e.request;
   if (req.method !== 'GET') return;
@@ -35,7 +33,6 @@ self.addEventListener('fetch', function (e) {
 
   var isPage = req.mode === 'navigate' ||
     (req.headers.get('accept') || '').indexOf('text/html') > -1;
-
   if (isPage) {
     // Red primero: siempre carga la versión nueva si hay conexión
     e.respondWith(
@@ -51,7 +48,6 @@ self.addEventListener('fetch', function (e) {
     );
     return;
   }
-
   // Resto de archivos propios: caché y actualiza en segundo plano
   e.respondWith(
     caches.match(req).then(function (hit) {

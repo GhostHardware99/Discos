@@ -382,10 +382,10 @@ var sj=await(await fetch('https://'+L+'.wikipedia.org/api/rest_v1/page/summary/'
 if(full.length>40)return {t:cutT(full,9000),u:pu,title:h.title};
 if(sj.extract)return {t:cutT(sj.extract,9000),u:pu,title:h.title}}catch(e){}}return null}
 function shortSummary(t){t=String(t||'').split(/\n\s*\n/)[0].replace(/\s+/g,' ').trim();if(!t)return '';var parts=t.match(/[^.!?]+[.!?]+|[^.!?]+$/g)||[t];var out=parts.slice(0,2).join(' ').trim();if(out.length>420)out=cutT(out,420);return out}
-async function loadW(k){if((W[k]&&W[k].v>=6)||wq[k]||!S.a[k]||navigator.onLine===false)return;wq[k]=1;var a=S.a[k];
+async function loadW(k){if((W[k]&&W[k].v>=7)||wq[k]||!S.a[k]||navigator.onLine===false)return;wq[k]=1;var a=S.a[k];
 try{var al=await wk(a.al+' (album)',a.al,'album',a.ar),ar=await wk(a.ar+' singer musician',a.ar,'artist',a.ar);
 if(al&&ar&&((al.u&&ar.u&&al.u===ar.u)||shortSummary(al.t)===shortSummary(ar.t)))al=null;
-if(al)al.t=shortSummary(al.t);if(ar)ar.t=shortSummary(ar.t);W[k]={al:al,ar:ar,v:6};try{localStorage.setItem('digz-wiki',JSON.stringify(W))}catch(e){}}catch(e){}
+if(al)al.t=shortSummary(al.t);if(ar)ar.t=shortSummary(ar.t);W[k]={al:al,ar:ar,v:7};try{localStorage.setItem('digz-wiki',JSON.stringify(W))}catch(e){}}catch(e){}
 delete wq[k];if(W[k])rs2(k)}
 
 /* ---------- Last.fm ---------- */
