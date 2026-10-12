@@ -374,10 +374,9 @@ var full='';try{var fj=await(await fetch('https://'+L+'.wikipedia.org/w/api.php?
 var s=await(await fetch('https://'+L+'.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(h.title.replace(/ /g,'_')))).json(),pu=((s.content_urls||{}).desktop||{}).page||'';
 if(full.length>40)return {t:cutT(full,9000),u:pu};
 if(s.extract)return {t:cutT(s.extract,9000),u:pu}}catch(e){}}return null}
-async function loadW(k){if((W[k]&&W[k].v>=4)||wq[k]||!S.a[k]||navigator.onLine===false)return;wq[k]=1;var a=S.a[k];
-try{var al=null,ar=null;if(lfKey()){try{var i1=await lf('album.getinfo',{artist:a.ar,album:a.al,autocorrect:1}),s1=i1.album&&i1.album.wiki&&(i1.album.wiki.content||i1.album.wiki.summary);if(s1)al=lfw(s1,i1.album.url);
-var j1=await lf('artist.getinfo',{artist:a.ar,autocorrect:1}),b1=j1.artist&&j1.artist.bio&&(j1.artist.bio.content||j1.artist.bio.summary);if(b1)ar=lfw(b1,j1.artist.url)}catch(e){}}
-var al2=await wk(a.ar+' '+a.al+' album',a.al),ar2=await wk(a.ar+' music',a.ar);if(al2&&(!al||al2.t.length>al.t.length))al=al2;if(ar2&&(!ar||ar2.t.length>ar.t.length))ar=ar2;W[k]={al:al,ar:ar,v:4};try{localStorage.setItem('digz-wiki',JSON.stringify(W))}catch(e){}}catch(e){}
+function shortSummary(t){t=String(t||'').split(/\n\s*\n/)[0].replace(/\s+/g,' ').trim();if(!t)return '';var parts=t.match(/[^.!?]+[.!?]+|[^.!?]+$/g)||[t];var out=parts.slice(0,2).join(' ').trim();if(out.length>420)out=cutT(out,420);return out}
+async function loadW(k){if((W[k]&&W[k].v>=5)||wq[k]||!S.a[k]||navigator.onLine===false)return;wq[k]=1;var a=S.a[k];
+try{var al=await wk(a.ar+' '+a.al+' album',a.al),ar=await wk(a.ar+' music',a.ar);if(al)al.t=shortSummary(al.t);if(ar)ar.t=shortSummary(ar.t);W[k]={al:al,ar:ar,v:5};try{localStorage.setItem('digz-wiki',JSON.stringify(W))}catch(e){}}catch(e){}
 delete wq[k];if(W[k])rs2(k)}
 
 /* ---------- Last.fm ---------- */
@@ -655,7 +654,7 @@ var u=(m&&m.u)||{},ai=m&&m.ai,au=(ai&&AR[ai]&&AR[ai].u)||{},lc=LC[k],w=W[k],tv=O
 var u2={};for(var z in u)u2[z]=u[z];if(a.mb)u2.mb='https://musicbrainz.org/release-group/'+a.mb;
 var AL=albumLinks(k);AL.splice(AL.length-1,0,['MusicBrainz','mb','']);if(!a.mb)AL=AL.filter(function(x){return x[1]!='mb'});
 var meta=!m?'<div class="h">'+(tries[k]>=4?'No pude conectar con MusicBrainz.':'Cargando datos del álbum…')+'</div>':m.x?'<div class="h">No encontré este álbum en MusicBrainz.</div>':(function(){var p=[(m.d||'').slice(0,4),m.t&&m.t.length?m.t.length+' canciones':'',m.l].filter(Boolean);return p.length?'<div class="h">'+esc(p.join(' • '))+'</div>':''})(),
-gen=m&&!m.x&&m.g&&m.g.length?'<div class="gn">'+m.g.map(function(x){return '<span data-a="ge" data-ge="'+esc(x)+'">'+esc(x)+'</span>'}).join('')+'</div>':'',
+gen=m&&!m.x&&m.g&&m.g.length?'<div class="gn">'+m.g.slice(0,2).map(function(x){return '<span data-a="ge" data-ge="'+esc(x)+'">'+esc(x)+'</span>'}).join('')+'</div>':'',
 lfx=lc?'<div class="h">Last.fm'+(lc.pc?' · '+lc.pc+' reproducciones tuyas':'')+(lc.ls?' · '+lc.ls.toLocaleString()+' oyentes':'')+'</div>'+(lc.g.length?'<div class="gn">'+lc.g.map(function(x){return '<span data-a="ge" data-ge="'+esc(x)+'">'+esc(x)+'</span>'}).join('')+'</div>':''):(lfKey()&&LF.u?'<div class="h">Cargando etiquetas de Last.fm…</div>':''),
 tl='';var hast=!!(m&&m.t&&m.t.length),mbp=(!m&&!(tries[k]>=4))||(m&&a.mb&&!m.x&&!m.t&&tq[k]!=2),ldg=FBq[k]==1||mbp;
 if(hast){tl='<div class="tk">'+m.t.map(function(t,i){var s=t[1]||0,r=(a.tr||{})[i],f=(a.tf||{})[i],row='<div class="tr1" data-a="trk" data-i="'+i+'"><span class="n">'+(i+1)+'</span><span class="nm">'+esc(t[0])+'</span>'+'<span class="du">'+(s?Math.floor(s/60)+':'+('0'+s%60).slice(-2):'')+'</span><span class="tfw"><span class="tfh'+(f?' on':'')+'" data-a="tfv" data-i="'+i+'" aria-label="Canción favorita">'+(f?ICHT:ICHT0)+'</span>'+(r?'<span class="rv3">★'+fr(r)+'</span>':'')+'</span></div>';
@@ -675,12 +674,12 @@ else{var avg=tv.length?tv.reduce(function(p,c){return p+c},0)/tv.length:0;body='
 var rc=RC[k],rcs='';
 function rrow(t,l,j){return l&&l.length?'<div class="sc2">'+t+'</div><div class="hs">'+l.map(function(x,i){var c=hue(x.al+x.ar);return '<div class="tl" data-a="rco" data-j="'+j+'" data-i="'+i+'"><div class="cv" style="background:linear-gradient(145deg,hsl('+c+',50%,42%),hsl('+((c+50)%360)+',55%,20%))"><span>'+esc(ini(x.al))+'</span>'+(x.img?'<img loading="lazy" alt="" src="'+esc(x.img)+'" onerror="this.remove()">':'')+'</div><div class="t">'+esc(x.al)+'</div><div class="a">'+esc(x.ar)+'</div></div>'}).join('')+'</div>':''}
 if(rc)rcs=rrow('Más de '+esc(a.ar),rc.more,'more')+rrow('Quizá te guste',rc.sim,'sim');
-var wa=w&&w.ar,asec=(tb=='tk'&&wa)?'<div class="sa'+(ui.wx.ar?' open':'')+'" data-a="wx" data-w="ar"><span>Sobre el artista · '+esc(a.ar)+'</span><span class="ch">›</span></div>'+(ui.wx.ar?'<div class="ds open" style="margin:12px 2px 0">'+esc(wa.t)+'</div>'+(wa.u?'<a class="src2" href="'+esc(wa.u)+'" target="_blank" rel="noopener" style="display:inline-block;margin:6px 2px 0">· Fuente</a>':''):''):'';
+var wa=w&&w.ar,asec=(tb=='tk'&&(al||wa))?'<div class="sa'+(ui.wx.sum?' open':'')+'" data-a="wx" data-w="sum"><span>Resumen del álbum y del artista</span><span class="ch">›</span></div>'+(ui.wx.sum?'<div style="padding:12px 2px 0">'+(al&&al.t?'<div class="sec" style="margin-top:0">El álbum</div><div class="ds open">'+esc(al.t)+'</div>':'')+(wa&&wa.t?'<div class="sec">El artista · '+esc(a.ar)+'</div><div class="ds open">'+esc(wa.t)+'</div>':'')+'</div>':''):'';
 var en=SV.filter(function(q){return q.on}),lst='<div class="lo" data-a="lst"><div class="pf">'+en.slice(0,7).map(function(q){return '<span style="background:'+(BR[q.n]||['#666'])[0]+'">'+pic(q.n)+'</span>'}).join('')+'</div><span class="lt">Escuchar en…</span><span class="ch">›</span></div>',
 lsh=ui.ls?lsheet(a,k,m,en):'',
 cvu=cvs(a,500);
 var h='<div class="hero"><div class="hbg">'+(cvu?'<img alt="" src="'+esc(cvu)+'" onerror="this.remove()">':'')+'</div><div class="htop"><button id="x" class="rb" aria-label="Atrás">'+ICBK+'</button><span class="h" style="color:var(--mut)">Álbum</span><span style="width:46px"></span></div>'
-+'<div class="ab">'+cv(a,'big',k,500,1)+'<h2>'+esc(a.al)+'</h2><div class="by">de <span class="art" data-a="art">'+esc(a.ar)+'</span></div>'+meta+desc+'</div></div>'
++'<div class="ab">'+cv(a,'big',k,500,1)+'<h2>'+esc(a.al)+'</h2><div class="by">de <span class="art" data-a="art">'+esc(a.ar)+'</span></div>'+gen+meta+'</div></div>'
 +'<div class="rate">'+stars(a.rate||0,'rate')+'</div>'
 +(a.tmp?'<div class="btns"><button class="p" data-a="addl">＋ Añadir a mi biblioteca</button></div>':'')
 +'<div class="btns"><button class="p" data-a="done">'+(a.done?'✓ Escuchado':'Marcar escuchado')+'</button><button data-a="fav" class="hb'+(a.fav?' on':'')+'" aria-label="Favorito">'+ICHT+'</button><button data-a="shm" class="shb" aria-label="Compartir">'+ICSH+'</button></div>'
