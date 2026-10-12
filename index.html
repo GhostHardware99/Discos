@@ -715,7 +715,7 @@ e.innerHTML=SV.map(function(s,i){return '<button data-sv="'+i+'" class="'+(s.on?
 [].forEach.call(e.querySelectorAll('[data-sv]'),function(b){b.onclick=function(){var s=SV[b.dataset.sv];s.on=!s.on;saveSV();b.className=s.on?'on':''}});
 var c=$('svc');if(c){c.innerHTML=SV.map(function(s,i){return s.c?'<div class="sv"><span>'+esc(s.n)+'</span><button data-sd="'+i+'">✕</button></div>':''}).join('');
 [].forEach.call(c.querySelectorAll('[data-sd]'),function(b){b.onclick=function(){SV.splice(+b.dataset.sd,1);saveSV();svList()}})}}
-var APPV='2026-10-12 · f';
+var APPV='2026-10-12 · g';
 function settings(){cur=null;var conn=LF.u&&lfKey();
 show('<div class="hd"><div class="t">Ajustes</div><button id="x">✕</button></div>'
 +'<div class="card"><b>Last.fm</b><div class="h" id="lfs">'+(conn?'✓ Conectado como '+esc(LF.u):'Sin conectar. Solo necesitas tu usuario.')+'</div><input id="lu" placeholder="Tu usuario de Last.fm" autocapitalize="off" autocomplete="off">'
@@ -784,9 +784,8 @@ if(t.dataset.t=='ar'){artistPage(t.dataset.g);return}
 if(t.dataset.t){ui.o={t:t.dataset.t,n:t.dataset.g};ui.lim=120;render();window.scrollTo(0,0);return}
 if(t.dataset.k)sheet(t.dataset.k)};
 render();obUpd();
-try{if('serviceWorker' in navigator){var SWV='digz-sw-v3';
-if(localStorage.getItem(SWV)!='1'){navigator.serviceWorker.getRegistrations().then(function(rs){return Promise.all(rs.map(function(r){return r.unregister()}))}).then(function(){return window.caches?caches.keys().then(function(ks){return Promise.all(ks.map(function(k){return caches.delete(k)}))}):0}).then(function(){try{localStorage.setItem(SWV,'1')}catch(e){}return navigator.serviceWorker.register('sw.js')}).catch(function(){})}
-else navigator.serviceWorker.register('sw.js').catch(function(){})}}catch(e){}
+try{if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(function(rs){rs.forEach(function(r){r.unregister()})}).catch(function(){});
+if(window.caches)caches.keys().then(function(ks){ks.forEach(function(k){caches.delete(k)})}).catch(function(){})}}catch(e){}
 </script>
 </body>
 </html>
