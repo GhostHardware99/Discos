@@ -140,7 +140,7 @@ details>summary+*{margin-top:10px}
 .rb svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
 .by{color:var(--mut);font-size:16px}
 .ds{color:var(--mut);font-size:14px;margin-top:8px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.ds.open{display:block}
+.ds.open{display:block;white-space:pre-line}
 .hb{flex:none;width:54px;padding:0;color:var(--mut)}
 .hb.on{color:#ff4d6d}
 .hb svg{width:26px;height:26px;display:block;margin:auto}
@@ -208,7 +208,8 @@ function nf(s){return String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').
 function cln(s){return nrm(nf(String(s).replace(/\(.*?\)|\[.*?\]/g,'').replace(/\b(deluxe|remaster(ed)?|edition|expanded|bonus|version)\b.*$/i,'')))}
 function cvs(a,sz){if(a.id)return 'https://api.deezer.com/album/'+a.id+'/image?size='+((sz||250)>300?'big':'medium');if(a.cu)return a.cu.replace('100x100','300x300');return a.mb&&!NC[a.mb]?covurl(a.mb,sz||250):''}
 function cvf(im){var m=im.dataset.m;if(m&&!im.dataset.t&&!NC[m]){im.dataset.t=1;im.src=covurl(m,250);return}ncv(im)}
-function lfw(s,u){s=String(s).replace(/<a [^>]*>.*?<\/a>/g,'').replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim();s=s.replace(/User-contributed text.*$/i,'').trim();return s.length>40?{t:s.length>1500?s.slice(0,1500)+'…':s,u:u||''}:null}
+function cutT(s,n){if(s.length<=n)return s;var c=s.slice(0,n),i=Math.max(c.lastIndexOf('. '),c.lastIndexOf('.\n'));return (i>n*.6?c.slice(0,i+1):c)+(i>n*.6?'':'…')}
+function lfw(s,u){s=String(s).replace(/<a [^>]*>.*?<\/a>/g,'').replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim();s=s.replace(/User-contributed text.*$/i,'').trim();return s.length>40?{t:cutT(s,9000),u:u||''}:null}
 function $(i){return document.getElementById(i)}
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
 function hue(s){var h=0;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))%360;return h}
@@ -343,14 +344,19 @@ function lkRow(L,u){return '<div class="lk">'+L.map(function(x){var d=u[x[1]];re
 
 /* ---------- Wikipedia (secundaria) ---------- */
 var W={},wq={};try{W=JSON.parse(localStorage.getItem('digz-wiki')||'{}')}catch(e){}
+var WSKIP=/^(references?|external links?|see also|notes?|further reading|bibliography|track listings?|tracklist|personnel|credits?|charts?|weekly charts?|year-end charts?|certifications?|sales|release history|formats?|referencias?|enlaces externos|véase también|notas|bibliografía|lista de (temas|canciones)|personal|posiciones|certificaciones|historial de lanzamiento|discograf[ií]a|filmograf[ií]a|awards? and nominations|tours?|singles|videography)$/i;
+function wkClean(t){var out=[],skip=0,lv=0;String(t).split('\n').forEach(function(l){var m=l.match(/^(=+)\s*(.+?)\s*=+\s*$/);if(m){var n=m[1].length;if(skip&&n>lv)return;skip=WSKIP.test(m[2])?1:0;lv=n;return}if(!skip)out.push(l)});
+return out.join('\n').replace(/[ \t]+\n/g,'\n').replace(/\n{3,}/g,'\n\n').trim()}
 async function wk(q,m){for(var L of ['es','en']){try{var r=await(await fetch('https://'+L+'.wikipedia.org/w/api.php?action=query&list=search&format=json&origin=*&srlimit=4&srsearch='+encodeURIComponent(q))).json();
 var h=((r.query||{}).search||[]).filter(function(x){return same(x.title,m)})[0];if(!h)continue;
-var s=await(await fetch('https://'+L+'.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(h.title.replace(/ /g,'_')))).json();
-if(s.extract)return {t:s.extract.slice(0,1500)+(s.extract.length>1500?'…':''),u:((s.content_urls||{}).desktop||{}).page||''}}catch(e){}}return null}
-async function loadW(k){if((W[k]&&W[k].v)||wq[k]||!S.a[k]||navigator.onLine===false)return;wq[k]=1;var a=S.a[k];
+var full='';try{var fj=await(await fetch('https://'+L+'.wikipedia.org/w/api.php?action=query&prop=extracts&explaintext=1&redirects=1&format=json&origin=*&titles='+encodeURIComponent(h.title))).json(),pg=fj.query&&fj.query.pages,fp=pg&&pg[Object.keys(pg)[0]];full=wkClean((fp&&fp.extract)||'')}catch(e){}
+var s=await(await fetch('https://'+L+'.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(h.title.replace(/ /g,'_')))).json(),pu=((s.content_urls||{}).desktop||{}).page||'';
+if(full.length>40)return {t:cutT(full,9000),u:pu};
+if(s.extract)return {t:cutT(s.extract,9000),u:pu}}catch(e){}}return null}
+async function loadW(k){if((W[k]&&W[k].v>=3)||wq[k]||!S.a[k]||navigator.onLine===false)return;wq[k]=1;var a=S.a[k];
 try{var al=null,ar=null;if(lfKey()){try{var i1=await lf('album.getinfo',{artist:a.ar,album:a.al,autocorrect:1}),s1=i1.album&&i1.album.wiki&&(i1.album.wiki.content||i1.album.wiki.summary);if(s1)al=lfw(s1,i1.album.url);
 var j1=await lf('artist.getinfo',{artist:a.ar,autocorrect:1}),b1=j1.artist&&j1.artist.bio&&(j1.artist.bio.content||j1.artist.bio.summary);if(b1)ar=lfw(b1,j1.artist.url)}catch(e){}}
-if(!al)al=await wk(a.ar+' '+a.al+' album',a.al);if(!ar)ar=await wk(a.ar+' music',a.ar);W[k]={al:al,ar:ar,v:2};try{localStorage.setItem('digz-wiki',JSON.stringify(W))}catch(e){}}catch(e){}
+if(!al)al=await wk(a.ar+' '+a.al+' album',a.al);if(!ar)ar=await wk(a.ar+' music',a.ar);W[k]={al:al,ar:ar,v:3};try{localStorage.setItem('digz-wiki',JSON.stringify(W))}catch(e){}}catch(e){}
 delete wq[k];if(W[k])rs2(k)}
 
 /* ---------- Last.fm ---------- */
