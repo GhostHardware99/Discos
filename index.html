@@ -16,7 +16,7 @@
 :root[data-theme="dark"]{--bg:#0d0d0f;--card:#18181b;--tx:#f3f3f0;--mut:#9a9890;--bd:#2a2a2d;--so:#3a3a3e;--ac2:#10301c}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0}
-body{background:var(--bg);color:var(--tx);font:15px/1.4 -apple-system,system-ui,"Segoe UI",Roboto,sans-serif;max-width:900px;margin-inline:auto;padding:env(safe-area-inset-top,0px) 0 calc(100px + env(safe-area-inset-bottom,0px))}
+body{background:var(--bg);color:var(--tx);font:14.5px/1.4 -apple-system,system-ui,"Segoe UI",Roboto,sans-serif;max-width:900px;margin-inline:auto;padding:env(safe-area-inset-top,0px) 0 calc(100px + env(safe-area-inset-bottom,0px))}
 input,select,textarea,button{font:inherit;color:var(--tx)}
 input,select,textarea{width:100%;background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:10px 12px}
 button{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:9px 14px;cursor:pointer}
@@ -92,15 +92,19 @@ button.p{background:var(--ac);border-color:var(--ac);color:#fff;font-weight:600}
 .lk a{border:1px solid var(--bd);border-radius:99px;padding:6px 12px;font-size:13px;color:var(--tx);text-decoration:none;background:var(--card)}
 .lk a.d{border-color:var(--ac)}
 .tk{border-top:1px solid var(--bd)}
-.tr1{display:flex;gap:10px;align-items:center;padding:11px 2px;border-bottom:1px solid var(--bd);cursor:pointer}
-.tr1 .n{width:22px;text-align:right;color:var(--mut);flex:none}
+.tr1{display:flex;gap:8px;align-items:center;padding:8px 2px;font-size:13.5px;border-bottom:1px solid var(--bd);cursor:pointer}
+.tr1 .n{width:20px;text-align:right;color:var(--mut);flex:none;font-size:12px}
 .tr1 .nm{flex:1;min-width:0}
 .tr1 .rv{color:var(--st);font-size:13px;font-weight:600}
 .tr1 .rv2{display:block;color:var(--st);font-size:13px;font-weight:700;margin-top:2px;line-height:1.2}
 .tr1 .tfh{color:var(--mut);display:flex;align-items:center;justify-content:center;width:36px;height:36px;margin-right:-8px;flex:none;cursor:pointer}
 .tr1 .tfh svg{width:20px;height:20px;display:block}
 .tr1 .tfh.on{color:#ff4d6d}
-.tr1 .du{color:var(--mut);font-size:13px;flex:none}
+.tr1 .du{color:var(--mut);font-size:12px;flex:none}
+.tr1 .tfw{display:flex;flex-direction:column;align-items:center;justify-content:center;width:34px;flex:none;margin-right:-6px}
+.tr1 .tfw .tfh{margin:0;width:34px;height:28px}
+.tr1 .tfw .tfh svg{width:18px;height:18px}
+.tr1 .rv3{color:var(--st);font-size:10.5px;font-weight:700;line-height:1;margin-top:-1px}
 .tp{padding:12px 6px 16px;background:var(--card);border-bottom:1px solid var(--bd);text-align:center}
 .tp .lk{justify-content:center;margin-top:10px}
 .wk p{margin:4px 0 10px;font-size:14px}
@@ -353,10 +357,10 @@ var full='';try{var fj=await(await fetch('https://'+L+'.wikipedia.org/w/api.php?
 var s=await(await fetch('https://'+L+'.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(h.title.replace(/ /g,'_')))).json(),pu=((s.content_urls||{}).desktop||{}).page||'';
 if(full.length>40)return {t:cutT(full,9000),u:pu};
 if(s.extract)return {t:cutT(s.extract,9000),u:pu}}catch(e){}}return null}
-async function loadW(k){if((W[k]&&W[k].v>=3)||wq[k]||!S.a[k]||navigator.onLine===false)return;wq[k]=1;var a=S.a[k];
+async function loadW(k){if((W[k]&&W[k].v>=4)||wq[k]||!S.a[k]||navigator.onLine===false)return;wq[k]=1;var a=S.a[k];
 try{var al=null,ar=null;if(lfKey()){try{var i1=await lf('album.getinfo',{artist:a.ar,album:a.al,autocorrect:1}),s1=i1.album&&i1.album.wiki&&(i1.album.wiki.content||i1.album.wiki.summary);if(s1)al=lfw(s1,i1.album.url);
 var j1=await lf('artist.getinfo',{artist:a.ar,autocorrect:1}),b1=j1.artist&&j1.artist.bio&&(j1.artist.bio.content||j1.artist.bio.summary);if(b1)ar=lfw(b1,j1.artist.url)}catch(e){}}
-if(!al)al=await wk(a.ar+' '+a.al+' album',a.al);if(!ar)ar=await wk(a.ar+' music',a.ar);W[k]={al:al,ar:ar,v:3};try{localStorage.setItem('digz-wiki',JSON.stringify(W))}catch(e){}}catch(e){}
+var al2=await wk(a.ar+' '+a.al+' album',a.al),ar2=await wk(a.ar+' music',a.ar);if(al2&&(!al||al2.t.length>al.t.length))al=al2;if(ar2&&(!ar||ar2.t.length>ar.t.length))ar=ar2;W[k]={al:al,ar:ar,v:4};try{localStorage.setItem('digz-wiki',JSON.stringify(W))}catch(e){}}catch(e){}
 delete wq[k];if(W[k])rs2(k)}
 
 /* ---------- Last.fm ---------- */
@@ -638,7 +642,7 @@ var meta=!m?'<div class="h">'+(tries[k]>=4?'No pude conectar con MusicBrainz.':'
 gen=m&&!m.x&&m.g&&m.g.length?'<div class="gn">'+m.g.map(function(x){return '<span data-a="ge" data-ge="'+esc(x)+'">'+esc(x)+'</span>'}).join('')+'</div>':'',
 lfx=lc?'<div class="h">Last.fm'+(lc.pc?' · '+lc.pc+' reproducciones tuyas':'')+(lc.ls?' · '+lc.ls.toLocaleString()+' oyentes':'')+'</div>'+(lc.g.length?'<div class="gn">'+lc.g.map(function(x){return '<span data-a="ge" data-ge="'+esc(x)+'">'+esc(x)+'</span>'}).join('')+'</div>':''):(lfKey()&&LF.u?'<div class="h">Cargando etiquetas de Last.fm…</div>':''),
 tl='';var hast=!!(m&&m.t&&m.t.length),mbp=(!m&&!(tries[k]>=4))||(m&&a.mb&&!m.x&&!m.t&&tq[k]!=2),ldg=FBq[k]==1||mbp;
-if(hast){tl='<div class="tk">'+m.t.map(function(t,i){var s=t[1]||0,r=(a.tr||{})[i],f=(a.tf||{})[i],row='<div class="tr1" data-a="trk" data-i="'+i+'"><span class="n">'+(i+1)+'</span><span class="nm">'+esc(t[0])+(r?'<span class="rv2">★ '+fr(r)+'</span>':'')+'</span>'+'<span class="du">'+(s?Math.floor(s/60)+':'+('0'+s%60).slice(-2):'')+'</span><span class="tfh'+(f?' on':'')+'" data-a="tfv" data-i="'+i+'" aria-label="Canción favorita">'+(f?ICHT:ICHT0)+'</span></div>';
+if(hast){tl='<div class="tk">'+m.t.map(function(t,i){var s=t[1]||0,r=(a.tr||{})[i],f=(a.tf||{})[i],row='<div class="tr1" data-a="trk" data-i="'+i+'"><span class="n">'+(i+1)+'</span><span class="nm">'+esc(t[0])+'</span>'+'<span class="du">'+(s?Math.floor(s/60)+':'+('0'+s%60).slice(-2):'')+'</span><span class="tfw"><span class="tfh'+(f?' on':'')+'" data-a="tfv" data-i="'+i+'" aria-label="Canción favorita">'+(f?ICHT:ICHT0)+'</span>'+(r?'<span class="rv3">★'+fr(r)+'</span>':'')+'</span></div>';
 if(ui.tk===i)row+='<div class="tp">'+stars(r||0,'trr','data-i="'+i+'"',1)+'</div>';
 return row}).join('')+'</div>'}
 else tl=ldg?'<div class="h" style="padding:18px 0">Buscando canciones…</div>':'<div class="h" style="padding:18px 0 10px">No encontré la lista de canciones de este álbum.</div><button data-a="rt">Reintentar</button>';
@@ -706,6 +710,7 @@ e.innerHTML=SV.map(function(s,i){return '<button data-sv="'+i+'" class="'+(s.on?
 [].forEach.call(e.querySelectorAll('[data-sv]'),function(b){b.onclick=function(){var s=SV[b.dataset.sv];s.on=!s.on;saveSV();b.className=s.on?'on':''}});
 var c=$('svc');if(c){c.innerHTML=SV.map(function(s,i){return s.c?'<div class="sv"><span>'+esc(s.n)+'</span><button data-sd="'+i+'">✕</button></div>':''}).join('');
 [].forEach.call(c.querySelectorAll('[data-sd]'),function(b){b.onclick=function(){SV.splice(+b.dataset.sd,1);saveSV();svList()}})}}
+var APPV='2026-10-12 · e';
 function settings(){cur=null;var conn=LF.u&&lfKey();
 show('<div class="hd"><div class="t">Ajustes</div><button id="x">✕</button></div>'
 +'<div class="card"><b>Last.fm</b><div class="h" id="lfs">'+(conn?'✓ Conectado como '+esc(LF.u):'Sin conectar. Solo necesitas tu usuario.')+'</div><input id="lu" placeholder="Tu usuario de Last.fm" autocapitalize="off" autocomplete="off">'
@@ -716,7 +721,7 @@ show('<div class="hd"><div class="t">Ajustes</div><button id="x">✕</button></d
 +'<div class="card"><b>Colecciones</b><div class="row"><input id="nc" placeholder="Nueva colección"><button id="ac" style="flex:none">Crear</button></div></div>'
 +'<div class="card"><b>Respaldo</b><div class="h">Genera el texto, guárdalo y pégalo aquí para restaurar.</div><textarea id="bk"></textarea><div class="row"><button id="ex">Generar respaldo</button><button id="rs">Restaurar</button></div></div>'
 +'<details><summary>Avanzado</summary><div class="card" style="border:0;padding:10px 0 0"><div class="h"><b>Otra plataforma</b>: busca algo en su web, copia la URL y pon {q} donde iba el texto buscado.</div><div id="svc"></div><div class="row"><input id="svn" placeholder="Nombre"><input id="svu" placeholder="https://sitio.com/search?q={q}"></div><button id="sva">Añadir plataforma</button>'
-+'<button id="ld">Cargar portadas y datos de toda mi biblioteca</button><div class="h">MusicBrainz permite 1 consulta por segundo (unos 2 min por cada 100 álbumes). Puedes cerrar esta ventana.</div><button id="cl">Borrar todo</button></div></details>');
++'<button id="ld">Cargar portadas y datos de toda mi biblioteca</button><div class="h">MusicBrainz permite 1 consulta por segundo (unos 2 min por cada 100 álbumes). Puedes cerrar esta ventana.</div><button id="cl">Borrar todo</button></div></details><div class="h" style="text-align:center;margin:18px 0">Versión '+APPV+'</div>');
 $('x').onclick=hide;$('lu').value=LF.u||'';svList();
 $('lcon').onclick=function(){var u=$('lu').value.trim(),kk=$('lk')?$('lk').value.trim():'';if(!u){msg('Escribe tu usuario de Last.fm');$('lfs').textContent='Escribe tu usuario de Last.fm';return}
 if(kk)LF.k=kk;if(!lfKey()){$('lfs').textContent='Falta la API key: pégala en el cuadro de arriba.';return}
