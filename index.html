@@ -368,15 +368,24 @@ var W={},wq={};try{W=JSON.parse(localStorage.getItem('digz-wiki')||'{}')}catch(e
 var WSKIP=/^(references?|external links?|see also|notes?|further reading|bibliography|track listings?|tracklist|personnel|credits?|charts?|weekly charts?|year-end charts?|certifications?|sales|release history|formats?|referencias?|enlaces externos|véase también|notas|bibliografía|lista de (temas|canciones)|personal|posiciones|certificaciones|historial de lanzamiento|discograf[ií]a|filmograf[ií]a|awards? and nominations|tours?|singles|videography)$/i;
 function wkClean(t){var out=[],skip=0,lv=0;String(t).split('\n').forEach(function(l){var m=l.match(/^(=+)\s*(.+?)\s*=+\s*$/);if(m){var n=m[1].length;if(skip&&n>lv)return;skip=WSKIP.test(m[2])?1:0;lv=n;return}if(!skip)out.push(l)});
 return out.join('\n').replace(/[ \t]+\n/g,'\n').replace(/\n{3,}/g,'\n\n').trim()}
-async function wk(q,m){for(var L of ['es','en']){try{var r=await(await fetch('https://'+L+'.wikipedia.org/w/api.php?action=query&list=search&format=json&origin=*&srlimit=4&srsearch='+encodeURIComponent(q))).json();
-var h=((r.query||{}).search||[]).filter(function(x){return same(x.title,m)})[0];if(!h)continue;
+async function wk(q,m,kind,artist){for(var L of ['es','en']){try{var r=await(await fetch('https://'+L+'.wikipedia.org/w/api.php?action=query&list=search&format=json&origin=*&srlimit=8&srsearch='+encodeURIComponent(q))).json();
+var hits=((r.query||{}).search||[]),h=null;
+if(kind==='album'){
+// Para un álbum homónimo, exige una página de álbum; nunca acepta por accidente la biografía del artista.
+var albumTitle=nrm(m+'album');h=hits.filter(function(x){return nrm(x.title)===albumTitle})[0]||null;
+if(!h&&nrm(m)!==nrm(artist))h=hits.filter(function(x){return nrm(x.title)===nrm(m)})[0]||null;
+if(!h)h=hits.filter(function(x){return nrm(x.title).indexOf(nrm(m))===0&&/album/i.test(x.title)})[0]||null;
+}else h=hits.filter(function(x){return nrm(x.title)===nrm(m)})[0]||hits.filter(function(x){return same(x.title,m)&&!(/\(album\)/i.test(x.title))})[0]||null;
+if(!h)continue;
 var full='';try{var fj=await(await fetch('https://'+L+'.wikipedia.org/w/api.php?action=query&prop=extracts&explaintext=1&redirects=1&format=json&origin=*&titles='+encodeURIComponent(h.title))).json(),pg=fj.query&&fj.query.pages,fp=pg&&pg[Object.keys(pg)[0]];full=wkClean((fp&&fp.extract)||'')}catch(e){}
-var s=await(await fetch('https://'+L+'.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(h.title.replace(/ /g,'_')))).json(),pu=((s.content_urls||{}).desktop||{}).page||'';
-if(full.length>40)return {t:cutT(full,9000),u:pu};
-if(s.extract)return {t:cutT(s.extract,9000),u:pu}}catch(e){}}return null}
+var sj=await(await fetch('https://'+L+'.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(h.title.replace(/ /g,'_')))).json(),pu=((sj.content_urls||{}).desktop||{}).page||'';
+if(full.length>40)return {t:cutT(full,9000),u:pu,title:h.title};
+if(sj.extract)return {t:cutT(sj.extract,9000),u:pu,title:h.title}}catch(e){}}return null}
 function shortSummary(t){t=String(t||'').split(/\n\s*\n/)[0].replace(/\s+/g,' ').trim();if(!t)return '';var parts=t.match(/[^.!?]+[.!?]+|[^.!?]+$/g)||[t];var out=parts.slice(0,2).join(' ').trim();if(out.length>420)out=cutT(out,420);return out}
-async function loadW(k){if((W[k]&&W[k].v>=5)||wq[k]||!S.a[k]||navigator.onLine===false)return;wq[k]=1;var a=S.a[k];
-try{var al=await wk(a.ar+' '+a.al+' album',a.al),ar=await wk(a.ar+' music',a.ar);if(al)al.t=shortSummary(al.t);if(ar)ar.t=shortSummary(ar.t);W[k]={al:al,ar:ar,v:5};try{localStorage.setItem('digz-wiki',JSON.stringify(W))}catch(e){}}catch(e){}
+async function loadW(k){if((W[k]&&W[k].v>=6)||wq[k]||!S.a[k]||navigator.onLine===false)return;wq[k]=1;var a=S.a[k];
+try{var al=await wk(a.al+' (album)',a.al,'album',a.ar),ar=await wk(a.ar+' singer musician',a.ar,'artist',a.ar);
+if(al&&ar&&((al.u&&ar.u&&al.u===ar.u)||shortSummary(al.t)===shortSummary(ar.t)))al=null;
+if(al)al.t=shortSummary(al.t);if(ar)ar.t=shortSummary(ar.t);W[k]={al:al,ar:ar,v:6};try{localStorage.setItem('digz-wiki',JSON.stringify(W))}catch(e){}}catch(e){}
 delete wq[k];if(W[k])rs2(k)}
 
 /* ---------- Last.fm ---------- */
@@ -654,7 +663,7 @@ var u=(m&&m.u)||{},ai=m&&m.ai,au=(ai&&AR[ai]&&AR[ai].u)||{},lc=LC[k],w=W[k],tv=O
 var u2={};for(var z in u)u2[z]=u[z];if(a.mb)u2.mb='https://musicbrainz.org/release-group/'+a.mb;
 var AL=albumLinks(k);AL.splice(AL.length-1,0,['MusicBrainz','mb','']);if(!a.mb)AL=AL.filter(function(x){return x[1]!='mb'});
 var meta=!m?'<div class="h">'+(tries[k]>=4?'No pude conectar con MusicBrainz.':'Cargando datos del álbum…')+'</div>':m.x?'<div class="h">No encontré este álbum en MusicBrainz.</div>':(function(){var p=[(m.d||'').slice(0,4),m.t&&m.t.length?m.t.length+' canciones':'',m.l].filter(Boolean);return p.length?'<div class="h">'+esc(p.join(' • '))+'</div>':''})(),
-gen=m&&!m.x&&m.g&&m.g.length?'<div class="gn">'+m.g.slice(0,2).map(function(x){return '<span data-a="ge" data-ge="'+esc(x)+'">'+esc(x)+'</span>'}).join('')+'</div>':'',
+gen=m&&!m.x&&m.g&&m.g.length?'<div class="h">'+esc(m.g.slice(0,2).join(' • '))+'</div>':'',
 lfx=lc?'<div class="h">Last.fm'+(lc.pc?' · '+lc.pc+' reproducciones tuyas':'')+(lc.ls?' · '+lc.ls.toLocaleString()+' oyentes':'')+'</div>'+(lc.g.length?'<div class="gn">'+lc.g.map(function(x){return '<span data-a="ge" data-ge="'+esc(x)+'">'+esc(x)+'</span>'}).join('')+'</div>':''):(lfKey()&&LF.u?'<div class="h">Cargando etiquetas de Last.fm…</div>':''),
 tl='';var hast=!!(m&&m.t&&m.t.length),mbp=(!m&&!(tries[k]>=4))||(m&&a.mb&&!m.x&&!m.t&&tq[k]!=2),ldg=FBq[k]==1||mbp;
 if(hast){tl='<div class="tk">'+m.t.map(function(t,i){var s=t[1]||0,r=(a.tr||{})[i],f=(a.tf||{})[i],row='<div class="tr1" data-a="trk" data-i="'+i+'"><span class="n">'+(i+1)+'</span><span class="nm">'+esc(t[0])+'</span>'+'<span class="du">'+(s?Math.floor(s/60)+':'+('0'+s%60).slice(-2):'')+'</span><span class="tfw"><span class="tfh'+(f?' on':'')+'" data-a="tfv" data-i="'+i+'" aria-label="Canción favorita">'+(f?ICHT:ICHT0)+'</span>'+(r?'<span class="rv3">★'+fr(r)+'</span>':'')+'</span></div>';
@@ -674,7 +683,7 @@ else{var avg=tv.length?tv.reduce(function(p,c){return p+c},0)/tv.length:0;body='
 var rc=RC[k],rcs='';
 function rrow(t,l,j){return l&&l.length?'<div class="sc2">'+t+'</div><div class="hs">'+l.map(function(x,i){var c=hue(x.al+x.ar);return '<div class="tl" data-a="rco" data-j="'+j+'" data-i="'+i+'"><div class="cv" style="background:linear-gradient(145deg,hsl('+c+',50%,42%),hsl('+((c+50)%360)+',55%,20%))"><span>'+esc(ini(x.al))+'</span>'+(x.img?'<img loading="lazy" alt="" src="'+esc(x.img)+'" onerror="this.remove()">':'')+'</div><div class="t">'+esc(x.al)+'</div><div class="a">'+esc(x.ar)+'</div></div>'}).join('')+'</div>':''}
 if(rc)rcs=rrow('Más de '+esc(a.ar),rc.more,'more')+rrow('Quizá te guste',rc.sim,'sim');
-var wa=w&&w.ar,asec=(tb=='tk'&&(al||wa))?'<div class="sa'+(ui.wx.sum?' open':'')+'" data-a="wx" data-w="sum"><span>Resumen del álbum y del artista</span><span class="ch">›</span></div>'+(ui.wx.sum?'<div style="padding:12px 2px 0">'+(al&&al.t?'<div class="sec" style="margin-top:0">El álbum</div><div class="ds open">'+esc(al.t)+'</div>':'')+(wa&&wa.t?'<div class="sec">El artista · '+esc(a.ar)+'</div><div class="ds open">'+esc(wa.t)+'</div>':'')+'</div>':''):'';
+var wa=w&&w.ar,asec=(tb=='tk'&&((al&&al.t)||(wa&&wa.t)))?'<div class="sa'+(ui.wx.sum?' open':'')+'" data-a="wx" data-w="sum"><span>Resumen del álbum y del artista</span><span class="ch">›</span></div>'+(ui.wx.sum?'<div style="padding:12px 2px 0">'+(al&&al.t?'<div class="sec" style="margin-top:0">El álbum</div><div class="ds open">'+esc(al.t)+'</div>':'')+(wa&&wa.t?'<div class="sec">El artista · '+esc(a.ar)+'</div><div class="ds open">'+esc(wa.t)+'</div>':'')+'</div>':''):'';
 var en=SV.filter(function(q){return q.on}),lst='<div class="lo" data-a="lst"><div class="pf">'+en.slice(0,7).map(function(q){return '<span style="background:'+(BR[q.n]||['#666'])[0]+'">'+pic(q.n)+'</span>'}).join('')+'</div><span class="lt">Escuchar en…</span><span class="ch">›</span></div>',
 lsh=ui.ls?lsheet(a,k,m,en):'',
 cvu=cvs(a,500);
