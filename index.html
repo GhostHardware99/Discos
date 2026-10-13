@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0d0d0f">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -314,7 +314,7 @@ function dzBar(c){var m=document.querySelector('meta[name=theme-color]');if(m&&w
 function dzHc(av){var d=document.documentElement;if(!av){d.style.removeProperty('--hc');d.style.setProperty('--hcr',dzRgbs(window.DZTC));dzBar();return}
 var rgb=[1,3,5].map(function(i){return parseInt(av.substr(i,2),16)}),bg=window.DZDK?[13,13,15]:[244,243,239],c=dzHex(dzMix(dzMix(bg,rgb,.55),[0,0,0],.12));d.style.setProperty('--hc',c);d.style.setProperty('--hcr',dzRgbs(c));dzBar(c)}
 dzApply(dzLoad());
-try{var vv=window.visualViewport;if(vv){var vf=function(){document.documentElement.style.setProperty('--vvt',(vv.offsetTop||0)+'px')};vv.addEventListener('resize',vf);vv.addEventListener('scroll',vf);vf()}}catch(e){}
+try{var vv=window.visualViewport;if(vv){var vf=function(){document.documentElement.style.setProperty('--vvt',(vv.offsetTop||0)+'px')};vv.addEventListener('resize',vf);vv.addEventListener('scroll',vf);window.addEventListener('scroll',vf,{passive:true});var vk=function(){vf();[80,200,400,700,1100].forEach(function(t){setTimeout(vf,t)})};document.addEventListener('focusin',vk);document.addEventListener('focusout',vk);vf()}}catch(e){}
 try{matchMedia('(prefers-color-scheme:dark)').addListener(function(){var t=dzLoad();if(t.m=='sys')dzApply(t)})}catch(e){}
 </script>
 </head>
