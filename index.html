@@ -28,13 +28,15 @@ button.p{background:var(--ac);border-color:var(--ac);color:var(--onac);font-weig
 .ttl span{color:var(--mut);font-size:13px;text-align:right}
 html{background:var(--bg)}
 body::before{content:"";position:fixed;left:0;right:0;top:var(--vvt,0px);height:560px;background:linear-gradient(180deg,rgba(var(--acr),var(--g1)) 0,rgba(var(--acr),var(--g2)) 42%,transparent 100%);pointer-events:none;z-index:0}
-#stabs{display:none}
 body.srch #seg,body.srch #chips,body.srch #opt{display:none!important}
-body.srch #stabs{display:flex}
-body.srch.sblank #list{display:none}
-#list .li>b.gp{background:var(--ac2);color:var(--act);border:1px solid rgba(var(--acr),.55);border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:18px;flex:none;margin-left:6px}
+body.srch.sblank #list,body.srch.sblank #gauto{display:none}
+#gauto{position:relative;z-index:1;padding:0 16px 20px}
+#gauto:empty{padding:0}
+body:not(.srch) #gauto{display:none}
+#list .li>b.gp,#gauto .li>b.gp{background:var(--ac2);color:var(--act);border:1px solid rgba(var(--acr),.55);border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:18px;flex:none;margin-left:6px}
 html[data-gr="1"] body::before{top:0;height:100%;background:linear-gradient(180deg,transparent 30%,rgba(var(--acr),calc(var(--g2) + .06)) 68%,rgba(var(--acr),var(--g1)) 100%)}
 #hd,#list{position:relative;z-index:1}
+html:before{content:"";position:fixed;left:0;right:0;top:0;height:calc(84px + env(safe-area-inset-top,0px));pointer-events:none;z-index:5;background:linear-gradient(to bottom,color-mix(in srgb,var(--tc,var(--bg)) 100%,transparent) 0%,color-mix(in srgb,var(--tc,var(--bg)) 82%,transparent) 14%,color-mix(in srgb,var(--tc,var(--bg)) 58%,transparent) 32%,color-mix(in srgb,var(--tc,var(--bg)) 33%,transparent) 52%,color-mix(in srgb,var(--tc,var(--bg)) 14%,transparent) 73%,color-mix(in srgb,var(--tc,var(--bg)) 4%,transparent) 89%,transparent 100%)}
 .ttl .tools{display:flex;gap:8px;flex:none;align-items:center}
 .ttl .tools button{width:44px;height:44px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:20px;line-height:1;background:var(--gl);border-color:var(--glb)}
 .ttl .tools button svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
@@ -47,7 +49,6 @@ html[data-gr="1"] body::before{top:0;height:100%;background:linear-gradient(180d
 #nav .sbx>svg{width:22px;height:22px;flex:none;fill:none;stroke:var(--mut);stroke-width:1.9;stroke-linecap:round}
 #nav .sbx input{border:0;background:none;padding:12px 2px;font-size:16px;min-width:0;outline:none}
 #nav .sbx button svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}
-#nav .sbx #qa{background:var(--ac);color:var(--onac)}
 #nav .sbx button{flex:none;width:38px;height:38px;padding:0;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;background:var(--bd);border:0;color:var(--tx)}
 #nav.qs>button{display:none}
 #nav.qs .sbx{display:flex}
@@ -89,6 +90,8 @@ html[data-gr="1"] body::before{top:0;height:100%;background:linear-gradient(180d
 .fh h2{font-size:26px;letter-spacing:-.5px;margin:4px 0 2px}
 .bk{border:0;background:none;color:var(--act);padding:4px 0;font-weight:600}
 .sec{font-size:13px;color:var(--mut);margin:20px 0 8px;font-weight:600}
+.sch{font-size:12px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--act);margin:4px 2px 12px}
+#gauto .sch{margin-top:10px;padding-top:18px;border-top:1px solid var(--bd)}
 .sec span{font-weight:400}
 .btns{display:flex;gap:8px;margin-top:12px}
 .btns>*{flex:1}
@@ -328,11 +331,11 @@ try{matchMedia('(prefers-color-scheme:dark)').addListener(function(){var t=dzLoa
 <div class="ttl"><h1>Digz</h1></div>
 <div class="seg2" id="seg"></div>
 <div class="chips" id="chips"></div>
-<div class="seg2" id="stabs"></div>
 <div id="opt"><label>Vista</label><div class="seg" id="vs"><button data-v="g"><svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>Cuadrícula</button><button data-v="l"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>Lista</button></div><label>Ordenar por</label><select id="so"><option value="ar">Artista A-Z</option><option value="al">Álbum A-Z</option><option value="rate">Mejor nota</option><option value="t">Escuchado reciente</option></select><label>Colección</label><select id="cf"></select></div>
 </header>
 <div id="list"></div>
-<nav id="nav"><button id="nl" class="on" aria-label="Biblioteca"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.6"/><path d="M6.8 9.2a6 6 0 0 1 3-2.6M17.2 14.8a6 6 0 0 1-3 2.6"/></svg><span>Biblioteca</span></button><button id="fv" aria-label="Favoritos"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg><span>Favoritos</span></button><button id="bs" aria-label="Buscar o añadir álbum"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span>Buscar</span></button><button id="nst" aria-label="Resumen"><svg viewBox="0 0 24 24"><path d="M5 20V11M12 20V4M19 20v-6"/></svg><span>Resumen</span></button><button id="cfg" aria-label="Ajustes"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span>Ajustes</span></button><div class="sbx"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" placeholder="Buscar en tu biblioteca" type="search" autocomplete="off"><button id="qa" aria-label="Añadir álbum"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button><button id="qx" aria-label="Cerrar búsqueda">✕</button></div></nav>
+<div id="gauto"></div>
+<nav id="nav"><button id="nl" class="on" aria-label="Biblioteca"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.6"/><path d="M6.8 9.2a6 6 0 0 1 3-2.6M17.2 14.8a6 6 0 0 1-3 2.6"/></svg><span>Biblioteca</span></button><button id="fv" aria-label="Favoritos"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg><span>Favoritos</span></button><button id="bs" aria-label="Buscar o añadir álbum"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span>Buscar</span></button><button id="nst" aria-label="Resumen"><svg viewBox="0 0 24 24"><path d="M5 20V11M12 20V4M19 20v-6"/></svg><span>Resumen</span></button><button id="cfg" aria-label="Ajustes"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span>Ajustes</span></button><div class="sbx"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" placeholder="Buscar en tu biblioteca" type="search" autocomplete="off"><button id="qx" aria-label="Cerrar búsqueda">✕</button></div></nav>
 <div id="ov"><div id="sh"></div></div>
 <div id="toast"></div>
 <script>
@@ -910,7 +913,7 @@ function libInfo(n,d,rs,rn){var sc=function(a,b){return '<div class="sc"><b>'+a+
 function render(){var ks=Object.keys(S.a),d=0,rs=0,rn=0;
 ks.forEach(function(k){var a=S.a[k];if(a.done)d++;if(a.rate){rs+=a.rate;rn++}});
 var se=$('st');if(se)se.innerHTML=libInfo(ks.length,d,rs,rn);
-$('seg').innerHTML=[['g','','Todos','all'],['g','ar','Artistas','ar'],['g','ge','Géneros','ge']].map(chipB).join('');
+$('seg').innerHTML=[['g','','Álbumes','all'],['g','ar','Artistas','ar'],['g','ge','Géneros','ge']].map(chipB).join('');
 $('chips').innerHTML=[['f','todo','Por escuchar','todo'],['f','done','Escuchados','done'],['f','top','4+','top']].map(chipB).join('')+'<button id="ob" class="'+((ui.c||ui.s!='ar')?'act ':'')+($('opt').style.display=='block'?'on':'')+'" aria-label="Vista, orden y colección"><svg viewBox="0 0 24 24"><path d="M4 7h9M19 7h1M4 17h1M11 17h9"/><circle cx="16" cy="7" r="2.6"/><circle cx="8" cy="17" r="2.6"/></svg></button>'+(ui.ge?'<button data-x="1" class="on">'+esc(ui.ge)+' ✕</button>':'');
 $('cf').innerHTML='<option value="">Colecciones</option>'+S.cols.map(function(c){return '<option'+(ui.c==c?' selected':'')+'>'+esc(c)+'</option>'}).join('');
 [].forEach.call($('vs').children,function(b){b.classList.toggle('on',b.dataset.v==ui.v)});$('nl').classList.toggle('on',ui.f!='fav');$('fv').classList.toggle('on',ui.f=='fav');
@@ -920,10 +923,10 @@ if(ui.g&&!ui.q&&!ui.o){var gr={},o=[];f.forEach(function(k){var n=gk(k,ui.g);(gr
 o.sort(ui.g=='ge'?function(x,y){return gr[y].length-gr[x].length||x.localeCompare(y)}:function(x,y){return x.localeCompare(y)});
 h=o.length?(ui.v=='g'?'<div class="grid">'+o.map(function(n){return fold(n,gr[n],ui.g)}).join('')+'</div>':o.map(function(n){return fold(n,gr[n],ui.g)}).join('')):'<div class="empty">'+(ks.length?'Nada con ese filtro.':'Toca ＋ para añadir tu primer álbum.')+'</div>'}
 else{var sl=f.slice(0,ui.lim);
-h=(ui.o?folderHead(f):'')+(sl.length?blk(sl):'<div class="empty">'+(ks.length?'Nada con ese filtro.':'Toca ＋ para añadir tu primer álbum o importa tu música en Ajustes.')+'</div>');
+h=(ui.q&&!ui.o?'<div class="sch">En tu biblioteca</div>':'')+(ui.o?folderHead(f):'')+(sl.length?blk(sl):ui.q?'<div class="h">Sin resultados en tu biblioteca</div>':'<div class="empty">'+(ks.length?'Nada con ese filtro.':'Toca ＋ para añadir tu primer álbum o importa tu música en Ajustes.')+'</div>');
 if(f.length>ui.lim)h+='<button class="more" id="mr">Ver más ('+(f.length-ui.lim)+')</button>';
 if(ui.o&&ui.o.t=='ar'){var ai=aiOf(f);if(ai)loadA(ai)}}
-if(!inGlob())$('list').innerHTML=h+(ui.q&&!ui.o?'<button class="more" id="gq">Buscar «'+esc(ui.q)+'» en todo el catálogo</button>':'');watch()}
+if(!inGlob())$('list').innerHTML=h;watch()}
 var io=window.IntersectionObserver?new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){io.unobserve(e.target);keysOf(e.target).forEach(function(k){needCover(k);need(k);needG(k,1)})}})},{rootMargin:'300px'}):null;
 function keysOf(el){if(el.dataset.ks){try{return JSON.parse(el.dataset.ks)}catch(e){return []}}return [el.dataset.k]}
 function watch(){[].forEach.call($('list').querySelectorAll('[data-k],[data-ks]'),function(el){var miss=keysOf(el).some(function(k){var a=S.a[k];return !M[k]||!GX[k]||(a&&!a.cu&&!a.cx)});if(miss){if(io)io.observe(el);else keysOf(el).forEach(function(k){needCover(k);need(k);needG(k,1)})}})}
@@ -1183,11 +1186,11 @@ return '<div class="li" data-i="'+i+'"><div class="cv sm" style="background:line
 if(pre){$('cq').value=pre;$('cq').oninput()}$('cq').focus()}
 
 /* ---------- Eventos generales ---------- */
-$('cfg').onclick=settings;$('qa').onclick=function(){catalog(ui.q)};$('list').addEventListener('click',function(e){if(e.target.closest('#gq'))setSm('glob')});
+$('cfg').onclick=settings;
 $('fv').onclick=function(){ui.o=null;ui.g='';ui.ge='';ui.f=ui.f=='fav'?'all':'fav';ui.lim=120;hide();render();window.scrollTo(0,0)};
 $('nl').onclick=function(){if(ui.f=='fav')ui.f='all';ui.o=null;ui.lim=120;hide();render();window.scrollTo(0,0)};
 $('ov').onclick=function(e){if(e.target==this)hide()};
-$('q').oninput=function(){ui.q=this.value;ui.lim=120;if(inGlob())gsearch();else render()};
+$('q').oninput=function(){ui.q=this.value;ui.lim=120;if(inGlob())gsearch();else{render();gsearch(0,1)}};
 function obUpd(){var b=$('ob');if(b)b.classList.toggle('act',!!ui.c||ui.s!='ar')}
 $('so').onchange=function(){ui.s=this.value;obUpd();render()};
 $('cf').onchange=function(){ui.c=this.value;ui.lim=120;obUpd();render()};
@@ -1201,19 +1204,17 @@ $('nst').onclick=function(){stats()};
 $('bs').onclick=function(){hide();ui.o=null;$('nav').classList.add('qs');$('q').focus()};
 /* ---------- Búsqueda: pestañas «Tu biblioteca» / «Búsqueda global» ---------- */
 ui.sm='lib';var gTm,gTok=0;
-function inGlob(){return $('nav').classList.contains('qs')&&ui.sm=='glob'}
-function sTabs(){$('stabs').innerHTML=[['lib','Tu biblioteca'],['glob','Búsqueda global']].map(function(c){return '<button data-sm="'+c[0]+'" class="'+(ui.sm==c[0]?'on':'')+'"><span>'+c[1]+'</span></button>'}).join('')}
-function setSm(m){ui.sm=m;sTabs();if(m=='glob')gsearch(1);else{gTok++;render()}window.scrollTo(0,0)}
-function gsearch(now){clearTimeout(gTm);if(mbAb)mbAb.abort();var v=(ui.q||'').trim();if(v.length<2){gTok++;$('list').innerHTML='';return}
-gTm=setTimeout(function(){var my=++gTok;$('list').innerHTML='<div class="h">Buscando…</div>';
-Promise.all([buscarMB(v),buscarArt(v).catch(function(){return []})]).then(function(rs){var d=rs[0],ars=rs[1];if(my!=gTok||!inGlob())return;var l=d['release-groups']||[];
-$('list').innerHTML=ahtml(ars)+(l.length?'<div class="sec">Álbumes</div>':'')+l.map(function(x,i){var ar=acs(x)[0]||'Desconocido',y=(x['first-release-date']||'').slice(0,4),h=hue(x.title+ar),ty=x['primary-type']&&x['primary-type']!='Album'?' · '+esc(x['primary-type']):'';
+function inGlob(){return false}
+function gsearch(now,auto){var T=function(){return auto?$('gauto'):$('list')},OK=function(){return $('nav').classList.contains('qs')};clearTimeout(gTm);if(mbAb)mbAb.abort();var v=(ui.q||'').trim();if(v.length<2){gTok++;T().innerHTML='';return}
+gTm=setTimeout(function(){var my=++gTok;T().innerHTML='<div class="h">Buscando…</div>';
+Promise.all([buscarMB(v),buscarArt(v).catch(function(){return []})]).then(function(rs){var d=rs[0],ars=rs[1];if(my!=gTok||!OK())return;var l=d['release-groups']||[];
+T().innerHTML=(auto?'<div class="sch">Búsqueda global</div>':'')+ahtml(ars)+(l.length?'<div class="sec">Álbumes</div>':'')+l.map(function(x,i){var ar=acs(x)[0]||'Desconocido',y=(x['first-release-date']||'').slice(0,4),h=hue(x.title+ar),ty=x['primary-type']&&x['primary-type']!='Album'?' · '+esc(x['primary-type']):'';
 return '<div class="li" data-i="'+i+'"><div class="cv sm" style="background:linear-gradient(145deg,hsl('+h+',50%,42%),hsl('+((h+50)%360)+',55%,20%))"><span>'+esc(ini(x.title))+'</span>'+(x._cu?'<img alt="" src="'+esc(x._cu)+'" onerror="this.remove()">':(NC[x.id]?'':'<img loading="lazy" alt="" data-m="'+x.id+'" src="'+covurl(x.id,250)+'" onerror="ncv(this)">'))+'</div><div class="in"><div class="t">'+esc(x.title)+'</div><div class="a">'+esc(ar)+(y?' · '+y:'')+ty+'</div></div><b>'+(S.a[kof(ar,x.title)]&&!S.a[kof(ar,x.title)].tmp?'✓':'＋')+'</b></div>'}).join('')||(ars.length?'':'<div class="empty">Sin resultados</div>');
-[].forEach.call($('list').querySelectorAll('[data-ar]'),function(r){r.onclick=function(){artistPage(ars[r.dataset.ar])}});
-[].forEach.call($('list').querySelectorAll('[data-i]'),function(r){r.onclick=function(){var x=l[r.dataset.i],ar=acs(x)[0]||'Desconocido',k=kof(ar,x.title);if(S.a[k]){sheet(k);return}add(ar,x.title,'',x.id);S.a[k].cu=x._cu||'';S.a[k].tmp=1;if(x.id)M[k]=pickM(x);save();saveM();sheet(k)}});
-[].forEach.call($('list').querySelectorAll('[data-i]'),function(r){var bt=r.lastElementChild,x=l[r.dataset.i],ar=acs(x)[0]||'Desconocido',k=kof(ar,x.title);if(S.a[k]&&!S.a[k].tmp){bt.textContent='✓';return}bt.classList.add('gp');bt.onclick=function(e){e.stopPropagation();if(S.a[k]&&!S.a[k].tmp)return;if(!S.a[k]){add(ar,x.title,'',x.id);S.a[k].cu=x._cu||'';if(x.id)M[k]=pickM(x)}else delete S.a[k].tmp;save();saveM();bt.textContent='✓';bt.classList.remove('gp');toast('Añadido a tu biblioteca')}});
-[].forEach.call($('list').querySelectorAll('[data-ar]'),function(r){var n=ars[r.dataset.ar],ch=r.lastElementChild,bt=document.createElement('b');bt.className='gp';bt.textContent='＋';bt.setAttribute('aria-label','Añadir álbumes del artista');r.insertBefore(bt,ch);bt.onclick=function(e){e.stopPropagation();gAddArtist(n,bt)}});
-}).catch(function(e){if(e&&e.name=='AbortError')return;if(my==gTok)$('list').textContent=e=='q'?'MusicBrainz está saturado; prueba en unos segundos.':'No pude conectar con MusicBrainz.'})},now?0:400)}
+[].forEach.call(T().querySelectorAll('[data-ar]'),function(r){r.onclick=function(){artistPage(ars[r.dataset.ar])}});
+[].forEach.call(T().querySelectorAll('[data-i]'),function(r){r.onclick=function(){var x=l[r.dataset.i],ar=acs(x)[0]||'Desconocido',k=kof(ar,x.title);if(S.a[k]){sheet(k);return}add(ar,x.title,'',x.id);S.a[k].cu=x._cu||'';S.a[k].tmp=1;if(x.id)M[k]=pickM(x);save();saveM();sheet(k)}});
+[].forEach.call(T().querySelectorAll('[data-i]'),function(r){var bt=r.lastElementChild,x=l[r.dataset.i],ar=acs(x)[0]||'Desconocido',k=kof(ar,x.title);if(S.a[k]&&!S.a[k].tmp){bt.textContent='✓';return}bt.classList.add('gp');bt.onclick=function(e){e.stopPropagation();if(S.a[k]&&!S.a[k].tmp)return;if(!S.a[k]){add(ar,x.title,'',x.id);S.a[k].cu=x._cu||'';if(x.id)M[k]=pickM(x)}else delete S.a[k].tmp;save();saveM();bt.textContent='✓';bt.classList.remove('gp');toast('Añadido a tu biblioteca')}});
+[].forEach.call(T().querySelectorAll('[data-ar]'),function(r){var n=ars[r.dataset.ar],ch=r.lastElementChild,bt=document.createElement('b');bt.className='gp';bt.textContent='＋';bt.setAttribute('aria-label','Añadir álbumes del artista');r.insertBefore(bt,ch);bt.onclick=function(e){e.stopPropagation();gAddArtist(n,bt)}});
+}).catch(function(e){if(e&&e.name=='AbortError')return;if(my==gTok)T().textContent=e=='q'?'MusicBrainz está saturado; prueba en unos segundos.':'No pude conectar con MusicBrainz.'})},now?0:400)}
 async function gAddArtist(n,bt){bt.textContent='…';var d=[];try{d=await artistAlbums(n)}catch(e){}
 var seen={},its=[];d.forEach(function(x){var c=cln(x.al);if(!c||seen[c])return;seen[c]=1;its.push(x)});
 var nw=its.filter(function(x){var q=S.a[kof(x.ar||n,x.al)];return !q||q.tmp});
@@ -1222,11 +1223,10 @@ if(!nw.length){bt.textContent='✓';toast('Ya tienes todos sus álbumes');return
 if(!confirm('¿Añadir '+nw.length+(nw.length==1?' álbum':' álbumes')+' de '+n+' a tu biblioteca?')){bt.textContent='＋';return}
 nw.forEach(function(x){var ar=x.ar||n,k=kof(ar,x.al);if(S.a[k]){delete S.a[k].tmp;return}if(add(ar,x.al,x.id,'')&&S.a[k]){if(x.cu)S.a[k].cu=x.cu;if(x.img&&!x.cu)S.a[k].img=x.img;if(x.iid)S.a[k].iid=x.iid}});
 save();bt.textContent='✓';bt.classList.remove('gp');toast(nw.length+(nw.length==1?' álbum añadido':' álbumes añadidos'))}
-$('stabs').onclick=function(e){var b=e.target.closest('[data-sm]');if(b)setSm(b.dataset.sm)};
 (function(){var n=$('nav'),q=$('q'),b=document.body;function f(){var on=n.classList.contains('qs'),was=b.classList.contains('srch');b.classList.toggle('srch',on);b.classList.toggle('sblank',on&&!q.value.trim());
-if(on&&!was){ui.sm='lib';sTabs();window.scrollTo(0,0)}if(!on&&was){ui.sm='lib';gTok++;render()}}
-try{new MutationObserver(f).observe(n,{attributes:true,attributeFilter:['class']})}catch(e){}q.addEventListener('input',f);sTabs();f()})();
-$('qx').onclick=function(){$('q').value='';ui.q='';$('nav').classList.remove('qs');ui.lim=120;render()};
+if(on&&!was){window.scrollTo(0,0)}if(!on&&was){gTok++;$('gauto').innerHTML='';render()}}
+try{new MutationObserver(f).observe(n,{attributes:true,attributeFilter:['class']})}catch(e){}q.addEventListener('input',f);f()})();
+$('qx').onclick=function(){$('q').value='';ui.q='';gTok++;$('gauto').innerHTML='';$('nav').classList.remove('qs');ui.lim=120;render()};
 $('q').onkeydown=function(e){if(e.key=='Enter')this.blur()};
 $('list').onclick=function(e){if(e.target.id=='mr'){ui.lim+=240;render();return}
 var t=e.target.closest('[data-a],[data-g],[data-k]');if(!t)return;
