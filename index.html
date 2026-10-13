@@ -1395,25 +1395,7 @@ if(t.dataset.t=='ge'){genrePage(t.dataset.g);return}
 if(t.dataset.t){ui.ot='lib';ui.o={t:t.dataset.t,n:t.dataset.g};ui.lim=120;render();window.scrollTo(0,0);return}
 if(t.dataset.k)sheet(t.dataset.k)};
 render();obUpd();setTimeout(bulkG,1500);
-
-/* ---------- Instalación como app: si el manifiesto del sitio falta o está incompleto, se genera uno válido ---------- */
-(async function(){try{
-var m=null;try{var r=await fetch('manifest.webmanifest',{cache:'no-store'});if(r.ok)m=await r.json()}catch(e){}
-var ic=(m&&m.icons)||[],has=function(z){return ic.some(function(i){return String(i.sizes||'').split(' ').indexOf(z)>-1})};
-if(m&&m.start_url&&m.display&&has('192x192')&&has('512x512'))return;
-var base=location.href.split('#')[0].split('?')[0].replace(/[^\/]*$/,'');
-function mk(sz,im){var c=document.createElement('canvas');c.width=c.height=sz;var x=c.getContext('2d');
-if(im){x.imageSmoothingEnabled=false;x.fillStyle='#0d0d0f';x.fillRect(0,0,sz,sz);x.drawImage(im,0,0,sz,sz)}
-else{x.fillStyle='#0d0d0f';x.fillRect(0,0,sz,sz);x.fillStyle='#7ee08a';x.beginPath();x.arc(sz/2,sz/2,sz*.34,0,7);x.fill();x.fillStyle='#0d0d0f';x.beginPath();x.arc(sz/2,sz/2,sz*.1,0,7);x.fill()}
-return c.toDataURL('image/png')}
-var im=await new Promise(function(ok){var i=new Image();i.onload=function(){ok(i)};i.onerror=function(){ok(null)};i.src=base+'icon-192.png'});
-var man={name:'Digz',short_name:'Digz',id:base,start_url:base,scope:base,display:'standalone',orientation:'portrait',background_color:'#0d0d0f',theme_color:'#0d0d0f',
-icons:[{src:mk(192,im),sizes:'192x192',type:'image/png',purpose:'any'},{src:mk(512,im),sizes:'512x512',type:'image/png',purpose:'any'},{src:mk(512,im),sizes:'512x512',type:'image/png',purpose:'maskable'}]};
-var old=document.querySelector('link[rel="manifest"]');if(old)old.remove();
-var l=document.createElement('link');l.rel='manifest';l.href=URL.createObjectURL(new Blob([JSON.stringify(man)],{type:'application/manifest+json'}));document.head.appendChild(l)
-}catch(e){}})();
-try{if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(function(rs){rs.forEach(function(r){r.unregister()})}).catch(function(){});
-if(window.caches)caches.keys().then(function(ks){ks.forEach(function(k){caches.delete(k)})}).catch(function(){})}}catch(e){}
+try{if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}}catch(e){}
 </script>
 </body>
 </html>
