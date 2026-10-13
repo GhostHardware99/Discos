@@ -28,6 +28,7 @@ button.p{background:var(--ac);border-color:var(--ac);color:var(--onac);font-weig
 .ttl span{color:var(--mut);font-size:13px;text-align:right}
 html{background:var(--bg)}
 body::before{content:"";position:fixed;left:0;right:0;top:var(--vvt,0px);height:560px;background:linear-gradient(180deg,rgba(var(--acr),var(--g1)) 0,rgba(var(--acr),var(--g2)) 42%,transparent 100%);pointer-events:none;z-index:0}
+body.srch #hd,body.srch #list{display:none}
 html[data-gr="1"] body::before{top:0;height:100%;background:linear-gradient(180deg,transparent 30%,rgba(var(--acr),calc(var(--g2) + .06)) 68%,rgba(var(--acr),var(--g1)) 100%)}
 #hd,#list{position:relative;z-index:1}
 .ttl .tools{display:flex;gap:8px;flex:none;align-items:center}
@@ -1193,6 +1194,8 @@ if(b.dataset.f!==undefined){ui.f=ui.f==b.dataset.f?'all':b.dataset.f;ui.lim=120;
 $('seg').onclick=$('chips').onclick;
 $('nst').onclick=function(){stats()};
 $('bs').onclick=function(){hide();ui.o=null;$('nav').classList.add('qs');$('q').focus()};
+/* Búsqueda vacía: página limpia con el degradado, sin la biblioteca debajo */
+(function(){var n=$('nav'),q=$('q');function f(){var on=n.classList.contains('qs')&&!q.value.trim();document.body.classList.toggle('srch',on);if(on)window.scrollTo(0,0)}try{new MutationObserver(f).observe(n,{attributes:true,attributeFilter:['class']})}catch(e){}q.addEventListener('input',f);f()})();
 $('qx').onclick=function(){$('q').value='';ui.q='';$('nav').classList.remove('qs');ui.lim=120;render()};
 $('q').onkeydown=function(e){if(e.key=='Enter')this.blur()};
 $('list').onclick=function(e){if(e.target.id=='mr'){ui.lim+=240;render();return}
