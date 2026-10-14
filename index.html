@@ -134,7 +134,8 @@ html:before{content:"";position:fixed;left:0;right:0;top:0;height:calc(10px + en
 .tr1 .rv3{color:var(--st);font-size:14px;font-weight:700;flex:none;white-space:nowrap;margin-right:2px;display:inline-flex;align-items:center;gap:3px}
 .tr1 .tdu{display:block;width:100%;color:var(--mut);font-size:12px;margin-top:4px;line-height:1.2;font-variant-numeric:tabular-nums}
 .tr1{min-height:56px}
-.tp{padding:12px 6px 16px;background:var(--card);border-bottom:1px solid var(--bd);text-align:center}
+.mn-card{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px 14px;margin-top:6px}.mn-big{font-size:34px;font-weight:600;line-height:1;min-width:44px;text-align:center}.mn-in{flex:1;min-width:0}.mn-in .st{font-size:24px}.mn-in .sr{pointer-events:none}.mn-sub{color:var(--mut);font-size:12px;margin-top:2px}.mn-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}.mn-3 div{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:9px 6px;text-align:center}.mn-3 b{display:block;font-size:16px;font-weight:600}.mn-3 span{font-size:11px;color:var(--mut)}.mn-lbl{font-size:11px;letter-spacing:.8px;text-transform:uppercase;color:var(--mut);font-weight:600;margin:18px 2px 8px}.mn-chips{display:flex;flex-wrap:wrap;gap:8px}.mn-chip{display:flex;align-items:center;gap:8px;max-width:100%;border-radius:99px;padding:7px 12px;background:var(--card)}.mn-chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}.mn-chip.on{background:var(--ac2);border-color:var(--ac)}.mn-chip i{font-style:normal;color:var(--mut);flex:none;font-size:16px;line-height:1}.mn-chip.add{border-style:dashed}.mn-del{display:block;margin:22px auto 0;background:none;border:0;color:#e5736f;font-weight:500}
+.tp{padding:6px 6px 12px;background:transparent;border-bottom:1px solid var(--bd);text-align:center}.tp .sr.sm .st{font-size:22px}
 .tp .lk{justify-content:center;margin-top:10px}
 .wk p{margin:4px 0 10px;font-size:14px}
 .wk a{color:var(--act)}
@@ -1408,7 +1409,11 @@ body='<div class="sec">Mi reseña</div><textarea id="nt" rows="4" placeholder="E
 +'<div class="sec">Críticas y reseñas de webs</div>'+lkRow(CRL,u2)
 +'<div class="sec">Más información</div>'+lkRow(INF,u2)}
 else if(tb=='ge')body=(gen?'<div class="sec">Géneros</div>'+gen+'<div class="h" style="margin-top:8px">Toca un género para ver tus álbumes de ese estilo.</div>':(GX[k]?'':'<div class="h" style="padding:18px 0">Buscando géneros…</div>'))+(lfx?'<div class="sec">Last.fm</div>'+lfx:'')||'<div class="h" style="padding:18px 0">Sin datos de género todavía.</div>';
-else{var avg=tv.length?tv.reduce(function(p,c){return p+c},0)/tv.length:0;body='<div class="sec">Mi puntuación</div><div style="font-size:15px">'+(a.rate?'Álbum: <b>'+fr(a.rate)+' / 5</b>':'')+'</div>'+(tv.length?'<div style="font-size:15px;margin-top:6px">Canciones puntuadas: <b>'+tv.length+'</b> · media <b>'+avg.toFixed(1)+'</b></div>':'')+(Object.keys(a.tf||{}).length?'<div style="font-size:15px;margin-top:6px">Canciones favoritas: <b>'+Object.keys(a.tf||{}).length+'</b></div>':'')+'<div class="sec">Mi biblioteca</div>'+(S.cols.length?S.cols.map(function(c){return '<label class="clk"><input type="checkbox" data-cl="'+esc(c)+'"'+(hasCol(a,c)?' checked':'')+' style="width:auto;flex:none"> '+esc(c)+'</label>'}).join(''):'<div class="h">Aún no tienes colecciones</div>')+'<button data-a="del" style="margin-top:18px">Quitar de mi biblioteca</button>'}
+else{var avg=tv.length?tv.reduce(function(p,c){return p+c},0)/tv.length:0,cls=colList(a),nfv=Object.keys(a.tf||{}).length,dtx=(a.done&&a.t)?new Date(a.t).toLocaleDateString('es',{day:'numeric',month:'short'}).replace('.',''):'—';
+body='<div class="mn-card"><div class="mn-big">'+(a.rate?fr(a.rate):'—')+'</div><div class="mn-in">'+stars(a.rate||0,'mnr')+'<div class="mn-sub">'+(tv.length?'Media de canciones '+avg.toFixed(1)+' · '+tv.length+' de '+(hast?m.t.length:tv.length)+' puntuadas':'Aún no has puntuado canciones')+'</div></div></div>'
++'<div class="mn-3"><div><b>'+nfv+'</b><span>Favoritas</span></div><div><b>'+dtx+'</b><span>'+(a.done?'Escuchado':'Por escuchar')+'</span></div><div><b>'+cls.length+'</b><span>Colecciones</span></div></div>'
++'<div class="mn-lbl">Colecciones</div><div class="mn-chips">'+cls.map(function(c){return '<button class="mn-chip on" data-a="rmc" data-c="'+esc(c)+'" aria-label="Quitar de la colección '+esc(c)+'"><span>'+esc(c)+'</span><i>×</i></button>'}).join('')+'<button class="mn-chip add" data-a="addc">＋ Colección</button></div>'
++'<button class="mn-del" data-a="del">Quitar de mi biblioteca</button>'}
 var rc=RC[k],rcs='';
 function rrow(t,l,j){return l&&l.length?'<div class="sc2">'+t+'</div><div class="hs">'+l.map(function(x,i){var c=hue(x.al+x.ar);return '<div class="tl" data-a="rco" data-j="'+j+'" data-i="'+i+'"><div class="cv" style="background:linear-gradient(145deg,hsl('+c+',50%,42%),hsl('+((c+50)%360)+',55%,20%))"><span>'+esc(ini(x.al))+'</span>'+(x.img||x.cu||x.id?'<img loading="lazy" decoding="async" alt="" data-alt="'+esc([x.cu,x.id?'https://api.deezer.com/album/'+x.id+'/image?size=medium':''].filter(Boolean).join('|'))+'" src="'+esc(x.img||x.cu||(x.id?'https://api.deezer.com/album/'+x.id+'/image?size=medium':''))+'" onerror="cvf(this)">':'')+'</div><div class="t">'+esc(x.al)+'</div><div class="a">'+esc(x.ar)+'</div></div>'}).join('')+'</div>':''}
 if(rc)rcs=(rc.more&&rc.more.length?rrow('Más del artista',rc.more,'more'):'<div class="sc2">Más del artista</div><div class="h">'+(rc.moreLoading?'Buscando álbumes del artista…':'No encontré más álbumes de este artista.')+'</div>')+(rc.sim&&rc.sim.length?rrow('Quizá te guste',rc.sim,'sim'):'<div class="sc2">Quizá te guste</div><div class="h">'+(rc.simLoading?'Buscando recomendaciones…':'No encontré recomendaciones por ahora.')+'</div>');else if(RCq[k])rcs='<div class="sc2">Más del artista</div><div class="h">Buscando álbumes del artista…</div><div class="sc2">Quizá te guste</div><div class="h">Buscando recomendaciones…</div>';
@@ -1453,6 +1458,8 @@ else if(ac=='rt'){delete FBq[k];delete tq[k];delete tqn[k];delete tries[k];if(M[
 else if(ac=='rco'){openItem(RC[k][t.dataset.j][+t.dataset.i])}
 else if(ac=='wx'){var wi=t.dataset.w;ui.wx[wi]=!ui.wx[wi];sheet(k)}
 else if(ac=='sht'){ui.sm=false;sheet(k);shareAlbum(k,false)}
+else if(ac=='rmc'){var rcn=t.dataset.c;rmCol(a,rcn);save();render();sheet(k);toast('Quitado de «'+rcn+'»')}
+else if(ac=='addc'){albumMenu(k,null,'pick')}
 else if(ac=='del'){if(confirm('¿Quitar este álbum de tu biblioteca?')){delete S.a[k];save();render();ovBack()}}});
 $('sh').addEventListener('keydown',function(e){var t=e.target.closest('.gn [data-a="ge"]');if(t&&(e.key==='Enter'||e.key===' ')){e.preventDefault();t.click()}});
 $('sh').addEventListener('change',function(e){if(!cur||!S.a[cur])return;if(e.target.dataset&&e.target.dataset.cl!==undefined){var qa=S.a[cur];if(e.target.checked)addCol(qa,e.target.dataset.cl);else rmCol(qa,e.target.dataset.cl);save();render()}else if(e.target.id=='nt'){S.a[cur].note=e.target.value;save()}});
@@ -1720,15 +1727,15 @@ $('sh').addEventListener('click',function(e){var pg=$('sh').querySelector('.colp
 
 /* ---------- Pulsación larga sobre un álbum ---------- */
 function lpClose(){var e=$('lpm');if(e)e.remove()}
-function albumMenu(k,ctx){var a=S.a[k];if(!a)return;lpClose();
+function albumMenu(k,ctx,start){var a=S.a[k];if(!a)return;lpClose();
 var w=document.createElement('div');w.id='lpm';w.className='lpm dzmod';w.innerHTML='<div class="lpc"></div>';document.body.appendChild(w);var box=w.firstChild;
 function head(){return '<div class="lph">'+cv(a,'sm',k,120)+'<div class="in"><div class="t">'+esc(a.al)+'</div><div class="a">'+esc(a.ar)+'</div></div></div>'}
 function home(){box.innerHTML=head()+(ctx?'<button data-p="uncol">Quitar de colección</button><button data-p="col">Añadir a otra colección</button>':'<button data-p="done">'+(a.done?'Marcar como por escuchar':'Marcar como escuchado')+'</button><button data-p="fav">'+(a.fav?'Quitar de favoritos':'Añadir a favoritos')+'</button><button data-p="col">Añadir a una colección</button><button class="dg" data-p="del">Quitar de mi biblioteca</button>')}
 function pick(){var cs=S.cols.filter(function(c){return !hasCol(a,c)});
 box.innerHTML='<div class="lpt">Elegir colección</div>'+cs.map(function(c){return '<button data-c="'+esc(c)+'">'+esc(c)+'</button>'}).join('')+'<button data-p="new">＋ Nueva colección</button><button class="lpx" data-p="bk">‹ Volver</button>'}
 function refresh(){var y=$('sh').scrollTop;render();if(ctx&&$('sh').querySelector('.colpg'))colPage(ctx,y)}
-function put(c){addCol(a,c);save();lpClose();refresh();toast('Añadido a «'+c+'»')}
-home();
+function put(c){addCol(a,c);save();lpClose();refresh();if(start=='pick')sheet(k);toast('Añadido a «'+c+'»')}
+if(start=='pick')pick();else home();
 w.onclick=function(e){if(e.target===w){lpClose();return}var b=e.target.closest('button');if(!b)return;
 if(b.dataset.c!==undefined){put(b.dataset.c);return}
 var p=b.dataset.p;
