@@ -86,6 +86,9 @@ html:before{content:"";position:fixed;left:0;right:0;top:0;height:calc(10px + en
 .li b{width:22px;color:var(--act);flex:none}
 .more{display:block;margin:18px auto}
 .empty{text-align:center;color:var(--mut);padding:50px 10px}
+.emp{margin:34px 0;padding:28px 18px;border:2px dashed var(--bd);border-radius:22px;text-align:center;cursor:pointer}
+.emp .et{font-size:19px;font-weight:800}.emp .es{color:var(--mut);margin:6px 0 18px;font-size:14px}
+.emp .eb{display:flex;flex-direction:column;gap:10px;max-width:260px;margin:0 auto}.emp .eb button{padding:13px 14px;font-weight:600;border-radius:14px}
 .fh{margin-bottom:16px}
 .fh h2{font-size:26px;letter-spacing:-.5px;margin:4px 0 2px}
 .bk{border:0;background:none;color:var(--act);padding:4px 0;font-weight:600}
@@ -226,6 +229,7 @@ details>summary+*{margin-top:10px}
 .chead{display:flex;align-items:center;gap:8px;margin:2px 0 14px}
 .chead .tt{flex:1;font-size:20px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .chead button{flex:none;padding:7px 12px;border-radius:99px;font-size:13px;display:inline-flex;align-items:center;gap:4px}
+.chead .tt:empty{display:block}.chead .cplus{width:42px;height:42px;padding:0;justify-content:center;border-radius:50%}.chead .cplus svg{width:20px;height:20px}
 .chead button svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .cnewf{display:flex;gap:8px;margin-bottom:14px}.cnewf input{flex:1}.cnewf button{flex:none}
 #opt{display:none;margin-top:10px;background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px}
@@ -246,6 +250,9 @@ details>summary+*{margin-top:10px}
 .lr .ex{width:24px;height:24px;color:var(--mut);flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .lr:active{background:var(--bd)}
 textarea#nt{min-height:96px;resize:vertical}
+.rvt{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.5;padding:2px 0 4px}
+button.dgb{color:#d6336c}
+.btns.rvb{gap:8px;margin-top:8px}.btns.rvb button{flex:0 0 auto;width:auto;padding:7px 14px;font-size:13px;font-weight:600;border-radius:12px}
 
 .seg2{display:flex;gap:4px;margin-top:14px;padding:4px;border-radius:22px;background:var(--gl);border:1px solid var(--glb);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
 .seg2 button{flex:1;min-width:0;display:flex;align-items:center;justify-content:center;gap:7px;border:0;background:none;border-radius:18px;padding:11px 6px;font-size:14px;font-weight:600;color:var(--mut)}
@@ -403,6 +410,8 @@ body.msel #list .tl.msx .cv,body.msel #cpl .tl.msx .cv{box-shadow:0 0 0 3px var(
 body.msel #list .li.msx,body.msel #cpl .li.msx{background:var(--ac2);border-radius:14px}
 body.msel #cpl{padding-bottom:150px}
 body.msel #nav{display:none}
+body.msel #list .cv b,body.msel #cpl .cv b{display:none}
+body.msel #list .li[data-k]>div:last-child,body.msel #cpl .li[data-k]>div:last-child{visibility:hidden}
 #msb{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:60;max-width:876px;margin:auto;background:var(--navbg);border:1px solid var(--glb);border-radius:22px;padding:10px;box-shadow:0 8px 30px rgba(0,0,0,.35);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);animation:lpin .16s ease-out}
 #msb .mh{display:flex;align-items:center;gap:8px;padding:0 2px 8px}
 #msb .mh b{flex:1;font-size:15px}
@@ -1223,6 +1232,7 @@ return h+'</div>'}
 var DI={col:'<svg viewBox="0 0 24 24"><path d="M3 8a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M7 4h4"/></svg>',all:'<svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>',ar:'<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>',ge:'<svg viewBox="0 0 24 24"><path d="M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.2"/></svg>',todo:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',done:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></svg>',top:'<svg viewBox="0 0 24 24"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>',fav:'<svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>',list:'<svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>',grid:'<svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>',sys:'<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>',sun:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',moon:'<svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>'};
 function chipB(c){var on=c[0]=='k'?(!!ui.cv||!!ui.c):c[0]=='g'?(c[1]===''?(!ui.g&&ui.f=='all'):ui.g==c[1]):ui.f==c[1];return '<button data-'+c[0]+'="'+c[1]+'" class="'+(on?'on':'')+'">'+DI[c[3]]+'<span>'+c[2]+'</span></button>'}
 function libInfo(n,d,rs,rn){var sc=function(a,b){return '<div class="sc"><b>'+a+'</b><span>'+b+'</span></div>'};return '<div class="sinfo">'+sc(n,'Álbumes')+sc(d,'Escuchados')+sc(n-d,'Por escuchar')+'</div>'+(q2.length>2?'<div class="h" style="margin-top:4px">Cargando portadas ('+q2.length+')…</div>':(gq.length>2?'<div class="h" style="margin-top:4px">Cargando géneros ('+gq.length+')…</div>':''))}
+function emptyLib(){return '<div class="emp" data-em="add" role="button" tabindex="0"><div class="et">Tu biblioteca está vacía</div><div class="es">Toca aquí para buscar y añadir tu primer álbum</div><div class="eb"><button class="p" data-em="add">Buscar álbum</button><button data-em="imp">Importar CSV o lista</button></div></div>'}
 function render(){var ks=Object.keys(S.a),d=0,rs=0,rn=0;
 ks.forEach(function(k){var a=S.a[k];if(a.done)d++;if(a.rate){rs+=a.rate;rn++}});
 var se=$('st');if(se)se.innerHTML=libInfo(ks.length,d,rs,rn);
@@ -1236,13 +1246,13 @@ if(ui.o)f=f.filter(inFolder);
 if(ui.g&&!ui.q&&!ui.o){var gr={},o=[],pend=0,nog=0;
 if(ui.g=='ar'){f.forEach(function(k){var n=S.a[k].ar;(gr[n]=gr[n]||(o.push(n),[])).push(k)});
 o.sort(function(x,y){return x.localeCompare(y)});
-h=o.length?(vm()=='g'?'<div class="grid">'+o.map(function(n){return acard(n,gr[n].length)}).join('')+'</div>':o.map(function(n){return acard(n,gr[n].length)}).join('')):'<div class="empty">'+(ks.length?'Nada con ese filtro.':'Toca ＋ para añadir tu primer álbum.')+'</div>'}
+h=o.length?(vm()=='g'?'<div class="grid">'+o.map(function(n){return acard(n,gr[n].length)}).join('')+'</div>':o.map(function(n){return acard(n,gr[n].length)}).join('')):(ks.length?'<div class="empty">Nada con ese filtro.</div>':emptyLib())}
 else{f.forEach(function(k){var g=agen(k);if(!g.length){if(GX[k]&&(GX[k].v>=2||GX[k].g.length))nog++;else pend++;return}g.forEach(function(n){(gr[n]=gr[n]||(o.push(n),[])).push(k)})});
 o.sort(function(x,y){return gr[y].length-gr[x].length||x.localeCompare(y)});
-h=o.length?(vm()=='g'?'<div class="grid">'+o.map(function(n){return gcard(n,gr[n].length)}).join('')+'</div>':o.map(function(n){return gcard(n,gr[n].length)}).join('')):'<div class="empty">'+(pend?'Buscando géneros…':ks.length?'Nada con ese filtro.':'Toca ＋ para añadir tu primer álbum.')+'</div>';
+h=o.length?(vm()=='g'?'<div class="grid">'+o.map(function(n){return gcard(n,gr[n].length)}).join('')+'</div>':o.map(function(n){return gcard(n,gr[n].length)}).join('')):(!ks.length?emptyLib():'<div class="empty">'+(pend?'Buscando géneros…':'Nada con ese filtro.')+'</div>');
 if(pend||nog)h+='<div class="gnote">'+(pend?'Buscando géneros de '+pend+(pend==1?' álbum…':' álbumes…'):'')+(pend&&nog?'<br>':'')+(nog?nog+(nog==1?' álbum sin género encontrado (sigue en Álbumes)':' álbumes sin género encontrado (siguen en Álbumes)'):'')+'</div>'}}
 else{var sl=f.slice(0,ui.lim);
-h=(ui.q&&!ui.o?'<div class="sch">En tu biblioteca</div>':'')+(ui.o?folderHead(f):'')+(sl.length?blk(sl):ui.q?'<div class="h">Sin resultados en tu biblioteca</div>':'<div class="empty">'+(ks.length?'Nada con ese filtro.':'Toca ＋ para añadir tu primer álbum o importa tu música en Ajustes.')+'</div>');
+h=(ui.q&&!ui.o?'<div class="sch">En tu biblioteca</div>':'')+(ui.o?folderHead(f):'')+(sl.length?blk(sl):ui.q?'<div class="h">Sin resultados en tu biblioteca</div>':(ks.length?'<div class="empty">Nada con ese filtro.</div>':emptyLib()));
 if(ui.o&&ui.o.t=='ge'&&ui.ot=='glob')h=folderHead(f)+ggHtml(ui.o.n,f);
 else if(f.length>ui.lim)h+='<button class="more" id="mr">Ver más ('+(f.length-ui.lim)+')</button>';
 if(ui.o&&ui.o.t=='ar'){var ai=aiOf(f);if(ai)loadA(ai)}}
@@ -1265,7 +1275,7 @@ ui.ovk=key;$('sh').innerHTML=h;$('ov').className='full';$('ov').style.display='f
 if(ui.sy&&ui.sy.k===key)$('sh').scrollTop=ui.sy.v;
 if(cur&&S.a[cur]&&$('sh').querySelector('.hbg'))albumBar(cur);else dzHc(null)}
 function cleanTmp(){var ch=0;Object.keys(S.a).forEach(function(k){var t=S.a[k];if(!t||!t.tmp)return;if(t.rate||t.done||t.fav||colList(t).length||t.note)delete t.tmp;else delete S.a[k];ch=1});if(ch){save();render()}}
-function hide(){if(!ui.keep)cleanTmp();
+function hide(){var cmx=document.getElementById('cmenu');if(cmx)cmx.remove();if(!ui.keep&&typeof MS!='undefined'&&MS)msEnd();if(!ui.keep)cleanTmp();
 if(!ui.keep){$('ov').style.display='none';$('ov').className='';OVS=[];ui.ovk=null;ui.sy=null;ui.ls=false}
 dzHc(null);ui.st=false;ui.back=null;cur=null;mbPause=false;pump()}
 function rs2(k){if(cur!=k||SD)return;if(ui.st){if($('spv'))stdraw(k);return}var f=document.activeElement;if(f&&(f.id=='nt'||f.id=='sc'))return;sheet(k)}
@@ -1381,19 +1391,19 @@ var foot=H-(hist?120:55),y;
 if(sq){var tx=X+Z+60,tw=W2-tx-70;x.textAlign='left';y=Y+70;x.fillStyle=th.x;x.font='bold 56px '+F;
 wrapT(x,a.al,tw,3).forEach(function(l){x.fillText(l,tx,y);y+=66});y+=-66+60;
 x.fillStyle=th.m;x.font='bold 38px '+F;wrapT(x,a.ar,tw,2).forEach(function(l){x.fillText(l,tx,y);y+=46});
-if(meta){y+=6;x.font='30px '+F;x.fillText(wrapT(x,meta,tw,1)[0],tx,y);y+=40}
+if(meta){y+=6;x.font='30px '+F;wrapT(x,meta,tw,4).forEach(function(l){x.fillText(l,tx,y);y+=38});y+=2}
 if(a.rate){y+=64;stars(tx,y,64)}
-if(AS.c&&m.t){var fl=favList(3);if(fl.length){y+=62;x.fillStyle=th.a;x.font='bold 24px '+F;x.fillText('MIS CANCIONES TOP',tx,y);fl.forEach(function(p){y+=44;x.fillStyle=th.x;x.font='30px '+F;x.fillText((p.f?'♥ ':'★ ')+(wrapT(x,m.t[p.i][0],tw-(p.r&&p.f?90:0),1)[0]||'')+(p.r&&p.f?'  ★'+fr(p.r):''),tx,y)})}}
+if(AS.c&&m.t){var fl=favList(3);if(fl.length){y+=62;x.fillStyle=th.a;x.font='bold 24px '+F;x.fillText('CANCIONES FAVORITAS',tx,y);fl.forEach(function(p){y+=44;x.fillStyle=th.x;x.font='30px '+F;x.fillText((p.f?'♥ ':'★ ')+(wrapT(x,m.t[p.i][0],tw-(p.r&&p.f?90:0),1)[0]||'')+(p.r&&p.f?'  ★'+fr(p.r):''),tx,y)})}}
 if(AS.s){var st=sumOf(k);if(st){st=st.length>400?st.slice(0,400):st;var sy=Y+Z+70,sn=Math.min(4,Math.floor((H-55-60-sy)/42)+1);
 if(sn>=2){x.textAlign='left';x.fillStyle=th.m;x.font='30px '+F;wrapT(x,st,W2-160,sn).forEach(function(l){x.fillText(l,80,sy);sy+=42})}}}
 x.textAlign='left';x.fillStyle=th.m;x.font='bold 30px '+F;x.fillText('Digz',80,H-55);return c}
 var cx=W2/2,lh=hist?80:72;y=Y+Z+(hist?125:110);x.textAlign='center';x.fillStyle=th.x;x.font='bold '+(hist?70:62)+'px '+F;
 wrapT(x,a.al,W2-140,2).forEach(function(l){x.fillText(l,cx,y);y+=lh});y=y-lh+68;
 x.fillStyle=th.a;x.font='bold 44px '+F;x.fillText(wrapT(x,a.ar,W2-140,1)[0],cx,y);
-if(meta){y+=56;x.fillStyle=th.m;x.font='34px '+F;x.fillText(wrapT(x,meta,W2-140,1)[0],cx,y)}
+if(meta){y+=56;x.fillStyle=th.m;x.font='34px '+F;wrapT(x,meta,W2-140,3).forEach(function(l,i){if(i)y+=44;x.fillText(l,cx,y)})}
 if(a.rate){y+=hist?125:115;stars(null,y,hist?100:90);x.textAlign='center'}
 if(AS.c&&m.t){var tr=favList(hist?5:3),av=Math.floor((foot-60-(y+90))/58);tr=tr.slice(0,Math.max(0,av));
-if(tr.length){y+=70;x.textAlign='center';x.fillStyle=th.a;x.font='bold 30px '+F;x.fillText('MIS CANCIONES TOP',cx,y);y+=20;
+if(tr.length){y+=70;x.textAlign='center';x.fillStyle=th.a;x.font='bold 30px '+F;x.fillText('CANCIONES FAVORITAS',cx,y);y+=20;
 tr.forEach(function(p){y+=58;x.fillStyle=th.x;x.font='38px '+F;x.fillText((p.f?'♥  ':'★  ')+(wrapT(x,m.t[p.i][0],W2-(p.r&&p.f?460:300),1)[0]||'')+(p.r&&p.f?'  ★'+fr(p.r):''),cx,y)})}}
 if(AS.s){var tx2=((a.note||'').trim())||(w.al&&w.al.t)||'';
 if(tx2){tx2=tx2.length>600?tx2.slice(0,600):tx2;y+=hist?80:65;var n=Math.min(hist?7:4,Math.floor((foot-60-y)/50));
@@ -1414,7 +1424,7 @@ show(bhd('Compartir álbum')+'<div class="stp"><img id="spv" alt=""></div>'
 +'<div class="h" style="margin-top:8px">Fondo</div><div class="chips">'+o('bg',[['mesh','Suave'],['grad','Degradado']],AS.bg)+'</div>'
 +'<div class="chips" id="mg2r" style="'+(AS.bg=='grad'?'':'display:none')+'"><button id="mg2"><i class="cdot" style="background:'+(DS.g2||'linear-gradient(135deg,#888,#222)')+'"></i>Color final</button><button id="mg2a">Auto</button></div>'
 +'<div class="h" style="margin-top:8px">Texto</div><div class="chips">'+o('tx',[['tint','Integrado'],['plain','Neutro']],AS.tx)+'</div>'
-+'<div class="chips"><button data-tg="s" class="'+(AS.s?'on':'')+'">Resumen</button><button data-tg="c" class="'+(AS.c?'on':'')+'">Mis canciones top</button></div>'
++'<div class="chips"><button data-tg="s" class="'+(AS.s?'on':'')+'">Resumen</button><button data-tg="c" class="'+(AS.c?'on':'')+'">Canciones favoritas</button></div>'
 +'<div class="btns"><button class="p" id="stsh">Compartir</button></div><div class="btns"><button id="stdl">Guardar imagen</button><button id="stlk">Compartir enlace</button></div>');
 $('sh').scrollTop=0;$('x').onclick=ovBack;
 [].forEach.call($('sh').querySelectorAll('[data-s]'),function(b){b.onclick=function(){var key=b.dataset.s;AS[key]=b.dataset.v;[].forEach.call($('sh').querySelectorAll('[data-s="'+key+'"]'),function(q){q.className=q.dataset.v==String(AS[key])?'on':''});stdraw(k)}});
@@ -1440,7 +1450,7 @@ stdraw(k)}
 
 /* ---------- Ficha del álbum ---------- */
 function sheet(k){var o=$('nt');if(o&&cur==k)S.a[k].note=o.value;var same2=cur==k,sc=same2?$('sh').scrollTop:0;
-if(!same2){ui.tk=null;ui.op={};ui.wx={};ui.sm=false;ui.tab='tk';ui.ls=false}
+if(!same2){ui.tk=null;ui.op={};ui.wx={};ui.sm=false;ui.tab='tk';ui.ls=false;ui.rv=false}
 mbPause=false;cur=k;var a=S.a[k],m=M[k];needCover(k,1);if(stIm[k]===undefined&&!stPre[k]){stPre[k]=1;loadCover(k).then(function(im){if(im)stIm[k]=im;else delete stPre[k]})}needG(k,1);fbCheck(k);need(k,1);loadT(k);loadR(k);loadL(k);loadW(k);recoLoad(k);if(m&&m.ai)loadA(m.ai);
 var u=(m&&m.u)||{},ai=m&&m.ai,au=(ai&&AR[ai]&&AR[ai].u)||{},lc=LC[k],w=W[k],tv=Object.keys(a.tr||{}).map(function(i){return a.tr[i]});
 var u2={};for(var z in u)u2[z]=u[z];if(a.mb)u2.mb='https://musicbrainz.org/release-group/'+a.mb;
@@ -1458,7 +1468,8 @@ desc=dt?'<div class="ds open">'+esc(ex?dt:bf)+'</div>'+(more?'<button class="vm"
 var TB=[['tk','Canciones'],['cr','Críticas'],['ge','Géneros'],['bi','Mi nota']],tb=ui.tab||'tk',body='';
 if(tb=='tk')body=tl;
 else if(tb=='cr'){var CRK=['metacritic','aoty','rym','pitchfork','allmusic'],CRL=AL.filter(function(x){return CRK.indexOf(x[1])>-1}),INF=AL.filter(function(x){return CRK.indexOf(x[1])<0});
-body='<div class="sec">Mi reseña</div><textarea id="nt" rows="4" placeholder="Escribe tu reseña de este álbum…">'+esc(a.note)+'</textarea>'
+var hasN=!!(a.note&&a.note.trim()),edN=!hasN||ui.rv;
+body='<div class="sec">Mi reseña</div>'+(edN?'<textarea id="nt" rows="4" placeholder="Escribe tu reseña de este álbum…">'+esc(a.note)+'</textarea><div class="btns rvb"><button class="p" data-a="rvsv">Guardar</button>'+(hasN?'<button data-a="rvcx">Cancelar</button><button class="dgb" data-a="rvdel">Eliminar</button>':'')+'</div>':'<div class="rvt">'+esc(a.note)+'</div><div class="btns rvb"><button data-a="rved">Editar reseña</button></div>')
 +'<div class="sec">Críticas y reseñas de webs</div>'+lkRow(CRL,u2)
 +'<div class="sec">Más información</div>'+lkRow(INF,u2)}
 else if(tb=='ge')body=(gen?'<div class="sec">Géneros</div>'+gen+'<div class="h" style="margin-top:8px">Toca un género para ver tus álbumes de ese estilo.</div>':(GX[k]?'':'<div class="h" style="padding:18px 0">Buscando géneros…</div>'))+(lfx?'<div class="sec">Last.fm</div>'+lfx:'')||'<div class="h" style="padding:18px 0">Sin datos de género todavía.</div>';
@@ -1500,6 +1511,10 @@ else if(ac=='trk'){var j=+t.dataset.i;ui.tk=ui.tk===j?null:j;sheet(k)}
 else if(ac=='done'){a.done=!a.done;a.t=a.done?Date.now():0;save();render();sheet(k)}
 else if(ac=='fav'){a.fav=!a.fav;save();render();sheet(k)}
 else if(ac=='art')artistPage(a.ar);
+else if(ac=='rved'){ui.rv=true;sheet(k);var nt=$('nt');if(nt){nt.focus();try{nt.setSelectionRange(nt.value.length,nt.value.length)}catch(x){}}}
+else if(ac=='rvsv'){var nt1=$('nt');a.note=nt1?nt1.value.trim():(a.note||'');ui.rv=false;save();sheet(k);toast(a.note?'Reseña guardada':'Reseña vacía')}
+else if(ac=='rvcx'){var nt2=$('nt');if(nt2)nt2.value=a.note||'';ui.rv=false;sheet(k)}
+else if(ac=='rvdel'){if(confirm('¿Eliminar tu reseña?')){var nt3=$('nt');if(nt3)nt3.value='';a.note='';ui.rv=false;save();sheet(k);toast('Reseña eliminada')}}
 else if(ac=='shm'){ui.sm=false;studio(k)}
 else if(ac=='addl'){delete a.tmp;save();render();sheet(k)}
 else if(ac=='ge'){goGenre(t.dataset.ge)}
@@ -1620,7 +1635,7 @@ $('so').onchange=function(){ui.s=this.value;obUpd();render();closeOpt()};
 
 $('vs').onclick=function(e){var b=e.target.closest('button');if(!b)return;setVm(b.dataset.v);render();closeOpt()};
 $('chips').onclick=function(e){if(e.target.closest('[data-x]')){ui.ge='';render();return}var b=e.target.closest('button');if(!b)return;
-if(b.id=='ob'){var o=$('opt'),v=o.style.display=='block';if(!v)o.style.top=(b.getBoundingClientRect().bottom-$('hd').getBoundingClientRect().top+8)+'px';o.style.display=v?'none':'block';b.classList.toggle('on',!v);return}
+if(b.id=='ob'){var o=$('opt'),v=o.style.display=='block';if(!v)o.style.top=(b.getBoundingClientRect().bottom-$('hd').getBoundingClientRect().top+8)+'px';o.style.display=v?'none':'block';ui.optT=Date.now();b.classList.toggle('on',!v);return}
 if(b.dataset.k!==undefined){ui.cn=0;if(ui.cv||ui.c){ui.cv=false;ui.c=''}else{ui.cv=true;ui.o=null;ui.g='';ui.ge='';ui.f='all'}ui.lim=120;render();window.scrollTo(0,0);return}
 if(b.dataset.g!==undefined){ui.cv=false;if(b.dataset.g===''){ui.g='';ui.f='all';ui.ge=''}else ui.g=b.dataset.g;ui.o=null;ui.lim=120;render();return}
 if(b.dataset.f!==undefined){ui.cv=false;ui.f=ui.f==b.dataset.f?'all':b.dataset.f;ui.lim=120;render()}};
@@ -1635,12 +1650,13 @@ var ICIMG='<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx=
 function cdraft(L){var ph=ui.cnp&&ui.cnp.ci,cover=ph?'<div class="mos"><img class="cp" alt="" src="'+ph+'"></div>':'<div class="cdempty">'+ICIMG+'<span>Añadir foto</span></div>',
 inp='<input id="cni" class="cdi" placeholder="Nombre" maxlength="40" value="'+esc(ui.cnn||'')+'" autocomplete="off" enterkeyhint="done">';
 return L?'<div class="crow cdraft"><div class="cdcv" data-cn="ph">'+cover+'</div><div class="in">'+inp+'</div></div>':'<div class="cfold cdraft"><div class="cdcv" data-cn="ph">'+cover+'</div>'+inp+'</div>'}
-function colsHtml(){var h='<div class="chead"><div class="tt">Colecciones</div></div>',L=vm('cols')=='l';
-if(L){h+=(ui.cn?cdraft(true):'')+S.cols.map(function(c){return '<div class="crow" data-cf="'+esc(c)+'">'+colMos(c)+'<div class="in"><div class="t">'+esc(c)+'</div><div class="a">'+colCnt(c)+'</div></div><div class="a">›</div></div>'}).join('')+(ui.cn?'':'<div class="crow nw" data-cn="new">＋ Nueva colección</div>')}
-else h+='<div class="cgrid">'+(ui.cn?cdraft(false):'')+S.cols.map(function(c){return '<div class="cfold" data-cf="'+esc(c)+'">'+colMos(c)+'<div class="t">'+esc(c)+'</div><div class="a">'+colCnt(c)+'</div></div>'}).join('')+(ui.cn?'':'<div class="cnew" data-cn="new"><b>＋</b>Nueva colección</div>')+'</div>';
-if(!S.cols.length&&!ui.cn)h+='<div class="h" style="margin-top:14px;text-align:center">Aún no tienes colecciones. Toca «Nueva colección», ponle nombre y añade álbumes con ⋯ → «Añadir álbumes».</div>';
+function colsHtml(){var h='<div class="chead"><div class="tt"></div>'+(ui.cn?'':'<button class="cplus" data-cn="new" aria-label="Nueva colección"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>')+'</div>',L=vm('cols')=='l';
+if(L){h+=(ui.cn?cdraft(true):'')+S.cols.map(function(c){return '<div class="crow" data-cf="'+esc(c)+'">'+colMos(c)+'<div class="in"><div class="t">'+esc(c)+'</div><div class="a">'+colCnt(c)+'</div></div><div class="a">›</div></div>'}).join('')}
+else h+='<div class="cgrid">'+(ui.cn?cdraft(false):'')+S.cols.map(function(c){return '<div class="cfold" data-cf="'+esc(c)+'">'+colMos(c)+'<div class="t">'+esc(c)+'</div><div class="a">'+colCnt(c)+'</div></div>'}).join('')+'</div>';
+if(!S.cols.length&&!ui.cn)h+='<div class="h" style="margin-top:14px;text-align:center">Aún no tienes colecciones. Toca ＋, ponle nombre y añade álbumes con ⋯ → «Añadir álbumes».</div>';
 return h}
-$('list').addEventListener('click',function(e){var t=e.target.closest('[data-cf],[data-cn],[data-cb],[data-cd],[data-cp],[data-cx]');if(!t)return;
+$('list').addEventListener('click',function(e){var em=e.target.closest('[data-em]');if(em){if(em.dataset.em=='imp')settings('imp');else $('bs').click();return}
+var t=e.target.closest('[data-cf],[data-cn],[data-cb],[data-cd],[data-cp],[data-cx]');if(!t)return;
 if(t.dataset.cf!==undefined){colPage(t.dataset.cf)}
 else if(t.dataset.cn=='new'){ui.cn=1;ui.cnn='';ui.cnp=null;render();window.scrollTo(0,0);var i=$('cni');if(i)i.focus()}
 else if(t.dataset.cn=='ph'){cnPhoto()}});
@@ -1766,9 +1782,11 @@ function colMenu(n){var old=document.getElementById('cmenu');if(old){old.remove(
 var L=vm('cd')=='l',m=document.createElement('div');m.id='cmenu';m.className='cmenu';
 m.innerHTML='<button data-m="ed">Editar</button><button data-m="ad">Añadir álbumes</button><button data-m="vw">'+(L?'Ver en cuadrícula':'Ver en lista')+'</button><button class="dg" data-m="del">Eliminar colección</button>';
 document.body.appendChild(m);
-function close(){var e=document.getElementById('cmenu');if(e)e.remove();document.removeEventListener('click',away,true)}
+function close(){var e=document.getElementById('cmenu');if(e)e.remove();document.removeEventListener('click',away,true);document.removeEventListener('pointerdown',pd,true);document.removeEventListener('scroll',sc,true);document.removeEventListener('touchmove',sc,true);document.removeEventListener('wheel',sc,true)}
 function away(e){if(!e.target.closest('#cmenu,#cmb')){close();e.preventDefault();e.stopPropagation()}}
-setTimeout(function(){document.addEventListener('click',away,true)},0);
+function pd(e){if(!e.target.closest('#cmenu,#cmb')){close();swallowClick()}}
+function sc(e){if(e.target&&e.target.closest&&e.target.closest('#cmenu'))return;close()}
+setTimeout(function(){if(!document.getElementById('cmenu'))return;document.addEventListener('click',away,true);document.addEventListener('pointerdown',pd,true);document.addEventListener('scroll',sc,true);document.addEventListener('touchmove',sc,{capture:true,passive:true});document.addEventListener('wheel',sc,{capture:true,passive:true})},0);
 m.onclick=function(e){var b=e.target.closest('button');if(!b)return;var a=b.dataset.m;close();var y=$('sh').scrollTop;
 if(a=='ed')colEditDlg(n);
 else if(a=='ad')colAddDlg(n);
@@ -1793,7 +1811,7 @@ function lpClose(){var e=$('lpm');if(e)e.remove()}
 function albumMenu(k,ctx,start){var a=S.a[k];if(!a)return;lpClose();
 var w=document.createElement('div');w.id='lpm';w.className='lpm dzmod';w.innerHTML='<div class="lpc"></div>';document.body.appendChild(w);var box=w.firstChild;
 function head(){return '<div class="lph">'+cv(a,'sm',k,120)+'<div class="in"><div class="t">'+esc(a.al)+'</div><div class="a">'+esc(a.ar)+'</div></div></div>'}
-function home(){box.innerHTML=head()+(ctx?'<button data-p="uncol">Quitar de colección</button><button data-p="col">Añadir a otra colección</button><button data-p="multi">Seleccionar varios…</button>':'<button data-p="done">'+(a.done?'Marcar como por escuchar':'Marcar como escuchado')+'</button><button data-p="fav">'+(a.fav?'Quitar de favoritos':'Añadir a favoritos')+'</button><button data-p="col">Añadir a una colección</button><button data-p="multi">Seleccionar varios…</button><button class="dg" data-p="del">Quitar de mi biblioteca</button>')}
+function home(){box.innerHTML=head()+(ctx?'<button data-p="uncol">Quitar de colección</button><button data-p="col">Añadir a otra colección</button><button data-p="multi">Seleccionar varios…</button>':'<button data-p="fav">'+(a.fav?'Quitar de favoritos':'Añadir a favoritos')+'</button><button data-p="done">'+'Marcar como escuchado'+'</button><button data-p="col">Añadir a una colección</button><button data-p="multi">Seleccionar varios…</button><button class="dg" data-p="del">Quitar de mi biblioteca</button>')}
 function pick(){var cs=S.cols.filter(function(c){return !hasCol(a,c)});
 box.innerHTML='<div class="lpt">Elegir colección</div>'+cs.map(function(c){return '<button data-c="'+esc(c)+'">'+esc(c)+'</button>'}).join('')+'<button data-p="new">＋ Nueva colección</button><button class="lpx" data-p="bk">‹ Volver</button>'}
 function refresh(){var y=$('sh').scrollTop;render();if(ctx&&$('sh').querySelector('.colpg'))colPage(ctx,y)}
@@ -1802,7 +1820,7 @@ if(start=='pick')pick();else home();
 w.onclick=function(e){if(e.target===w){lpClose();return}var b=e.target.closest('button');if(!b)return;
 if(b.dataset.c!==undefined){put(b.dataset.c);return}
 var p=b.dataset.p;
-if(p=='done'){a.done=!a.done;a.t=a.done?Date.now():0;save();lpClose();render();toast(a.done?'Marcado como escuchado':'Marcado como por escuchar')}
+if(p=='done'){a.done=!a.done;a.t=a.done?Date.now():0;save();lpClose();render();toast(a.done?'Marcado como escuchado':'Quitado de escuchados')}
 else if(p=='fav'){a.fav=!a.fav;save();lpClose();render();toast(a.fav?'Añadido a favoritos':'Quitado de favoritos')}
 else if(p=='col')pick();
 else if(p=='multi'){lpClose();msStart(k,ctx)}
@@ -1820,8 +1838,14 @@ b.innerHTML='<div class="mh"><button data-m="x" aria-label="Cancelar">✕</butto
 function msMark(){if(!MS)return;[].forEach.call(MS.box.querySelectorAll('[data-k]'),function(e){e.classList.toggle('msx',!!MS.sel[e.dataset.k])})}
 function msTog(k){if(!MS||!S.a[k])return;if(MS.sel[k])delete MS.sel[k];else MS.sel[k]=1;msMark();msBar()}
 function msStart(k,ctx){msEnd();var box=ctx?$('sh').querySelector('#cpl'):$('list');if(!box)return;
-MS={ctx:ctx||'',box:box,sel:{}};document.body.classList.add('msel');msTog(k);
-if(MS)MS.iv=setInterval(function(){if(!MS)return;if(!document.body.contains(MS.box)||(MS.ctx&&!$('sh').querySelector('.colpg'))||(!MS.ctx&&$('ov').style.display=='flex'))msEnd()},300)}
+MS={ctx:ctx||'',box:box,sel:{},sig:msSig()};document.body.classList.add('msel');msTog(k);
+if(MS)MS.iv=setInterval(msWatch,150)}
+function msSig(){return [ui.cv,ui.f,ui.g,ui.ge,ui.c,ui.q,ui.o&&ui.o.n,ui.vk].join('|')}
+function msWatch(){if(!MS)return;var ov=$('ov').style.display=='flex',pg=ov&&$('sh').querySelector('.colpg'),bad=false;
+if(!document.body.contains(MS.box))bad=true;
+else if(MS.ctx)bad=!pg||pg.dataset.cpn!=MS.ctx;
+else bad=ov||msSig()!=MS.sig;
+if(bad)msEnd();else msMark()}
 function msDone(msg){var ctx=MS&&MS.ctx,y=$('sh').scrollTop;msEnd();save();render();if(ctx&&S.cols.indexOf(ctx)>-1)colPage(ctx,y);if(msg)toast(msg)}
 function msPick(){var ks=msKeys();if(!ks.length)return;lpClose();var ctx=MS.ctx,w=document.createElement('div');w.id='lpm';w.className='lpm dzmod';w.innerHTML='<div class="lpc"></div>';document.body.appendChild(w);var box=w.firstChild;
 function list(){var cs=S.cols.filter(function(c){return c!==ctx});box.innerHTML='<div class="lpt">Añadir '+ks.length+(ks.length==1?' álbum a…':' álbumes a…')+'</div>'+cs.map(function(c){return '<button data-c="'+esc(c)+'">'+esc(c)+'</button>'}).join('')+'<button data-p="new">＋ Nueva colección</button><button class="lpx" data-p="bk">Cancelar</button>'}
@@ -1861,8 +1885,11 @@ document.addEventListener('focusin',function(e){if(tf(e.target))document.body.cl
 document.addEventListener('focusout',function(){setTimeout(function(){if(!tf(document.activeElement))document.body.classList.remove('kbd')},60)})})();
 function closeModal(){var m=document.querySelectorAll('.dzmod');if(!m.length){var cm=document.getElementById('cmenu');if(cm){cm.remove();return true}return false}var e=m[m.length-1];try{e.dispatchEvent(new Event('dzclose'))}catch(x){}e.remove();return true}
 /* ---------- Panel Vista/Orden flotante ---------- */
+function swallowClick(){var h=function(e){e.preventDefault();e.stopPropagation();document.removeEventListener('click',h,true)};document.addEventListener('click',h,true);setTimeout(function(){document.removeEventListener('click',h,true)},450)}
 function closeOpt(){var o=$('opt');if(o.style.display=='block'){o.style.display='none';var b=$('ob');if(b)b.classList.remove('on')}}
 document.addEventListener('click',function(e){if($('opt').style.display=='block'&&!e.target.closest('#opt,#ob')){closeOpt();e.preventDefault();e.stopPropagation()}},true);
+document.addEventListener('pointerdown',function(e){if($('opt').style.display=='block'&&!e.target.closest('#opt,#ob')){closeOpt();swallowClick()}},true);
+['scroll','touchmove','wheel'].forEach(function(t){document.addEventListener(t,function(e){if($('opt').style.display=='block'&&!(e.target&&e.target.closest&&e.target.closest('#opt'))&&Date.now()-(ui.optT||0)>350)closeOpt()},{capture:true,passive:true})});
 
 $('nst').onclick=function(){stats()};
 $('bs').onclick=function(){navTrack(function(){hide();ui.o=null;$('nav').classList.add('qs');$('q').focus()})};
@@ -1928,6 +1955,7 @@ function navTrack(fn,ov){var s=snap();if(ov&&ui.ovk)s.ov={k:ui.ovk,s:OVS.slice()
 function closeFolds(){var o=$('sh').querySelectorAll('#fos .dfo.open');if(!o.length)return false;SP.fo={};[].forEach.call(o,function(f){f.classList.remove('open')});return true}
 function appBack(){
 if(closeModal())return true;
+if(MS){msEnd();return true}
 if($('ov').style.display=='flex'){
 if(cur&&S.a[cur]&&!ui.st&&ui.ls){ui.ls=false;sheet(cur);return true}
 if(!cur&&ui.ovk=='stats'&&closeFolds())return true;
