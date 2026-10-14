@@ -448,7 +448,7 @@ input.cdi{border:0;border-bottom:2px solid var(--ac);border-radius:0;background:
 .lpm,.lpm *{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
 .lpm input{-webkit-user-select:text;user-select:text}
 #ov:has(.colpg):after{display:none!important}
-#ov:has(.colpg):before{opacity:var(--bo,1);display:block!important;height:84px;z-index:4;background:linear-gradient(to bottom,rgba(var(--hcr,13,13,15),1.000) 0.0%,rgba(var(--hcr,13,13,15),0.918) 5.6%,rgba(var(--hcr,13,13,15),0.838) 11.1%,rgba(var(--hcr,13,13,15),0.761) 16.7%,rgba(var(--hcr,13,13,15),0.686) 22.2%,rgba(var(--hcr,13,13,15),0.614) 27.8%,rgba(var(--hcr,13,13,15),0.544) 33.3%,rgba(var(--hcr,13,13,15),0.478) 38.9%,rgba(var(--hcr,13,13,15),0.414) 44.4%,rgba(var(--hcr,13,13,15),0.354) 50.0%,rgba(var(--hcr,13,13,15),0.296) 55.6%,rgba(var(--hcr,13,13,15),0.243) 61.1%,rgba(var(--hcr,13,13,15),0.192) 66.7%,rgba(var(--hcr,13,13,15),0.146) 72.2%,rgba(var(--hcr,13,13,15),0.105) 77.8%,rgba(var(--hcr,13,13,15),0.068) 83.3%,rgba(var(--hcr,13,13,15),0.037) 88.9%,rgba(var(--hcr,13,13,15),0.013) 94.4%,rgba(var(--hcr,13,13,15),0.000) 100.0%)}
+#ov:has(.colpg):before{display:block!important;height:84px;z-index:4;background:linear-gradient(to bottom,rgba(var(--hcr,13,13,15),1.000) 0.0%,rgba(var(--hcr,13,13,15),0.918) 5.6%,rgba(var(--hcr,13,13,15),0.838) 11.1%,rgba(var(--hcr,13,13,15),0.761) 16.7%,rgba(var(--hcr,13,13,15),0.686) 22.2%,rgba(var(--hcr,13,13,15),0.614) 27.8%,rgba(var(--hcr,13,13,15),0.544) 33.3%,rgba(var(--hcr,13,13,15),0.478) 38.9%,rgba(var(--hcr,13,13,15),0.414) 44.4%,rgba(var(--hcr,13,13,15),0.354) 50.0%,rgba(var(--hcr,13,13,15),0.296) 55.6%,rgba(var(--hcr,13,13,15),0.243) 61.1%,rgba(var(--hcr,13,13,15),0.192) 66.7%,rgba(var(--hcr,13,13,15),0.146) 72.2%,rgba(var(--hcr,13,13,15),0.105) 77.8%,rgba(var(--hcr,13,13,15),0.068) 83.3%,rgba(var(--hcr,13,13,15),0.037) 88.9%,rgba(var(--hcr,13,13,15),0.013) 94.4%,rgba(var(--hcr,13,13,15),0.000) 100.0%)}
 .colpg .ccv:before{display:none!important}
 .colpg .ccv>.mos{opacity:1!important}
 </style>
@@ -1453,7 +1453,7 @@ e.innerHTML=SV.map(function(s,i){return '<button data-sv="'+i+'" class="'+(s.on?
 [].forEach.call(e.querySelectorAll('[data-sv]'),function(b){b.onclick=function(){var s=SV[b.dataset.sv];s.on=!s.on;saveSV();b.className=s.on?'on':''}});
 var c=$('svc');if(c){c.innerHTML=SV.map(function(s,i){return s.c?'<div class="sv"><span>'+esc(s.n)+'</span><button data-sd="'+i+'">✕</button></div>':''}).join('');
 [].forEach.call(c.querySelectorAll('[data-sd]'),function(b){b.onclick=function(){SV.splice(+b.dataset.sd,1);saveSV();svList()}})}}
-var APPV='2026-10-14 · colecciones-10';
+var APPV='2026-10-14 · colecciones-11';
 var DZC=[['#8e8e93','Gris'],['#1db954','Verde'],['#2f80ff','Azul'],['#8b5cf6','Violeta'],['#ec4899','Rosa'],['#f97316','Naranja'],['#ef4444','Rojo'],['#14b8a6','Turquesa'],['#eab308','Amarillo']];
 function themeUI(){var t=dzLoad(),tm=$('tm'),tc=$('tc');if(!tm||!tc)return;
 function draw(){tm.innerHTML=[['sys','Sistema',DI.sys],['light','Claro',DI.sun],['dark','Oscuro',DI.moon]].map(function(m){return '<button data-m="'+m[0]+'" class="'+(t.m==m[0]?'on':'')+'">'+m[2]+m[1]+'</button>'}).join('');
@@ -1629,8 +1629,7 @@ function colFade(){var sh=$('sh');sh.onscroll=function(){colBarUpd()}}
 var CC={};
 function colBarUpd(){var sh=$('sh'),q=sh.querySelector('.colpg .ccv');if(!q||!CC.rows)return;var H=q.offsetHeight||1,y=Math.max(0,sh.scrollTop),bg=hx3(window.DZBG),c;
 if(y>=H)c=bg;else{var i=Math.min(CC.rows.length-1,Math.floor(y/H*CC.rows.length)),t=Math.max(0,Math.min(1,(y-(H-170))/170)),a=1-t*t*(3-2*t);c=dzMix(bg,CC.rows[i],a)}
-var hx=dzHex(c),al=Math.max(0,Math.min(1,y/90)),ds=document.documentElement.style;
-dzBar(al<1?'rgba('+c.join(',')+','+al.toFixed(2)+')':hx);ds.setProperty('--hcr',dzRgbs(hx));ds.setProperty('--bo',(.3+.7*al).toFixed(2))}
+var hx=dzHex(c);dzBar(hx);document.documentElement.style.setProperty('--hcr',dzRgbs(hx))}
 function colBar(bg,n){CC={};if(!bg)return;var im=new Image();if(bg.indexOf('data:')!==0)im.crossOrigin='anonymous';
 im.onload=function(){try{var R=96,c=document.createElement('canvas');c.width=24;c.height=R;var x=c.getContext('2d');x.drawImage(im,0,0,24,R);var d=x.getImageData(0,0,24,R).data,rows=[];
 for(var r=0;r<R;r++){var a=0,g=0,b=0;for(var k=0;k<24;k++){var o=(r*24+k)*4;a+=d[o];g+=d[o+1];b+=d[o+2]}rows.push([Math.round(a/24),Math.round(g/24),Math.round(b/24)])}
