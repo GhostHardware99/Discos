@@ -423,6 +423,22 @@ html{overflow-x:hidden}
 input.cdi{border:0;border-bottom:2px solid var(--ac);border-radius:0;background:transparent;padding:3px 0;margin-top:9px;font-weight:700;font-size:14.5px;outline:none}
 .crow input.cdi{margin-top:0;font-size:15px}
 .cdraft{border-color:var(--ac)}
+
+/* ===== Cabeceras con botón atrás a la izquierda y título centrado ===== */
+#sh .hd.bh{display:grid;grid-template-columns:46px minmax(0,1fr) 46px;align-items:center;gap:10px}
+#sh .hd.bh .t{text-align:center;font-weight:800;font-size:19px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#sh .hd.bh .rb{width:46px;height:46px;flex:none}
+/* ===== Portada de colección a todo el ancho, con degradado corto ===== */
+.hero.colpg{padding:0}
+.colpg .hbg{display:none}
+.hero.colpg>.htop{position:absolute;left:16px;right:16px;top:calc(12px + env(safe-area-inset-top,0px));margin:0;z-index:5}
+.colpg .ab{margin:0}
+.colpg .ccv{position:relative;width:100%;max-width:none;aspect-ratio:1;max-height:min(440px,58vh);margin:0;border-radius:0;box-shadow:none}
+.colpg .ccv:after{content:"";position:absolute;left:0;right:0;bottom:0;height:64px;background:linear-gradient(to bottom,transparent,var(--bg));pointer-events:none}
+.colpg .ab h2{padding:0 16px;margin:10px 0 0}
+.colpg .mos.m1{grid-template-columns:1fr;grid-template-rows:1fr}
+.colpg .mos.m2{grid-template-rows:1fr}
+.colpg .mos.m3>.cv:first-child{grid-row:1/3}
 </style>
 <script>
 /* Tema: modo claro/oscuro y color. Se aplica antes de pintar para evitar parpadeos */
@@ -845,7 +861,7 @@ async function shareImg(){return shareCanvas(draw(),'digz.png','Digz')}
 function ctl(){function o(k,l,cu){return l.map(function(e){return '<button data-s="'+k+'" data-v="'+e[0]+'" class="'+(String(cu)==String(e[0])?'on':'')+'">'+e[1]+'</button>'}).join('')}
 return '<div class="h">Diseño de la imagen</div><div class="chips">'+thChips('t',SH.t,1,'Mi color')+'</div><div class="chips">'+o('f',Object.keys(FM).map(function(k){return [k,FM[k][0]]}),SH.f)+'</div><div class="chips">'+o('n',[[5,'Top 5'],[10,'Top 10']],SH.n)+o('pl',[[1,'Con cifras'],[0,'Sin cifras']],SH.pl)+'</div><img id="pv" class="pv" alt="">'}
 function statsLF(){cur=null;ui.vk='stats';var P=[['7day','7 días'],['1month','Mes'],['12month','Año'],['overall','Siempre']],T=[['artists','Artistas'],['albums','Álbumes'],['tracks','Canciones']];
-show('<div class="hd"><div class="t">Resumen</div><button id="x">✕</button></div>'+statsTabs()+'<div class="chips">'+P.map(function(c){return '<button data-p="'+c[0]+'" class="'+(SP.p==c[0]?'on':'')+'">'+c[1]+'</button>'}).join('')+'</div><div class="chips">'+T.map(function(c){return '<button data-t="'+c[0]+'" class="'+(SP.t==c[0]?'on':'')+'">'+c[1]+'</button>'}).join('')+'</div><div id="sr" class="h">Cargando…</div>'+ctl()+'<button class="p" id="shr">Compartir imagen</button>');
+show(bhd('Resumen')+statsTabs()+'<div class="chips">'+P.map(function(c){return '<button data-p="'+c[0]+'" class="'+(SP.p==c[0]?'on':'')+'">'+c[1]+'</button>'}).join('')+'</div><div class="chips">'+T.map(function(c){return '<button data-t="'+c[0]+'" class="'+(SP.t==c[0]?'on':'')+'">'+c[1]+'</button>'}).join('')+'</div><div id="sr" class="h">Cargando…</div>'+ctl()+'<button class="p" id="shr">Compartir imagen</button>');
 $('x').onclick=ovBack;statsTabsBind();
 [].forEach.call($('sh').querySelectorAll('[data-p],[data-t]'),function(b){b.onclick=function(){if(b.dataset.p)SP.p=b.dataset.p;else SP.t=b.dataset.t;stats()}});
 $('shr').onclick=function(){shareImg().catch(function(){})};
@@ -873,15 +889,16 @@ D.tt=D.tracks.slice().sort(function(p,q){return q.r-p.r||(q.f-p.f)});
 D.fv=D.tracks.filter(function(t){return t.f}).concat(D.tfs).sort(function(p,q){return q.r-p.r});
 D.gl=Object.keys(D.gen).map(function(g){return [g,D.gen[g]]}).sort(function(p,q){return q[1]-p[1]||p[0].localeCompare(q[0])});
 D.avg=D.rated.length?D.sum/D.rated.length:0;return D}
-function statsMe(){cur=null;ui.vk='stats';var D=meData(),ks=D.ks,rated=D.rated,mx=Math.max.apply(null,D.dist.concat([1]));SP.fo=SP.fo||{gen:1};
+function statsMe(){cur=null;ui.vk='stats';var D=meData(),ks=D.ks,rated=D.rated,mx=Math.max.apply(null,D.dist.concat([1]));SP.fo=SP.fo||{};
 function card(n,l){return '<div class="sc"><b>'+n+'</b><span>'+l+'</span></div>'}
 function fold(id,ic,t,n,inner){return '<div class="dfo'+(SP.fo[id]?' open':'')+'" data-fo="'+id+'"><button class="dfh" type="button"><span class="dfi">'+ic+'</span><span class="dft">'+t+'</span>'+(n!=null?'<span class="dfc">'+n+'</span>':'')+'<span class="ch">›</span></button><div class="dfb">'+inner+'</div></div>'}
 function trRow(t,i){var a=S.a[t.k];return '<div class="li" data-k="'+esc(t.k)+'"><b>'+(i+1)+'</b><div class="in"><div class="t">'+esc(t.n)+'</div><div class="a">'+esc(a.ar)+' · '+esc(a.al)+'</div></div><div>'+(t.f?'♥ ':'')+(t.r?'★'+fr(t.r):'')+'</div></div>'}
 var any=rated.length||D.revs.length||D.trN||D.tfN||D.favs.length;
-var h='<div class="hd"><div class="t">Resumen</div><button id="x">✕</button></div>'+statsTabs();
+var h=bhd('Resumen')+statsTabs();
 var canSh=D.top.length||D.plays.length||D.favs.length||D.tt.length||D.fv.length;
 function sb(id){return '<div class="btns"><button type="button" data-shs="'+id+'">Compartir esta sección</button></div>'}
 if(canSh)h+='<button class="p" id="mshr" style="width:100%;margin-top:12px">Compartir imagen del resumen</button>';
+h+='<div id="st" style="margin-top:14px">'+libInfo(ks.length,D.done,D.sum,rated.length)+'</div>';
 h+='<div id="fos">';
 h+=fold('gen','▤','Resumen general',null,'<div class="sg">'+card(D.done,'Escuchados')+card(rated.length,'Puntuados')+card(rated.length?D.avg.toFixed(1):'–','Nota media')+card(D.revs.length,'Reseñas')+card(D.trN,'Canciones puntuadas')+card(D.tfN,'Canciones favoritas')+'</div>');
 if(!any){h+='<div class="empty">Aún no has puntuado ni reseñado nada.<br>Abre un álbum y toca las estrellas o escribe tu reseña.</div>'}
@@ -1123,7 +1140,8 @@ if(ui.f=='fav'&&!a.fav)return false;if(ui.ge&&!has(k,ui.ge))return false;if(ui.c
 var s=ui.s;f.sort(function(x,y){var a=S.a[x],b=S.a[y];
 if(s=='rate')return b.rate-a.rate||a.ar.localeCompare(b.ar);if(s=='t')return b.t-a.t;
 return (a[s]).localeCompare(b[s])||a.al.localeCompare(b.al)});return f}
-function cv(a,c,k,sz,nb){var urls=coverURLs(a,sz),src=urls[0]||'';return '<div class="cv '+c+'" style="background:linear-gradient(145deg,hsl('+hue(a.al+a.ar)+',50%,42%),hsl('+((hue(a.al+a.ar)+50)%360)+',55%,20%))"><span>'+esc(ini(a.al))+'</span>'+(src?'<img '+(nb?'loading="eager" fetchpriority="high"':'loading="lazy"')+' decoding="async" alt="" data-alt="'+esc(urls.slice(1).join('|'))+'" data-m="'+(a.mb&&!NC[a.mb]?a.mb:'')+'" src="'+esc(src)+'" onerror="cvf(this)">':'')+(nb?'':(a.done?'<b class="ok">✓</b>':'')+(a.fav&&c!='sm'?'<b class="fv">♥</b>':'')+(a.rate&&c!='sm'?'<b class="rt">★'+fr(a.rate)+'</b>':''))+'</div>'}
+var SB=true,CURCOL='';
+function cv(a,c,k,sz,nb){var urls=coverURLs(a,sz),src=urls[0]||'';return '<div class="cv '+c+'" style="background:linear-gradient(145deg,hsl('+hue(a.al+a.ar)+',50%,42%),hsl('+((hue(a.al+a.ar)+50)%360)+',55%,20%))"><span>'+esc(ini(a.al))+'</span>'+(src?'<img '+(nb?'loading="eager" fetchpriority="high"':'loading="lazy"')+' decoding="async" alt="" data-alt="'+esc(urls.slice(1).join('|'))+'" data-m="'+(a.mb&&!NC[a.mb]?a.mb:'')+'" src="'+esc(src)+'" onerror="cvf(this)">':'')+(nb?'':(SB&&a.done?'<b class="ok">✓</b>':'')+(SB&&a.fav&&c!='sm'?'<b class="fv">♥</b>':'')+(a.rate&&c!='sm'?'<b class="rt">★'+fr(a.rate)+'</b>':''))+'</div>'}
 /* ---------- Vista (cuadrícula/lista) independiente por sección ---------- */
 var VMK='digz-vm',VM={};try{VM=JSON.parse(localStorage.getItem(VMK)||'{}')}catch(e){}
 var VMN={all:'Álbumes',ar:'Artistas',ge:'Géneros',todo:'Por escuchar',done:'Escuchados',cols:'Colecciones',cd:'Dentro de la colección',fav:'Favoritos',q:'Búsqueda',oar:'Álbumes del artista',oge:'Álbumes del género'};
@@ -1131,8 +1149,8 @@ function vmk(){if(ui.cv)return 'cols';if(ui.q)return 'q';if(ui.o)return 'o'+ui.o
 function vm(k){return VM[k||vmk()]==='l'?'l':'g'}
 function setVm(v,k){VM[k||vmk()]=v;try{localStorage.setItem(VMK,JSON.stringify(VM))}catch(e){}}
 function tile(k){var a=S.a[k];return '<div class="tl" data-k="'+esc(k)+'">'+cv(a,'',k)+'<div class="t">'+esc(a.al)+'</div><div class="a">'+esc(a.ar)+'</div></div>'}
-function rowh(k){var a=S.a[k];return '<div class="li" data-k="'+esc(k)+'">'+cv(a,'sm',k)+'<div class="in"><div class="t">'+esc(a.al)+'</div><div class="a">'+esc(a.ar)+(colList(a).length?' · '+esc(colList(a).join(', ')):'')+'</div></div><div>'+(a.fav?'♥ ':'')+(a.rate?'★'+fr(a.rate):'')+'</div></div>'}
-function blk(l){return vm()=='g'?'<div class="grid">'+l.map(tile).join('')+'</div>':l.map(rowh).join('')}
+function rowh(k){var a=S.a[k],cl=colList(a).filter(function(c){return c!==CURCOL});return '<div class="li" data-k="'+esc(k)+'">'+cv(a,'sm',k)+'<div class="in"><div class="t">'+esc(a.al)+'</div><div class="a">'+esc(a.ar)+(cl.length?' · '+esc(cl.join(', ')):'')+'</div></div><div>'+(SB&&a.fav?'♥ ':'')+(a.rate?'★'+fr(a.rate):'')+'</div></div>'}
+function blk(l){var o=SB,r;SB=(vmk()=='all');try{r=vm()=='g'?'<div class="grid">'+l.map(tile).join('')+'</div>':l.map(rowh).join('')}finally{SB=o}return r}
 function fold(n,ks,t){var h=ks.slice(0,4),one=h.length<4,mo='<div class="mo'+(one?' one':'')+'">'+(one?cv(S.a[h[0]],'mini',h[0],250,1):h.map(function(k){return cv(S.a[k],'mini',k,250,1)}).join(''))+'</div>',
 cnt=ks.length+(ks.length==1?' álbum':' álbumes'),at='data-g="'+esc(n)+'" data-t="'+t+'" data-ks="'+esc(JSON.stringify(h))+'"';
 if(vm()=='g')return '<div class="fd" '+at+'>'+mo+'<div class="t">'+esc(n)+'</div><div class="a">'+cnt+'</div></div>';
@@ -1257,7 +1275,7 @@ async function genrePage(n){ui.keep=1;hide();ui.keep=0;ui.vk='genre:'+n;var my=+
 ks.sort(function(x,y){return S.a[x].ar.localeCompare(S.a[y].ar)||S.a[x].al.localeCompare(S.a[y].al)}).forEach(function(q){var a=S.a[q];items.push({al:a.al,ar:a.ar,y:'',img:cvs(a,300),cu:a.cu||'',id:a.id||'',iid:a.iid||'',k:q,done:a.done})});
 var nl=items.length,back='\u0001ge:'+n;
 function bind(root){[].forEach.call(root.querySelectorAll('[data-i]'),function(t){t.onclick=function(){ui.back=back;openItem(items[t.dataset.i])}})}
-show('<div class="hd"><div class="hl"><div class="gtw">'+genTile(n)+'</div><div class="t">'+esc(n)+'</div></div><button id="x">✕</button></div>'
+show(bhd(esc(n))
 +'<div class="tb2"><button id="tl" class="on">En tu biblioteca · '+nl+'</button><button id="tg">Búsqueda global</button></div>'
 +'<div id="pl">'+(nl?'<div id="dl">'+agrid(items,0)+'</div>':'<div class="h">Todavía no tienes álbumes de este género.</div>')+'</div>'
 +'<div id="pg" style="display:none"><div id="dg"><div class="h">Buscando álbumes…</div></div></div>');
@@ -1421,7 +1439,7 @@ e.innerHTML=SV.map(function(s,i){return '<button data-sv="'+i+'" class="'+(s.on?
 [].forEach.call(e.querySelectorAll('[data-sv]'),function(b){b.onclick=function(){var s=SV[b.dataset.sv];s.on=!s.on;saveSV();b.className=s.on?'on':''}});
 var c=$('svc');if(c){c.innerHTML=SV.map(function(s,i){return s.c?'<div class="sv"><span>'+esc(s.n)+'</span><button data-sd="'+i+'">✕</button></div>':''}).join('');
 [].forEach.call(c.querySelectorAll('[data-sd]'),function(b){b.onclick=function(){SV.splice(+b.dataset.sd,1);saveSV();svList()}})}}
-var APPV='2026-10-13 · colecciones-5';
+var APPV='2026-10-13 · colecciones-6';
 var DZC=[['#8e8e93','Gris'],['#1db954','Verde'],['#2f80ff','Azul'],['#8b5cf6','Violeta'],['#ec4899','Rosa'],['#f97316','Naranja'],['#ef4444','Rojo'],['#14b8a6','Turquesa'],['#eab308','Amarillo']];
 function themeUI(){var t=dzLoad(),tm=$('tm'),tc=$('tc');if(!tm||!tc)return;
 function draw(){tm.innerHTML=[['sys','Sistema',DI.sys],['light','Claro',DI.sun],['dark','Oscuro',DI.moon]].map(function(m){return '<button data-m="'+m[0]+'" class="'+(t.m==m[0]?'on':'')+'">'+m[2]+m[1]+'</button>'}).join('');
@@ -1437,14 +1455,14 @@ var CFT={lastfm:'Last.fm',plat:'Plataformas de escucha',look:'Apariencia',imp:'I
 function cfRow(a,ic,t,v,o){return '<button class="cfg-i'+(o&&o.indexOf('d')>-1?' dn':'')+'" '+a+'><span class="cfg-ic"><svg viewBox="0 0 24 24">'+CFI[ic]+'</svg></span><span class="cfg-t">'+t+'</span>'+(v?'<span class="cfg-v">'+v+'</span>':'')+(o&&o.indexOf('c')>-1?CHV:'')+'</button>'}
 function settings(sub){cur=null;if(!CFT[sub])sub='';ui.vk='settings'+(sub?':'+sub:'');var conn=LF.u&&lfKey(),h;
 if(!sub){var th=dzLoad(),ml={sys:'Sistema',light:'Claro',dark:'Oscuro'}[th.m]||'Sistema',on=SV.filter(function(s){return s.on}).length;
-h='<div class="hd"><div class="t">Ajustes</div><button id="x">✕</button></div><div id="st"></div>'
+h=bhd('Ajustes')
 +'<div class="cfg-h">Cuenta y servicios</div><div class="cfg-g">'
 +cfRow('data-go="lastfm"','fm','Last.fm',conn?esc(LF.u):'Sin conectar','c')
 +cfRow('data-go="plat"','pl','Plataformas',on+(on==1?' activa':' activas'),'c')+'</div>'
 +'<div class="cfg-h">Personalización</div><div class="cfg-g">'
 +cfRow('data-go="look"','lk','Apariencia',ml+'<i class="cdot" style="background:'+esc(th.c)+'"></i>','c')+'</div>'
 +'<div class="cfg-h">Biblioteca</div><div class="cfg-g">'
-+cfRow('data-do="rsm"','rs','Resumen','','c')
+
 +cfRow('data-go="imp"','im','Importar música','','c')+'</div>'
 +'<div class="cfg-h">Datos</div><div class="cfg-g">'
 +cfRow('data-go="bk"','bk','Respaldo y restauración','','c')
@@ -1465,8 +1483,6 @@ h='<div class="hd"><div class="hl"><button id="x" class="cfg-bk" aria-label="Atr
 show(h);$('x').onclick=ovBack;$('sh').scrollTop=ovsy();
 if(!sub){
 [].forEach.call($('sh').querySelectorAll('[data-go]'),function(b){b.onclick=function(){settings(b.dataset.go)}});
-(function(){var ks=Object.keys(S.a),d=0,rs=0,rn=0;ks.forEach(function(k){var a=S.a[k];if(a.done)d++;if(a.rate){rs+=a.rate;rn++}});$('st').innerHTML=libInfo(ks.length,d,rs,rn)})();
-$('sh').querySelector('[data-do="rsm"]').onclick=function(){stats()};
 $('sh').querySelector('[data-do="ld"]').onclick=function(){Object.keys(S.a).forEach(function(k){need(k)});if(lfKey()&&LF.u)bulkL();toast('Descargando portadas y datos…')};
 $('sh').querySelector('[data-do="cl"]').onclick=function(){if(this.dataset.s){S={a:{},cols:[]};save();render();hide()}else{this.dataset.s=1;this.querySelector('.cfg-t').textContent='¿Seguro? Toca otra vez'}};
 return}
@@ -1525,8 +1541,9 @@ if(b.dataset.g!==undefined){ui.cv=false;if(b.dataset.g===''){ui.g='';ui.f='all';
 if(b.dataset.f!==undefined){ui.cv=false;ui.f=ui.f==b.dataset.f?'all':b.dataset.f;ui.lim=120;render()}};
 $('seg').onclick=$('chips').onclick;
 /* ---------- Colecciones (pestaña propia) ---------- */
-function colMos(c,np){if(!np&&S.ci&&S.ci[c])return '<div class="mos"><img class="cp" alt="" src="'+S.ci[c]+'"></div>';
+function colMos(c,np,full){if(!np&&S.ci&&S.ci[c])return '<div class="mos"><img class="cp" alt="" src="'+S.ci[c]+'"></div>';
 var ks=Object.keys(S.a).filter(function(k){return hasCol(S.a[k],c)&&!S.a[k].tmp}),m='';
+if(full){var n=Math.min(ks.length,4);for(var j=0;j<n;j++)m+=cv(S.a[ks[j]],'mini',ks[j],500);return '<div class="mos m'+n+'">'+m+'</div>'}
 for(var i=0;i<4;i++)m+=ks[i]?cv(S.a[ks[i]],'mini',ks[i],120):'<i></i>';return '<div class="mos">'+m+'</div>'}
 function colCnt(c){var n=Object.keys(S.a).filter(function(k){return hasCol(S.a[k],c)&&!S.a[k].tmp}).length;return n+(n==1?' álbum':' álbumes')}
 var ICIMG='<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="1.8"/><path d="M21 16l-5-5-8 8"/></svg>';
@@ -1586,11 +1603,12 @@ var ICDOTS='<svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="2" fill="currentC
 function colKeys(n){var ks=Object.keys(S.a).filter(function(k){return hasCol(S.a[k],n)&&!S.a[k].tmp}),s=ui.s;
 ks.sort(function(x,y){var a=S.a[x],b=S.a[y];if(s=='rate')return b.rate-a.rate||a.ar.localeCompare(b.ar);if(s=='t')return b.t-a.t;return (a[s]).localeCompare(b[s])||a.al.localeCompare(b.al)});return ks}
 function colPage(n,keepY){if(S.cols.indexOf(n)<0){hide();return}
-ui.keep=1;hide();ui.keep=0;ui.vk='col:'+n;var ks=colKeys(n),L=vm('cd')=='l',ph=S.ci&&S.ci[n],first=ks[0]&&S.a[ks[0]],bg=ph||(first&&cvs(first,500))||'';
+ui.keep=1;hide();ui.keep=0;ui.vk='col:'+n;CURCOL=n;SB=false;var ks=colKeys(n),L=vm('cd')=='l',ph=S.ci&&S.ci[n],first=ks[0]&&S.a[ks[0]],bg=ph||(first&&cvs(first,500))||'';
 show('<div class="hero colpg" data-cpn="'+esc(n)+'"><div class="hbg">'+(bg?'<img alt="" src="'+esc(bg)+'" onerror="this.remove()">':'')+'</div><div class="htop"><button id="x" class="rb" aria-label="Atrás">'+ICBK+'</button><button id="cmb" class="rb" aria-label="Más opciones">'+ICDOTS+'</button></div>'
-+'<div class="ab"><div class="ccv">'+colMos(n)+'</div><h2>'+esc(n)+'</h2></div></div>'
++'<div class="ab"><div class="ccv">'+colMos(n,0,1)+'</div><h2>'+esc(n)+'</h2></div></div>'
 +'<div id="cpl" style="margin-top:18px">'+(ks.length?(L?ks.map(rowh).join(''):'<div class="grid">'+ks.map(tile).join('')+'</div>'):'<div class="h" style="text-align:center;padding:26px 8px">Toca ⋯ para añadir álbumes.</div>')+'</div>');
-$('x').onclick=hide;$('cmb').onclick=function(e){e.stopPropagation();colMenu(n)};
+CURCOL='';SB=true;
+$('x').onclick=ovBack;$('cmb').onclick=function(e){e.stopPropagation();colMenu(n)};
 ks.forEach(function(k){needCover(k)});if(keepY)$('sh').scrollTop=keepY}
 function colRename(o,nn){var i=S.cols.indexOf(o);if(i>-1)S.cols[i]=nn;Object.keys(S.a).forEach(function(k){var l=colList(S.a[k]),i=l.indexOf(o);if(i>-1)l[i]=nn});['ci','cs','cp'].forEach(function(f){if(S[f]&&S[f][o]!==undefined){S[f][nn]=S[f][o];delete S[f][o]}});if(ui.c==o)ui.c=nn}
 function colEditDlg(n){var P={ci:(S.ci&&S.ci[n])||null,cs:(S.cs&&S.cs[n])||null,cp:(S.cp&&S.cp[n])||null},w=document.createElement('div');
@@ -1747,6 +1765,7 @@ if(t.dataset.k)sheet(t.dataset.k)};
    hoja de «Escuchar en» → vista anterior (álbum, artista, ajustes…) → pestaña/lista anterior.
    Solo cuando ya estás en la biblioteca sin nada abierto deja salir de la app. */
 var OVS=[],NAV=[];
+function bhd(t){return '<div class="hd bh"><button id="x" class="rb" type="button" aria-label="Atrás">'+ICBK+'</button><div class="t">'+t+'</div><span></span></div>'}
 function ovsy(){return ui.sy&&ui.sy.k===ui.ovk?ui.sy.v:0}
 function ovOpen(e){var k=e.k,i=k.indexOf(':'),t=i<0?k:k.slice(0,i),v=i<0?'':k.slice(i+1);
 if((t=='album'||t=='studio')&&!S.a[v])return false;

@@ -1,5 +1,5 @@
 /* Service worker — cambia VERSION cada vez que subas un index.html nuevo */
-var VERSION = 'v16-2026-10-13';
+var VERSION = 'v17-2026-10-13';
 var CACHE = 'app-' + VERSION;
 var CORE = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png'];
 
