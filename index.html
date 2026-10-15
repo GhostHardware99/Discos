@@ -619,7 +619,7 @@ return n}
 
 /* ---------- Datos de MusicBrainz ---------- */
 var M={},MK='discos-meta3',q2=[],qd={},busy=0,tries={},rt=0,gap=150,jid=0,tq={},tqn={},rq={},mbT=0,mbC=Promise.resolve(),NC={},mbPause=false,mbAb=null,SC={};
-try{M=JSON.parse(localStorage.getItem(MK)||'{}');NC=JSON.parse(localStorage.getItem('digz-nc')||'{}');localStorage.removeItem('discos-meta2')}catch(e){}
+try{M=JSON.parse(localStorage.getItem(MK)||'{}');NC=JSON.parse(localStorage.getItem('digz-nc')||'{}');Object.keys(NC).forEach(function(k){if(NC[k]===1||Date.now()-NC[k]>2*864e5)delete NC[k]});localStorage.removeItem('discos-meta2')}catch(e){}
 function saveM(){try{localStorage.setItem(MK,JSON.stringify(M))}catch(e){}}
 function jsonpRaw(u,ms){return new Promise(function(ok,no){var cb='dz'+(++jid),s=document.createElement('script'),to=setTimeout(function(){end();no()},ms||6000);
 function end(){clearTimeout(to);delete window[cb];s.remove()}
@@ -681,7 +681,14 @@ function adbList(l,ar){return (l||[]).filter(function(x){return x.strAlbum&&!/^s
 function lazy(f,ms,stop){return function(){return sleep(ms).then(function(){if(stop())throw 0;return f()})}}
 function seAdbAlb(v){var m=v.split(/\s[-–—]\s/),ar=m[0],al=m[1]||'';
 return (al?adbGet('searchalbum.php?s='+qe(ar)+'&a='+qe(al)):adbGet('search.php?s='+qe(v)).then(function(d){var a=(d.artists||[])[0];return a?adbGet('album.php?i='+a.idArtist):{album:null}})).then(function(d){return adbList(d.album)})}
-function seMbAlb(v){return netGet('https://musicbrainz.org/ws/2/release-group?limit=25&query='+encodeURIComponent(cqry(v))+'&fmt=json',12000).then(function(d){return (d['release-groups']||[]).filter(function(x){return x.title&&acs(x)[0]}).map(function(x){return {al:x.title,ar:acs(x)[0],y:String(x['first-release-date']||'').slice(0,4),type:(x['primary-type']||'').toLowerCase()=='ep'?'ep':'album',id:'',iid:'',cu:'',img:covurl(x.id,250),mb:x.id}})})}
+function seMbAlb(v){var base='https://musicbrainz.org/ws/2/release-group?query=',tail='&fmt=json';
+function mp(d){return (d['release-groups']||[]).filter(function(x){return x.title&&acs(x)[0]}).map(function(x){return {al:x.title,ar:acs(x)[0],y:String(x['first-release-date']||'').slice(0,4),type:(x['primary-type']||'').toLowerCase()=='ep'?'ep':'album',id:'',iid:'',cu:'',img:covurl(x.id,250),mb:x.id}})}
+/* 1) título exacto (así «Brat» siempre aparece primero)  2) coincidencias parciales */
+var ex=netGet(base+encodeURIComponent('releasegroup:"'+esq(v)+'" AND (primarytype:album OR primarytype:ep)')+'&limit=15'+tail,12000).then(mp,function(){return []}),
+wd=netGet(base+encodeURIComponent(cqry(v))+'&limit=25'+tail,12000).then(mp,function(){return []});
+return Promise.all([ex,wd]).then(function(r){return r[0].concat(r[1])})}
+function seRank(l,v){var q=nrm(v),c=cln(v)||q;function sc(x){var t=cln(x.al),r=nrm(x.ar);if(t==c||t==q)return 0;if(t.indexOf(c)==0)return 1;if(r==q)return 2;if(t.indexOf(c)>-1||r.indexOf(q)>-1)return 3;return 4}
+return l.map(function(x,i){return [sc(x),i,x]}).sort(function(x,y){return x[0]-y[0]||x[1]-y[1]}).map(function(x){return x[2]})}
 function seAdbArt(v){return adbGet('search.php?s='+qe(v)).then(function(d){return (d.artists||[]).map(function(x){return x.strArtist}).filter(Boolean)})}
 function seMbArt(v){var w=v.toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').split(' ').filter(Boolean).slice(0,6);if(!w.length)return Promise.resolve([]);
 return netGet('https://musicbrainz.org/ws/2/artist?limit=8&query='+encodeURIComponent('artist:('+w.map(function(x,i){return esq(x)+(i==w.length-1&&x.length>=2?'*':'')}).join(' AND ')+')')+'&fmt=json',12000).then(function(d){return (d.artists||[]).map(function(x){return x.name}).filter(Boolean)})}
@@ -701,7 +708,7 @@ function esq(s){return String(s).replace(/[+\-!(){}\[\]^"~*?:\\\/&|]/g,'\\$&')}
 function cqry(v,all){var w=v.toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').split(' ').filter(Boolean).slice(0,8),n=w.length,t=w.map(function(x,i){var e=esq(x)+(i==n-1&&x.length>=3?'*':'');return '(releasegroup:'+e+' OR artist:'+e+')'});return t.join(' AND ')+(all?'':' AND primarytype:(album OR ep)')}
 function acs(d){return (d['artist-credit']||[]).map(function(c){return c.name||(c.artist||{}).name||''})}
 function covurl(mb,sz){return 'https://coverartarchive.org/release-group/'+mb+'/front-'+sz}
-function ncv(im){var m=im.dataset.m;im.remove();if(m){NC[m]=1;try{localStorage.setItem('digz-nc',JSON.stringify(NC))}catch(e){}}}
+function ncv(im){var m=im.dataset.m;im.remove();if(m){NC[m]=Date.now();try{localStorage.setItem('digz-nc',JSON.stringify(NC))}catch(e){}}}
 function sleep(t){return new Promise(function(r){setTimeout(r,t)})}
 function mbq(p){var run=mbC.then(function(){return sleep(Math.max(0,mbT+1100-Date.now()))}).then(function(){mbT=Date.now();return netGet('https://musicbrainz.org/ws/2/'+p+(p.indexOf('?')>-1?'&':'?')+'fmt=json',15000)});mbC=run.catch(function(){});return run}
 function mbs(p,sig){return fetch('https://musicbrainz.org/ws/2/'+p+'&fmt=json',{signal:sig}).then(function(r){if(r.status==503||r.status==429)throw 'q';if(!r.ok)throw 'e';return r.json()})}
@@ -1413,7 +1420,7 @@ var hd=setTimeout(fin,13000);
 function chk(l){left--;if(l&&l.length)res=res.concat(l);if(left<=0)fin();else if(res.length&&!gr)gr=setTimeout(fin,grace)}
 fns.forEach(function(f){var p;try{p=f()}catch(e){p=Promise.reject(e)}p.then(chk,function(){chk([])})})})}
 function seAlbums(v){var k=v.toLowerCase();if(SEC[k])return Promise.resolve(SEC[k]);var st=false;
-return seRace([function(){return seDzAlb(v)},function(){return seItAlb(v)},lazy(function(){return seAdbAlb(v)},1500,function(){return st||dOK('api.deezer.com')||dOK('itunes.apple.com')}),lazy(function(){return seMbAlb(v)},1800,function(){return st||dOK('api.deezer.com')||dOK('itunes.apple.com')})],seMerge,400).then(function(l){st=true;if(l.length)SEC[k]=l;return l})}
+return seRace([function(){return seDzAlb(v)},function(){return seItAlb(v)},lazy(function(){return seAdbAlb(v)},1500,function(){return st||dOK('api.deezer.com')||dOK('itunes.apple.com')}),lazy(function(){return seMbAlb(v)},1800,function(){return st||dOK('api.deezer.com')||dOK('itunes.apple.com')})],seMerge,400).then(function(l){st=true;l=seRank(l,v);if(l.length)SEC[k]=l;return l})}
 function seDzArt(v){return jsonp('https://api.deezer.com/search/artist?limit=8&q='+encodeURIComponent(v),5000).then(function(d){return (d.data||[]).map(function(x){return x.name}).filter(Boolean)})}
 function seItArt(v){return jsonp('https://itunes.apple.com/search?media=music&entity=musicArtist&limit=8&term='+encodeURIComponent(v),5000).then(function(d){return (d.results||[]).map(function(x){return x.artistName}).filter(Boolean)})}
 function buscarArt(v){var k=v.toLowerCase();if(SEA[k])return Promise.resolve(SEA[k]);var st=false;
