@@ -1,5 +1,5 @@
 /* Service worker — cambia VERSION cada vez que subas un index.html nuevo */
-var VERSION = 'v64-2026-10-15';
+var VERSION = 'v65-2026-10-15';
 var CACHE = 'app-' + VERSION;
 /* Portadas: caché propia que NO se borra al actualizar la app */
 var IMG = 'covers-v1', IMGMAX = 5000, BAD = {};
@@ -39,10 +39,10 @@ function tryFetch(u, mode, ms) {
 }
 /* 1) directo con CORS (se puede guardar)  2) si el sitio no permite CORS o está bloqueado: a través de weserv, que sí permite
    guardar (la imagen queda en caché con su URL original)  3) último recurso: directo sin CORS (se muestra, pero no se guarda) */
-var INF = {};
+var INF = {}, INFN = 0, NOCORS = {};
 function imgNet(u, cors, c, oc) {
   var host = new URL(u).host;
-  return tryFetch(u, 'cors', 5000).catch(function (e) {
+  return (!cors && NOCORS[host] ? Promise.reject(new Error('nocors')) : tryFetch(u, 'cors', 5000)).catch(function (e) {
     if (/(^|\.)weserv\.nl$/.test(host)) throw e;
     if (cors) {
       return tryFetch(WES + encodeURIComponent(u), 'cors', 15000).then(function (r) {
@@ -51,13 +51,15 @@ function imgNet(u, cors, c, oc) {
       });
     }
     /* <img> normal: se muestra YA la imagen directa (sin CORS) y en segundo plano se guarda una copia vía weserv para la próxima vez */
-    if (!INF[u]) {
+    NOCORS[host] = 1;
+    if (!INF[u] && INFN < 2) {
+      INFN++;
       INF[u] = tryFetch(WES + encodeURIComponent(u), 'cors', 20000).then(function (r) {
         if (!r.ok) throw new Error('wes');
         return c.put(u, r.clone()).then(function () { return trimImgs(c); });
       }).catch(function () {
         return tryFetch(u, 'no-cors', 10000).then(function (r) { return oc.put(u, r).then(function () { return trimOpq(oc); }); }).catch(function () {});
-      }).then(function () { delete INF[u]; });
+      }).then(function () { delete INF[u]; INFN--; });
     }
     return tryFetch(u, 'no-cors', 10000);
   });
