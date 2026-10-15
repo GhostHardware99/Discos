@@ -1,5 +1,5 @@
 /* Service worker — cambia VERSION cada vez que subas un index.html nuevo */
-var VERSION = 'v62-2026-10-15';
+var VERSION = 'v64-2026-10-15';
 var CACHE = 'app-' + VERSION;
 /* Portadas: caché propia que NO se borra al actualizar la app */
 var IMG = 'covers-v1', IMGMAX = 5000, BAD = {};
@@ -30,7 +30,7 @@ self.addEventListener('message', function (e) {
 });
 
 /* Portadas de cualquier sitio: primero la caché; si no está, se descarga y se guarda para siempre (hasta IMGMAX). */
-var WES = 'https://images.weserv.nl/?w=1000&we&q=90&output=jpg&url=';
+var WES = 'https://images.weserv.nl/?w=800&we&q=86&output=jpg&url=';
 function tryFetch(u, mode, ms) {
   var ctl = ('AbortController' in self) ? new AbortController() : null;
   var to = setTimeout(function () { if (ctl) ctl.abort(); }, ms);
@@ -39,16 +39,26 @@ function tryFetch(u, mode, ms) {
 }
 /* 1) directo con CORS (se puede guardar)  2) si el sitio no permite CORS o está bloqueado: a través de weserv, que sí permite
    guardar (la imagen queda en caché con su URL original)  3) último recurso: directo sin CORS (se muestra, pero no se guarda) */
-function imgNet(u, cors) {
+var INF = {};
+function imgNet(u, cors, c, oc) {
   var host = new URL(u).host;
-  return tryFetch(u, 'cors', 10000).catch(function (e) {
+  return tryFetch(u, 'cors', 5000).catch(function (e) {
     if (/(^|\.)weserv\.nl$/.test(host)) throw e;
-    return tryFetch(WES + encodeURIComponent(u), 'cors', 12000).then(function (r) {
-      if (!r.ok) throw new Error('wes');
-      return r;
-    });
-  }).catch(function (e) {
-    if (cors) throw e;
+    if (cors) {
+      return tryFetch(WES + encodeURIComponent(u), 'cors', 15000).then(function (r) {
+        if (!r.ok) throw new Error('wes');
+        return r;
+      });
+    }
+    /* <img> normal: se muestra YA la imagen directa (sin CORS) y en segundo plano se guarda una copia vía weserv para la próxima vez */
+    if (!INF[u]) {
+      INF[u] = tryFetch(WES + encodeURIComponent(u), 'cors', 20000).then(function (r) {
+        if (!r.ok) throw new Error('wes');
+        return c.put(u, r.clone()).then(function () { return trimImgs(c); });
+      }).catch(function () {
+        return tryFetch(u, 'no-cors', 10000).then(function (r) { return oc.put(u, r).then(function () { return trimOpq(oc); }); }).catch(function () {});
+      }).then(function () { delete INF[u]; });
+    }
     return tryFetch(u, 'no-cors', 10000);
   });
 }
@@ -81,10 +91,9 @@ function imgFetch(req) {
       var b = BAD[host];
       /* sitio que falló 3 veces seguidas en los últimos 5 min: falla al instante y la app pasa a su alternativa */
       if (b && b.n >= 3 && Date.now() - b.t < 300000) return Response.error();
-      return imgNet(u, cors).then(function (r) {
+      return imgNet(u, cors, c, oc).then(function (r) {
         if (r.type === 'opaque') {
           BAD[host] = { n: 0, t: Date.now() };
-          oc.put(u, r.clone()).then(function () { return trimOpq(oc); }).catch(function () {});
           return r;
         }
         if (r.ok) {
