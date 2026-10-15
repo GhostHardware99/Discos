@@ -621,10 +621,54 @@ return n}
 var M={},MK='discos-meta3',q2=[],qd={},busy=0,tries={},rt=0,gap=150,jid=0,tq={},tqn={},rq={},mbT=0,mbC=Promise.resolve(),NC={},mbPause=false,mbAb=null,SC={};
 try{M=JSON.parse(localStorage.getItem(MK)||'{}');NC=JSON.parse(localStorage.getItem('digz-nc')||'{}');localStorage.removeItem('discos-meta2')}catch(e){}
 function saveM(){try{localStorage.setItem(MK,JSON.stringify(M))}catch(e){}}
-function jsonp(u,ms){return new Promise(function(ok,no){var cb='dz'+(++jid),s=document.createElement('script'),to=setTimeout(function(){end();no()},ms||6000);
+function jsonpRaw(u,ms){return new Promise(function(ok,no){var cb='dz'+(++jid),s=document.createElement('script'),to=setTimeout(function(){end();no()},ms||6000);
 function end(){clearTimeout(to);delete window[cb];s.remove()}
 window[cb]=function(d){end();ok(d)};s.onerror=function(){end();no()};
 s.src=u+(u.indexOf('?')>-1?'&':'?')+'output=jsonp&callback='+cb;document.head.appendChild(s)})}
+/* ---------- RED RESISTENTE (v55) ----------
+   Deezer / iTunes / MusicBrainz / TheAudioDB: 1) conexión directa, 2) tu proxy propio (opcional), 3) proxies CORS públicos.
+   Si la directa falla (bloqueo o IP compartida con cuota agotada) entra un proxy; la ruta que funciona se recuerda. */
+var PXC='',NH={},NCH={};
+try{PXC=localStorage.getItem('digz-px')||''}catch(e){}
+var PXL=[function(u){return 'https://api.allorigins.win/raw?url='+encodeURIComponent(u)},
+function(u){return 'https://api.codetabs.com/v1/proxy/?quest='+encodeURIComponent(u)},
+function(u){return 'https://corsproxy.io/?url='+encodeURIComponent(u)},
+function(u){return 'https://thingproxy.freeboard.io/fetch/'+u}];
+var JPH={'api.deezer.com':1,'itunes.apple.com':1};
+function hostOf(u){var m=/^https?:\/\/([^\/?#]+)/.exec(u);return m?m[1]:''}
+function okPay(h,d){if(!d||typeof d!=='object')return false;if(h=='api.deezer.com')return !d.error;if(h=='itunes.apple.com')return typeof d.resultCount=='number'||Array.isArray(d.results);return true}
+function fj(u,ms){return new Promise(function(ok,no){var t=setTimeout(function(){no(new Error('t'))},ms);fetch(u).then(function(r){if(r.status==404){var e=new Error('404');e.nf=1;throw e}if(!r.ok)throw new Error('h'+r.status);return r.text()}).then(function(x){clearTimeout(t);try{ok(JSON.parse(x))}catch(e){no(new Error('j'))}},function(e){clearTimeout(t);no(e)})})}
+function netGet(u,ms,o){o=o||{};var h=hostOf(u),c=NCH[u];if(c&&Date.now()-c.t<300000)return Promise.resolve(c.d);
+var rs=[];
+if(!o.px)rs.push(JPH[h]?{n:'jp',d:1,f:function(){return jsonpRaw(u,7000)}}:{n:'dx',d:1,f:function(){return fj(u,9000)}});
+if(!o.dx){var px=[];if(PXC)px.push({n:'cp',f:function(){return fj(PXC+(PXC.indexOf('?')>-1?'&':'?')+'url='+encodeURIComponent(u),11000)}});
+PXL.forEach(function(p,i){px.push({n:'p'+i,f:function(){return fj(p(u),11000)}})});rs=PXC?px.slice(0,1).concat(rs,px.slice(1)):rs.concat(px)}
+var pf=NH[h],fresh=pf&&Date.now()-pf.t<600000;
+if(fresh){var ix=-1;rs.forEach(function(r,i){if(r.n==pf.r)ix=i});if(ix>0)rs.unshift(rs.splice(ix,1)[0])}
+var st=fresh?2500:1300,tot=Math.max(ms||6000,14000);
+return new Promise(function(ok,no){var n=rs.length,fl=0,dn=false,tm=[],sd={};
+function end(){dn=true;tm.forEach(clearTimeout)}
+function nxt(){for(var i=0;i<n;i++)if(!sd[i]){go(i);return}}
+function go(i){if(dn||sd[i])return;sd[i]=1;var p;try{p=rs[i].f()}catch(e){p=Promise.reject(e)}
+p.then(function(d){if(dn)return;if(!okPay(h,d))throw new Error('p');end();NH[h]={r:rs[i].n,t:Date.now()};if(Object.keys(NCH).length>400)NCH={};NCH[u]={d:d,t:Date.now()};ok(d)}).catch(function(e){if(dn)return;if(e&&e.nf&&rs[i].d){end();no(e);return}fl++;if(fl>=n){end();no(new Error('net'))}else nxt()})}
+rs.forEach(function(r,i){if(i==0)go(0);else tm.push(setTimeout(function(){go(i)},i*st))});
+tm.push(setTimeout(function(){if(!dn){end();no(new Error('timeout'))}},tot))})}
+function jsonp(u,ms){return netGet(u,ms)}
+/* ---------- Fuentes extra: TheAudioDB + MusicBrainz ---------- */
+var ADB='https://www.theaudiodb.com/api/v1/json/2/';
+function adbGet(p){return netGet(ADB+p,10000)}
+function adbList(l,ar){return (l||[]).filter(function(x){return x.strAlbum&&!/^single$/i.test(x.strReleaseFormat||'')}).map(function(x){return {al:x.strAlbum,ar:x.strArtist||ar||'',y:String(x.intYearReleased||''),type:/^ep$/i.test(x.strReleaseFormat||'')?'ep':'album',id:'',iid:'',cu:x.strAlbumThumb||'',img:x.strAlbumThumb||'',adb:x.idAlbum||'',g:x.strGenre||''}})}
+function lazy(f,ms,stop){return function(){return sleep(ms).then(function(){if(stop())throw 0;return f()})}}
+function seAdbAlb(v){var m=v.split(/\s[-–—]\s/),ar=m[0],al=m[1]||'';
+return (al?adbGet('searchalbum.php?s='+qe(ar)+'&a='+qe(al)):adbGet('search.php?s='+qe(v)).then(function(d){var a=(d.artists||[])[0];return a?adbGet('album.php?i='+a.idArtist):{album:null}})).then(function(d){return adbList(d.album)})}
+function seMbAlb(v){return netGet('https://musicbrainz.org/ws/2/release-group?limit=25&query='+encodeURIComponent(cqry(v))+'&fmt=json',12000).then(function(d){return (d['release-groups']||[]).filter(function(x){return x.title&&acs(x)[0]}).map(function(x){return {al:x.title,ar:acs(x)[0],y:String(x['first-release-date']||'').slice(0,4),type:(x['primary-type']||'').toLowerCase()=='ep'?'ep':'album',id:'',iid:'',cu:'',img:covurl(x.id,250),mb:x.id}})})}
+function seAdbArt(v){return adbGet('search.php?s='+qe(v)).then(function(d){return (d.artists||[]).map(function(x){return x.strArtist}).filter(Boolean)})}
+function seMbArt(v){var w=v.toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').split(' ').filter(Boolean).slice(0,6);if(!w.length)return Promise.resolve([]);
+return netGet('https://musicbrainz.org/ws/2/artist?limit=8&query='+encodeURIComponent('artist:('+w.map(function(x,i){return esq(x)+(i==w.length-1&&x.length>=2?'*':'')}).join(' AND ')+')')+'&fmt=json',12000).then(function(d){return (d.artists||[]).map(function(x){return x.name}).filter(Boolean)})}
+async function mbGen(a){var s1=await mbq('release-group?limit=8&query='+encodeURIComponent('releasegroup:"'+esq(a.al)+'" AND artist:"'+esq(a.ar)+'"')),m=rg(a,s1['release-groups']||[]),g=m?gs(m):[];
+if(!g.length){var s2=await mbq('artist?limit=5&query='+encodeURIComponent('artist:"'+esq(a.ar)+'"')),ar=(s2.artists||[]).filter(function(x){return nrm(x.name)===nrm(a.ar)})[0];if(ar)g=gs(ar)}
+return g}
+function cgn(g){return g.some(function(x){return gcan(x)})}
 function nrm(s){return String(s).toLowerCase().replace(/[^\p{L}\p{N}]/gu,'')}
 function same(x,y){x=nrm(x);y=nrm(y);return !!x&&!!y&&(x.indexOf(y)>-1||y.indexOf(x)>-1)}
 function cap(s){return String(s).replace(/(^|[\s\-\/])(\p{L})/gu,function(m,p,c){return p+c.toUpperCase()})}
@@ -638,7 +682,7 @@ function acs(d){return (d['artist-credit']||[]).map(function(c){return c.name||(
 function covurl(mb,sz){return 'https://coverartarchive.org/release-group/'+mb+'/front-'+sz}
 function ncv(im){var m=im.dataset.m;im.remove();if(m){NC[m]=1;try{localStorage.setItem('digz-nc',JSON.stringify(NC))}catch(e){}}}
 function sleep(t){return new Promise(function(r){setTimeout(r,t)})}
-function mbq(p){var run=mbC.then(function(){return sleep(Math.max(0,mbT+1100-Date.now()))}).then(function(){mbT=Date.now();return fetch('https://musicbrainz.org/ws/2/'+p+(p.indexOf('?')>-1?'&':'?')+'fmt=json')}).then(function(r){if(r.status==503||r.status==429){mbT=Date.now()+4000;throw 'q'}if(!r.ok)throw 'e';return r.json()});mbC=run.catch(function(){});return run}
+function mbq(p){var run=mbC.then(function(){return sleep(Math.max(0,mbT+1100-Date.now()))}).then(function(){mbT=Date.now();return netGet('https://musicbrainz.org/ws/2/'+p+(p.indexOf('?')>-1?'&':'?')+'fmt=json',15000)});mbC=run.catch(function(){});return run}
 function mbs(p,sig){return fetch('https://musicbrainz.org/ws/2/'+p+'&fmt=json',{signal:sig}).then(function(r){if(r.status==503||r.status==429)throw 'q';if(!r.ok)throw 'e';return r.json()})}
 function rg(a,l){var c=l.filter(function(x){return same(x.title,a.al)&&(a.ar=='Desconocido'||acs(x).some(function(n){return same(n,a.ar)}))});c.sort(function(x,y){return (x['primary-type']=='Album'?0:1)-(y['primary-type']=='Album'?0:1)});return c[0]}
 async function load(k){var a=S.a[k],d=null;
@@ -679,6 +723,8 @@ if(!h){r=await jsonp('https://api.deezer.com/search/album?limit=10&q='+qe(a.ar+'
 if(h)id=String(h.id)}
 if(id){var d=await jsonp('https://api.deezer.com/album/'+id),tr=await jsonp('https://api.deezer.com/album/'+id+'/tracks?limit=200'),t=(tr.data||[]).map(function(x){return [x.title,x.duration||0]});
 if(t.length)o={t:t,d:d.release_date||'',l:d.label||'',g:((d.genres||{}).data||[]).map(function(x){return x.name}).slice(0,12),id:id}}}catch(e){}
+/* 2b) TheAudioDB */
+if(!o)try{var ab=await adbGet('searchalbum.php?s='+qe(a.ar)+'&a='+qe(a.al)),a0=((ab&&ab.album)||[])[0];if(a0&&a0.idAlbum){var tj=await adbGet('track.php?m='+a0.idAlbum),tt=((tj&&tj.track)||[]).map(function(x){return [x.strTrack,Math.round((+x.intDuration||0)/1000)]}).filter(function(x){return x[0]});if(tt.length)o={t:tt,d:a0.intYearReleased?String(a0.intYearReleased):'',l:'',g:[a0.strGenre,a0.strStyle].filter(Boolean)}}}catch(e){}
 /* 3) Last.fm */
 if(!o&&lfKey())try{var j=await lf('album.getinfo',{artist:a.ar,album:a.al,autocorrect:1}),tl=j.album&&j.album.tracks&&j.album.tracks.track;tl=tl?[].concat(tl):[];var t3=tl.map(function(x){return [x.name,+x.duration||0]}).filter(function(x){return x[0]});if(t3.length)o={t:t3,d:'',l:'',g:[]}}catch(e){}
 FBq[k]=o?2:3;
@@ -758,9 +804,9 @@ delete wq[k];if(W[k])rs2(k)}
 
 /* ---------- Géneros rápidos (iTunes + Deezer), sin depender de MusicBrainz ---------- */
 var AGC={},GX={},gq=[],gqd={},gbz=0,gt={},gRT=0;
-try{GX=JSON.parse(localStorage.getItem('digz-gx')||'{}')}catch(e){}
+try{GX=JSON.parse(localStorage.getItem('digz-gx')||'{}');Object.keys(GX).forEach(function(k){if(GX[k]&&GX[k].v>=3&&!(GX[k].g||[]).length)delete GX[k]})}catch(e){}
 function saveGX(){clearTimeout(saveGX.t);saveGX.t=setTimeout(function(){try{localStorage.setItem('digz-gx',JSON.stringify(GX))}catch(e){}},1500)}
-function needG(k,front){if(!S.a[k]||(GX[k]&&(GX[k].v>=3||gm(k).length>=2)))return;if(gqd[k]){if(front){var i=gq.indexOf(k);if(i>0){gq.splice(i,1);gq.unshift(k)}}return}
+function needG(k,front){if(!S.a[k]||(GX[k]&&(GX[k].v>=3||gm(k).length>=2||(GX[k].v==2&&Date.now()-GX[k].t<86400000))))return;if(gqd[k]){if(front){var i=gq.indexOf(k);if(i>0){gq.splice(i,1);gq.unshift(k)}}return}
 gqd[k]=1;front?gq.unshift(k):gq.push(k);gPump()}
 function gPump(){if(gbz||!gq.length)return;gbz=1;var k=gq.shift();
 loadG(k).catch(function(){return false}).then(function(ok){delete gqd[k];gbz=0;
@@ -778,14 +824,18 @@ if(!dh){r=await jsonp('https://api.deezer.com/search/album?limit=10&q='+qe(a.ar+
 if(dh)id=String(dh.id)}
 if(id){var dz=await jsonp('https://api.deezer.com/album/'+id);ok=1;if(S.a[k]&&!S.a[k].id){S.a[k].id=id;saveSoon()}
 g=g.concat(((dz.genres||{}).data||[]).map(function(x){return x.name}))}else ok=1}catch(e){}
-if(!S.a[k])return true;if(!ok)return false;
 g=g.filter(function(x){return x&&!/^(music|m[uú]sica)$/i.test(x)});
+/* Fuentes extra: TheAudioDB, MusicBrainz y Last.fm (otras cuotas/IP; sirven si Deezer o iTunes no responden) */
+if(!cgn(g))try{var ax=await adbGet('searchalbum.php?s='+qe(a.ar)+'&a='+qe(a.al));ok=1;var al0=((ax&&ax.album)||[])[0];if(al0)[al0.strGenre,al0.strStyle].forEach(function(x){if(x)g.push(x)})}catch(e){}
+if(!cgn(g))try{var mg=await mbGen(a);ok=1;g=g.concat(mg)}catch(e){}
+if(!cgn(g)&&lfKey())try{var lj=await lf('album.gettoptags',{artist:a.ar,album:a.al,autocorrect:1});ok=1;g=g.concat(tg((lj.toptags||{}).tag))}catch(e){}
+if(!S.a[k])return true;if(!ok)return false;
 /* Respaldo: género principal del artista en iTunes */
 var cg={};g.forEach(function(x){var c=gcan(x);if(c)cg[c.n]=1});
 if(Object.keys(cg).length<2){try{var an=nrm(a.ar);if(AGC[an]===undefined){AGC[an]=[];var ra=await jsonp('https://itunes.apple.com/search?media=music&entity=musicArtist&limit=5&term='+qe(a.ar)),ah=(ra.results||[]).filter(function(x){return nrm(x.artistName)===an})[0];
 if(ah){if(ah.primaryGenreName)AGC[an].push(ah.primaryGenreName);if(ah.artistId){try{var rl=await jsonp('https://itunes.apple.com/lookup?id='+ah.artistId+'&entity=album&limit=30'),ct={};(rl.results||[]).forEach(function(x){if(x.wrapperType=='collection'&&x.primaryGenreName)ct[x.primaryGenreName]=(ct[x.primaryGenreName]||0)+1});Object.keys(ct).sort(function(x,y){return ct[y]-ct[x]}).forEach(function(x){AGC[an].push(x)})}catch(e){}}}}
 (AGC[an]||[]).forEach(function(x){var c=gcan(x);if(c&&!cg[c.n]&&Object.keys(cg).length<2){cg[c.n]=1;g.push(x)}})}catch(e){}}
-GX[k]={g:gcl(g).slice(0,12),t:Date.now(),v:3};saveGX();return true}
+var fg=gcl(g).slice(0,12);GX[k]={g:fg,t:Date.now(),v:cgn(fg)?3:2};saveGX();return true}
 function bulkG(){Object.keys(S.a).forEach(function(k){if(!S.a[k].tmp)needG(k)})}
 
 /* ---------- Last.fm ---------- */
@@ -1331,37 +1381,40 @@ var AD={};
 var SEC={},SEA={};
 function seDzAlb(v){return jsonp('https://api.deezer.com/search/album?limit=25&q='+encodeURIComponent(v),5000).then(function(d){return (d.data||[]).filter(function(x){return x.title&&x.record_type!=='single'}).map(function(x){return {al:x.title,ar:(x.artist||{}).name||'',y:'',type:x.record_type||'album',id:String(x.id||''),iid:'',cu:x.cover_medium||x.cover||'',img:x.cover_big||x.cover_medium||''}})})}
 function seItAlb(v){return jsonp('https://itunes.apple.com/search?media=music&entity=album&limit=25&term='+encodeURIComponent(v),5000).then(function(d){return (d.results||[]).filter(function(x){return x.collectionName&&!/\s-\sSingle$/i.test(x.collectionName)}).map(function(x){return {al:x.collectionName,ar:x.artistName||'',y:String(x.releaseDate||'').slice(0,4),type:/\s-\sEP$/i.test(x.collectionName)?'ep':'album',id:'',iid:String(x.collectionId||''),cu:x.artworkUrl100||'',img:String(x.artworkUrl100||'').replace(/100x100bb\./,'300x300bb.')}})})}
-function seMerge(lists){var out=[],ix={};lists.forEach(function(x){var k=nrm(x.ar)+'|'+cln(x.al);if(!k||k=='|')return;var e=ix[k];if(e){['id','iid','y','cu','img'].forEach(function(f){if(!e[f]&&x[f])e[f]=x[f]});return}ix[k]=x;out.push(x)});return out}
+function seMerge(lists){var out=[],ix={};lists.forEach(function(x){var k=nrm(x.ar)+'|'+cln(x.al);if(!k||k=='|')return;var e=ix[k];if(e){['id','iid','y','cu','img','mb','adb','g'].forEach(function(f){if(!e[f]&&x[f])e[f]=x[f]});return}ix[k]=x;out.push(x)});return out}
 function seRace(fns,merge,grace){return new Promise(function(ok){var res=[],left=fns.length,done=false,gr=null;
 function fin(){if(done)return;done=true;clearTimeout(gr);clearTimeout(hd);ok(merge(res))}
-var hd=setTimeout(fin,7000);
+var hd=setTimeout(fin,13000);
 function chk(l){left--;if(l&&l.length)res=res.concat(l);if(left<=0)fin();else if(res.length&&!gr)gr=setTimeout(fin,grace)}
 fns.forEach(function(f){var p;try{p=f()}catch(e){p=Promise.reject(e)}p.then(chk,function(){chk([])})})})}
-function seAlbums(v){var k=v.toLowerCase();if(SEC[k])return Promise.resolve(SEC[k]);
-return seRace([function(){return seDzAlb(v)},function(){return seItAlb(v)}],seMerge,300).then(function(l){if(l.length)SEC[k]=l;return l})}
+function seAlbums(v){var k=v.toLowerCase();if(SEC[k])return Promise.resolve(SEC[k]);var st=false;
+return seRace([function(){return seDzAlb(v)},function(){return seItAlb(v)},lazy(function(){return seAdbAlb(v)},1500,function(){return st}),lazy(function(){return seMbAlb(v)},1800,function(){return st})],seMerge,400).then(function(l){st=true;if(l.length)SEC[k]=l;return l})}
 function seDzArt(v){return jsonp('https://api.deezer.com/search/artist?limit=8&q='+encodeURIComponent(v),5000).then(function(d){return (d.data||[]).map(function(x){return x.name}).filter(Boolean)})}
 function seItArt(v){return jsonp('https://itunes.apple.com/search?media=music&entity=musicArtist&limit=8&term='+encodeURIComponent(v),5000).then(function(d){return (d.results||[]).map(function(x){return x.artistName}).filter(Boolean)})}
-function buscarArt(v){var k=v.toLowerCase();if(SEA[k])return Promise.resolve(SEA[k]);
-return seRace([function(){return seDzArt(v)},function(){return seItArt(v)}],function(l){var o=[],s={};l.forEach(function(n){var z=nrm(n);if(n&&!s[z]&&same(n,v)){s[z]=1;o.push(n)}});return o.slice(0,4)},300).then(function(l){if(l.length)SEA[k]=l;return l})}
+function buscarArt(v){var k=v.toLowerCase();if(SEA[k])return Promise.resolve(SEA[k]);var st=false;
+return seRace([function(){return seDzArt(v)},function(){return seItArt(v)},lazy(function(){return seAdbArt(v)},1500,function(){return st}),lazy(function(){return seMbArt(v)},1800,function(){return st})],function(l){var o=[],s={};l.forEach(function(n){var z=nrm(n);if(n&&!s[z]&&same(n,v)){s[z]=1;o.push(n)}});return o.slice(0,4)},400).then(function(l){st=true;if(l.length)SEA[k]=l;return l})}
 /* Mantiene el formato que ya usa la interfaz (objetos tipo «release-group») */
-function buscarMB(v){return seAlbums(v).then(function(l){return {'release-groups':l.map(function(x){return {id:'',title:x.al,'artist-credit':[{name:x.ar}],'first-release-date':x.y||'','primary-type':x.type=='ep'?'EP':'Album',_cu:x.cu||x.img||'',_did:x.id,_iid:x.iid}})}})}
+function buscarMB(v){return seAlbums(v).then(function(l){return {'release-groups':l.map(function(x){return {title:x.al,'artist-credit':[{name:x.ar}],'first-release-date':x.y||'',id:x.mb||'','primary-type':x.type=='ep'?'EP':'Album',_cu:x.cu||x.img||'',_did:x.id,_iid:x.iid}})}})}
 
 function ahtml(ars){return ars.length?'<div class="sec">Artistas</div>'+ars.map(function(n,i){var c=hue(n);return '<div class="li" data-ar="'+i+'"><div class="cv sm" style="background:linear-gradient(145deg,hsl('+c+',50%,42%),hsl('+((c+50)%360)+',55%,20%));border-radius:50%"><span>'+esc(ini(n))+'</span></div><div class="in"><div class="t">'+esc(n)+'</div><div class="a">Artista</div></div><b>›</b></div>'}).join(''):''}
 var apTok=0;
 function artistAlbums(n){
 function pick(l,nm){var e=l.filter(function(x){return nrm(nm(x))===nrm(n)})[0];return e||l.filter(function(x){return same(nm(x),n)})[0]}
-function timeout(p,ms){return Promise.race([p,sleep(ms).then(function(){throw 'timeout'})])}
+function timeout(p,ms){return Promise.race([p,sleep(ms+8000).then(function(){throw 'timeout'})])}
+var DN=0;
 async function fromDeezerAlb(){try{var r=await timeout(jsonp('https://api.deezer.com/search/album?limit=100&q='+encodeURIComponent('artist:"'+n+'"'),5000),5500);return (r.data||[]).filter(function(x){return x.title&&x.record_type!=='single'&&same((x.artist||{}).name,n)}).map(function(x){return {al:x.title,ar:(x.artist||{}).name||n,d:'',img:x.cover_big||x.cover_medium||'',cu:'',id:String(x.id||''),iid:''}})}catch(e){return []}}
 async function fromITunesS(){try{var r=await timeout(jsonp('https://itunes.apple.com/search?media=music&entity=album&attribute=artistTerm&limit=80&term='+encodeURIComponent(n)),8000);return (r.results||[]).filter(function(x){return x.collectionName&&x.wrapperType==='collection'&&same(x.artistName,n)&&!/ - (Single|EP)$/i.test(x.collectionName)}).map(function(x){return {al:x.collectionName,ar:x.artistName||n,d:String(x.releaseDate||''),img:String(x.artworkUrl100||'').replace(/100x100bb\./,'300x300bb.'),cu:x.artworkUrl100||'',id:'',iid:x.collectionId||''}})}catch(e){return []}}
 async function fromITunes(){try{var r=await timeout(jsonp('https://itunes.apple.com/search?media=music&entity=musicArtist&limit=10&term='+encodeURIComponent(n)),6500),ar=pick((r.results||[]).filter(function(x){return x.artistId}),function(x){return x.artistName});if(!ar)return [];var d=await timeout(jsonp('https://itunes.apple.com/lookup?id='+ar.artistId+'&entity=album&limit=200'),6500);return (d.results||[]).filter(function(x){return x.collectionName&&x.wrapperType==='collection'&&!/ - Single$/i.test(x.collectionName)}).map(function(x){return {al:x.collectionName,ar:x.artistName||n,d:String(x.releaseDate||''),img:String(x.artworkUrl100||'').replace(/100x100bb\./,'300x300bb.'),cu:x.artworkUrl100||'',id:'',iid:x.collectionId||''}})}catch(e){return []}}
 async function fromDeezer(){try{var r=await timeout(jsonp('https://api.deezer.com/search/artist?limit=8&q='+encodeURIComponent(n)),5500),l=r.data||[],ar=pick(l,function(x){return x.name});if(!ar)return [];var d=await timeout(jsonp('https://api.deezer.com/artist/'+ar.id+'/albums?limit=100',5000),5500);return (d.data||[]).filter(function(x){return x.title&&x.record_type!=='single'}).map(function(x){return {al:x.title,ar:ar.name,d:String(x.release_date||''),img:x.cover_big||x.cover_medium||'',cu:'',id:String(x.id||''),iid:''}})}catch(e){return []}}
-function fin(l){var out=[],seen={};l.forEach(function(x){var c=cln(x.al);if(!c||seen[c])return;seen[c]=1;out.push(x)});return out.sort(function(a,b){return String(b.d||'').localeCompare(String(a.d||''))})}
+async function fromAdb(){try{await sleep(1800);if(DN)return [];var r=await netGet(ADB+'search.php?s='+encodeURIComponent(n),12000),ar=pick(r.artists||[],function(x){return x.strArtist});if(!ar||DN)return [];var d=await netGet(ADB+'album.php?i='+ar.idArtist,12000);return adbList(d.album,ar.strArtist).map(function(x){return {al:x.al,ar:x.ar,d:x.y,img:x.img,cu:'',id:'',iid:'',adb:x.adb,g:x.g}})}catch(e){return []}}
+async function fromMB(){try{await sleep(2000);if(DN)return [];var r=await netGet('https://musicbrainz.org/ws/2/artist?limit=5&query='+encodeURIComponent('artist:"'+esq(n)+'"')+'&fmt=json',14000),ar=pick(r.artists||[],function(x){return x.name});if(!ar||DN)return [];var d=await netGet('https://musicbrainz.org/ws/2/release-group?artist='+ar.id+'&type=album%7Cep&limit=100&fmt=json',14000);return (d['release-groups']||[]).filter(function(x){return x.title&&!(x['secondary-types']||[]).some(function(t){return /compilation|remix|dj-mix|demo|spokenword|interview|audiobook/i.test(t)})}).map(function(x){return {al:x.title,ar:ar.name,d:String(x['first-release-date']||''),img:covurl(x.id,250),cu:'',id:'',iid:'',mb:x.id}})}catch(e){return []}}
+function fin(l){var out=[],ix={};l.forEach(function(x){var c=cln(x.al);if(!c)return;var e=ix[c];if(e){['d','img','cu','id','iid','mb','adb','g'].forEach(function(f){if(!e[f]&&x[f])e[f]=x[f]});return}ix[c]=x;out.push(x)});return out.sort(function(a,b){return String(b.d||'').localeCompare(String(a.d||''))})}
 /* Devuelve en cuanto responde la primera fuente con datos (+1,2 s de margen para sumar las demás) */
-return new Promise(function(ok){var res=[],left=4,done=false,grace=null;setTimeout(function(){if(!done){done=true;clearTimeout(grace);ok(fin(res))}},9000);
+return new Promise(function(ok){var res=[],left=6,done=false,grace=null;setTimeout(function(){if(!done){done=true;clearTimeout(grace);(DN=1,ok(fin(res)))}},18000);
 function chk(l){left--;if(l&&l.length)res=res.concat(l);if(done)return;
-if(left<=0){done=true;clearTimeout(grace);ok(fin(res))}
-else if(res.length&&!grace)grace=setTimeout(function(){if(!done){done=true;ok(fin(res))}},500)}
-[fromDeezer(),fromDeezerAlb(),fromITunesS(),fromITunes()].forEach(function(p){p.then(chk,function(){chk([])})})})}
+if(left<=0){done=true;clearTimeout(grace);(DN=1,ok(fin(res)))}
+else if(res.length&&!grace)grace=setTimeout(function(){if(!done){done=true;(DN=1,ok(fin(res)))}},500)}
+[fromDeezer(),fromDeezerAlb(),fromITunesS(),fromITunes(),fromAdb(),fromMB()].forEach(function(p){p.then(chk,function(){chk([])})})})}
 async function artistPage(n){ui.keep=1;hide();ui.keep=0;ui.vk='artist:'+n;var my=++apTok,ks=Object.keys(S.a).filter(function(k){return !S.a[k].tmp&&nrm(S.a[k].ar)==nrm(n)});
 var items=[];
 ks.sort(function(x,y){return String((M[y]||{}).d||'').localeCompare(String((M[x]||{}).d||''))||S.a[x].al.localeCompare(S.a[y].al)}).forEach(function(q){var a=S.a[q];items.push({al:a.al,ar:a.ar,y:String((M[q]||{}).d||'').slice(0,4),img:cvs(a,300),cu:a.cu||'',id:a.id||'',iid:a.iid||'',k:q,done:a.done})});
@@ -1597,7 +1650,7 @@ e.innerHTML=SV.map(function(s,i){return '<button data-sv="'+i+'" class="'+(s.on?
 [].forEach.call(e.querySelectorAll('[data-sv]'),function(b){b.onclick=function(){var s=SV[b.dataset.sv];s.on=!s.on;saveSV();b.className=s.on?'on':''}});
 var c=$('svc');if(c){c.innerHTML=SV.map(function(s,i){return s.c?'<div class="sv"><span>'+esc(s.n)+'</span><button data-sd="'+i+'">✕</button></div>':''}).join('');
 [].forEach.call(c.querySelectorAll('[data-sd]'),function(b){b.onclick=function(){SV.splice(+b.dataset.sd,1);saveSV();svList()}})}}
-var APPV='2026-10-14';
+var APPV='2026-10-15';
 var DZC=[['#8e8e93','Gris'],['#1db954','Verde'],['#2f80ff','Azul'],['#8b5cf6','Violeta'],['#ec4899','Rosa'],['#f97316','Naranja'],['#ef4444','Rojo'],['#14b8a6','Turquesa'],['#eab308','Amarillo']];
 function themeUI(){var t=dzLoad(),tm=$('tm'),tc=$('tc');if(!tm||!tc)return;
 function draw(){tm.innerHTML=[['sys','Sistema',DI.sys],['light','Claro',DI.sun],['dark','Oscuro',DI.moon]].map(function(m){return '<button data-m="'+m[0]+'" class="'+(t.m==m[0]?'on':'')+'">'+m[2]+m[1]+'</button>'}).join('');
@@ -1609,7 +1662,7 @@ $('trs').onclick=function(){t={m:DZD.m,c:DZD.c};dzSave(t);dzApply(t);draw()};
 draw()}
 var CHV='<svg class="cfg-ch" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>';
 var CFI={fm:'<path d="M3 12h3l3-7 4 14 3-7h5"/>',pl:'<circle cx="12" cy="12" r="9"/><path d="M10 8.5l5 3.5-5 3.5z"/>',lk:'<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4"/>',im:'<path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19h14"/>',co:'<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',rs:'<path d="M5 20V11M12 20V4M19 20v-6"/>',bk:'<path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/>',ld:'<path d="M20 11a8 8 0 0 0-14.5-4M4 4v4h4M4 13a8 8 0 0 0 14.5 4M20 20v-4h-4"/>',cl:'<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/>'};
-var CFT={lastfm:'Last.fm',plat:'Plataformas de escucha',look:'Apariencia',imp:'Importar música',bk:'Respaldo y restauración'};
+var CFT={lastfm:'Last.fm',plat:'Plataformas de escucha',look:'Apariencia',imp:'Importar música',bk:'Respaldo y restauración',cx:'Conexión y fuentes'};
 function cfRow(a,ic,t,v,o){return '<button class="cfg-i'+(o&&o.indexOf('d')>-1?' dn':'')+'" '+a+'><span class="cfg-ic"><svg viewBox="0 0 24 24">'+CFI[ic]+'</svg></span><span class="cfg-t">'+t+'</span>'+(v?'<span class="cfg-v">'+v+'</span>':'')+(o&&o.indexOf('c')>-1?CHV:'')+'</button>'}
 function settings(sub){cur=null;if(!CFT[sub])sub='';ui.vk='settings'+(sub?':'+sub:'');var conn=LF.u&&lfKey(),h;
 if(!sub){var th=dzLoad(),ml={sys:'Sistema',light:'Claro',dark:'Oscuro'}[th.m]||'Sistema',on=SV.filter(function(s){return s.on}).length;
@@ -1624,6 +1677,7 @@ h=bhd('Ajustes')
 +cfRow('data-go="imp"','im','Importar música','','c')+'</div>'
 +'<div class="cfg-h">Datos</div><div class="cfg-g">'
 +cfRow('data-go="bk"','bk','Respaldo y restauración','','c')
++cfRow('data-go="cx"','ld','Conexión y fuentes','','c')
 +cfRow('data-do="ld"','ld','Descargar portadas y datos','','')+'</div>'
 +'<div class="cfg-g" style="margin-top:22px">'+cfRow('data-do="cl"','cl','Borrar toda mi biblioteca','','d')+'</div>'
 +'<div class="cfg-n" style="text-align:center;margin:22px 0 8px">Versión '+APPV+' · Digz'+(LF&&LF.u?' · '+esc(LF.u):'')+'</div>'}
@@ -1635,6 +1689,7 @@ plat:'<div class="card"><b>Tus plataformas</b><div class="h">Toca las que uses. 
 +'<div class="card" style="margin-top:12px"><b>Añadir otra plataforma</b><div class="h">Busca algo en su web, copia la URL y pon {q} donde iba el texto buscado.</div><div id="svc"></div><div class="row"><input id="svn" placeholder="Nombre"><input id="svu" placeholder="https://sitio.com/search?q={q}"></div><button id="sva">Añadir plataforma</button></div>',
 look:'<div class="card"><b>Modo</b><div class="seg" id="tm"></div><b>Color</b><div class="dots" id="tc"></div><button id="trs">Restablecer</button></div>',
 imp:'<div class="card"><div class="h">CSV de Deezer, Spotify (Exportify)…</div><input type="file" id="f" multiple><div class="h">O pega un CSV, o líneas «Artista - Álbum»</div><textarea id="pt"></textarea><button class="p" id="im">Importar texto</button><div class="h" id="ms"></div></div>',
+cx:'<div class="card"><b>Proxy propio (opcional)</b><div class="h">Si tu red bloquea o limita alguna fuente, pon aquí la URL de tu proxy (Cloudflare Worker gratis). Vacío = proxies públicos.</div><input id="pxu" placeholder="https://tu-proxy.workers.dev/" autocapitalize="off" autocomplete="off"><button id="pxs">Guardar</button></div><div class="card" style="margin-top:12px"><b>Probar conexiones</b><div class="h">Comprueba qué fuentes responden en esta red, directo o con proxy.</div><button class="p" id="cxt">Probar ahora</button><div id="cxr"></div></div>',
 bk:'<div class="card"><div class="h">Genera el texto, guárdalo y pégalo aquí para restaurar.</div><textarea id="bk"></textarea><div class="row"><button id="ex">Generar respaldo</button><button id="rs">Restaurar</button></div></div>'};
 h='<div class="hd"><div class="hl"><button id="x" class="cfg-bk" aria-label="Atrás">'+ICBK+'</button><div class="t">'+CFT[sub]+'</div></div></div>'+B[sub]}
 show(h);$('x').onclick=ovBack;$('sh').scrollTop=ovsy();
@@ -1663,6 +1718,12 @@ $('im').onclick=function(){var v=$('pt').value,n=0;
 if(/^\ufeff?"?(track name|album|artist)/i.test(v.trim())){n=Math.max(0,importCSV(v))}
 else v.split('\n').forEach(function(l){var p=l.split(/\s[-–—]\s/);if(p.length>1)n+=add(p[0].trim(),p.slice(1).join(' - ').trim())});
 $('pt').value='';save();render();msg(n+' álbumes nuevos')}}
+else if(sub=='cx'){$('pxu').value=PXC;
+$('pxs').onclick=function(){var v=$('pxu').value.trim();if(v&&!/^https:\/\//i.test(v)){toast('Debe empezar por https://');return}PXC=v;try{localStorage.setItem('digz-px',v)}catch(e){}NH={};NCH={};toast(v?'Proxy guardado':'Proxy borrado')};
+$('cxt').onclick=function(){var el=$('cxr'),b=$('cxt');b.disabled=true;el.innerHTML='<div class="h">Probando…</div>';
+var T=[['Deezer','https://api.deezer.com/search/artist?q=janet&limit=1'],['iTunes','https://itunes.apple.com/search?term=janet&entity=musicArtist&limit=1'],['MusicBrainz','https://musicbrainz.org/ws/2/artist?query=janet&limit=1&fmt=json'],['TheAudioDB',ADB+'search.php?s=coldplay']];
+function t(u,o){var z=Date.now();return netGet(u+(u.indexOf('?')>-1?'&':'?')+'_='+z,12000,o).then(function(){return '✓ '+((Date.now()-z)/1000).toFixed(1)+' s'},function(){return '✗'})}
+Promise.all(T.map(function(x){return Promise.all([t(x[1],{dx:1}),t(x[1],{px:1})]).then(function(r){return '<div class="h"><b>'+x[0]+'</b> — directo '+r[0]+' · proxy '+r[1]+'</div>'})})).then(function(l){el.innerHTML=l.join('');b.disabled=false})}}
 else if(sub=='bk'){
 $('ex').onclick=function(){saveNow();$('bk').value=JSON.stringify(S)};
 $('rs').onclick=function(){try{var o=JSON.parse($('bk').value);if(o.a){S=o;save();render();toast('Restaurado')}else toast('Texto de respaldo no válido')}catch(e){toast('Texto de respaldo no válido')}}}}
