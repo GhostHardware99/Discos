@@ -1,8 +1,10 @@
 /* Service worker — cambia VERSION cada vez que subas un index.html nuevo */
-var VERSION = 'v61-2026-10-15';
+var VERSION = 'v62-2026-10-15';
 var CACHE = 'app-' + VERSION;
 /* Portadas: caché propia que NO se borra al actualizar la app */
 var IMG = 'covers-v1', IMGMAX = 5000, BAD = {};
+/* Portadas «opacas» (sitios sin CORS cuando no hay proxy): se guardan aparte con tope bajo, porque el navegador cuenta cada una como ~7 MB de cuota */
+var OPQ = 'covers-opq-v1', OPQMAX = 200;
 var CORE = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', function (e) {
@@ -16,7 +18,7 @@ self.addEventListener('activate', function (e) {
   e.waitUntil(
     caches.keys()
       .then(function (keys) {
-        return Promise.all(keys.filter(function (k) { return k !== CACHE && k !== IMG; })
+        return Promise.all(keys.filter(function (k) { return k !== CACHE && k !== IMG && k !== OPQ; })
           .map(function (k) { return caches.delete(k); }));
       })
       .then(function () { return self.clients.claim(); })
@@ -28,7 +30,7 @@ self.addEventListener('message', function (e) {
 });
 
 /* Portadas de cualquier sitio: primero la caché; si no está, se descarga y se guarda para siempre (hasta IMGMAX). */
-var WES = 'https://images.weserv.nl/?w=700&we&q=88&output=jpg&url=';
+var WES = 'https://images.weserv.nl/?w=1000&we&q=90&output=jpg&url=';
 function tryFetch(u, mode, ms) {
   var ctl = ('AbortController' in self) ? new AbortController() : null;
   var to = setTimeout(function () { if (ctl) ctl.abort(); }, ms);
@@ -64,16 +66,27 @@ function trimImgs(c) {
     }
   });
 }
+function trimOpq(c) {
+  return c.keys().then(function (ks) {
+    var over = ks.length - OPQMAX;
+    if (over > 0) return Promise.all(ks.slice(0, over).map(function (k) { return c.delete(k); }));
+  });
+}
 function imgFetch(req) {
   var u = req.url, host = new URL(u).host, cors = req.mode === 'cors';
-  return caches.open(IMG).then(function (c) {
-    return c.match(u).then(function (hit) {
+  return Promise.all([caches.open(IMG), caches.open(OPQ)]).then(function (cs) {
+    var c = cs[0], oc = cs[1];
+    return c.match(u).then(function (hit) { return hit || (cors ? null : oc.match(u)); }).then(function (hit) {
       if (hit) return hit;
       var b = BAD[host];
       /* sitio que falló 3 veces seguidas en los últimos 5 min: falla al instante y la app pasa a su alternativa */
       if (b && b.n >= 3 && Date.now() - b.t < 300000) return Response.error();
       return imgNet(u, cors).then(function (r) {
-        if (r.type === 'opaque') { BAD[host] = { n: 0, t: Date.now() }; return r; }
+        if (r.type === 'opaque') {
+          BAD[host] = { n: 0, t: Date.now() };
+          oc.put(u, r.clone()).then(function () { return trimOpq(oc); }).catch(function () {});
+          return r;
+        }
         if (r.ok) {
           BAD[host] = { n: 0, t: Date.now() };
           c.put(u, r.clone()).then(function () { return trimImgs(c); }).catch(function () {});
