@@ -655,12 +655,20 @@ rs.forEach(function(r,i){if(i==0)go(0);else if(!dg)tm.push(setTimeout(function()
 tm.push(setTimeout(function(){if(!dn){end();no(new Error('timeout'))}},tot))})}
 /* ---------- CACHÉ PERMANENTE (IndexedDB): lo ya buscado no se vuelve a pedir ----------
    Resultados con datos: 7 días. Resultados vacíos: 1 hora. Si no hay red, se usa lo guardado aunque esté caducado. */
-var CDB=null;
-function cdb(){if(CDB)return CDB;CDB=new Promise(function(ok){try{var r=indexedDB.open('digz-cache',1);r.onupgradeneeded=function(){r.result.createObjectStore('c')};r.onsuccess=function(){ok(r.result)};r.onerror=function(){ok(null)}}catch(e){ok(null)}});return CDB}
-function idbGet(k){return cdb().then(function(db){return new Promise(function(ok){if(!db)return ok(null);try{var q=db.transaction('c').objectStore('c').get(k);q.onsuccess=function(){ok(q.result||null)};q.onerror=function(){ok(null)}}catch(e){ok(null)}})})}
-function idbPut(k,v){cdb().then(function(db){if(!db)return;try{db.transaction('c','readwrite').objectStore('c').put(v,k)}catch(e){}})}
-function idbClear(){return cdb().then(function(db){return new Promise(function(ok){if(!db)return ok();try{var t=db.transaction('c','readwrite');t.objectStore('c').clear();t.oncomplete=ok;t.onerror=ok}catch(e){ok()}})})}
-function idbPrune(){cdb().then(function(db){if(!db)return;try{var st=db.transaction('c','readwrite').objectStore('c'),cu=st.openCursor(),all=[],now=Date.now();cu.onsuccess=function(){var c=cu.result;if(!c){all.sort(function(x,y){return x.t-y.t}).slice(0,Math.max(0,all.length-800)).forEach(function(x){st.delete(x.k)});return}var v=c.value;if(!v||now-v.t>30*864e5)c.delete();else all.push({k:c.key,t:v.t});c.continue()}}catch(e){}})}
+var CDB=null,LQ=null,LQT=0;
+/* Almacén principal: IndexedDB. Si el navegador no lo permite, respaldo en localStorage (tope ~900 KB para no afectar a tu biblioteca). */
+function cdb(){if(CDB)return CDB;CDB=new Promise(function(ok){try{var r=indexedDB.open('digz-cache',1);r.onupgradeneeded=function(){r.result.createObjectStore('c')};r.onsuccess=function(){ok(r.result)};r.onerror=function(){ok(null)};r.onblocked=function(){ok(null)}}catch(e){ok(null)}});return CDB}
+function lqLoad(){if(!LQ){try{LQ=JSON.parse(localStorage.getItem('digz-qc')||'{}')}catch(e){LQ={}}}return LQ}
+function lqSave(){clearTimeout(LQT);LQT=setTimeout(function(){try{var m=lqLoad(),ks=Object.keys(m),j=JSON.stringify(m);while(j.length>900000&&ks.length){ks.sort(function(x,y){return m[x].t-m[y].t});delete m[ks.shift()];j=JSON.stringify(m)}localStorage.setItem('digz-qc',j)}catch(e){}},1200)}
+function idbGet(k){return cdb().then(function(db){return new Promise(function(ok){if(!db){var v=lqLoad()[k];return ok(v||null)}try{var q=db.transaction('c').objectStore('c').get(k);q.onsuccess=function(){ok(q.result||null)};q.onerror=function(){ok(null)}}catch(e){ok(null)}})})}
+function idbPut(k,v){cdb().then(function(db){if(!db){lqLoad()[k]=v;lqSave();return}try{db.transaction('c','readwrite').objectStore('c').put(v,k)}catch(e){}})}
+function idbClear(){LQ={};try{localStorage.removeItem('digz-qc')}catch(e){}return cdb().then(function(db){return new Promise(function(ok){if(!db)return ok();try{var t=db.transaction('c','readwrite');t.objectStore('c').clear();t.oncomplete=ok;t.onerror=ok}catch(e){ok()}})})}
+function idbPrune(){cdb().then(function(db){if(!db)return;try{var st=db.transaction('c','readwrite').objectStore('c'),cu=st.openCursor(),all=[],now=Date.now();cu.onsuccess=function(){var c=cu.result;if(!c){all.sort(function(x,y){return x.t-y.t}).slice(0,Math.max(0,all.length-1500)).forEach(function(x){st.delete(x.k)});return}var v=c.value;if(!v||now-v.t>30*864e5)c.delete();else all.push({k:c.key,t:v.t});c.continue()}}catch(e){}})}
+function cstat(){return cdb().then(function(db){return new Promise(function(ok){if(!db)return ok('Guardado en: localStorage (respaldo) · '+Object.keys(lqLoad()).length+' consultas');try{var q=db.transaction('c').objectStore('c').count();q.onsuccess=function(){ok('Guardado en: IndexedDB · '+q.result+' consultas')};q.onerror=function(){ok('Caché: sin datos')}}catch(e){ok('Caché: sin datos')}})})}
+/* Resultados completos (p. ej. todos los álbumes de un artista): 7 días */
+function aggGet(k){return idbGet(k).then(function(c){return c&&c.d&&Date.now()-c.t<6048e5?c.d:null})}
+function aggPut(k,v){idbPut(k,{d:v,t:Date.now()})}
+try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
 setTimeout(idbPrune,6000);
 function netGet(u,ms,o){o=o||{};if(o.nc)return netRaw(u,ms,o);var m=NCH[u];if(m&&Date.now()-m.t<300000)return Promise.resolve(m.d);
 return idbGet(u).then(function(c){var ttl=c&&JSON.stringify(c.d).length>60?6048e5:36e5;if(c&&Date.now()-c.t<ttl){NCH[u]=c;return c.d}
@@ -1415,7 +1423,8 @@ function buscarMB(v){return seAlbums(v).then(function(l){return {'release-groups
 
 function ahtml(ars){return ars.length?'<div class="sec">Artistas</div>'+ars.map(function(n,i){var c=hue(n);return '<div class="li" data-ar="'+i+'"><div class="cv sm" style="background:linear-gradient(145deg,hsl('+c+',50%,42%),hsl('+((c+50)%360)+',55%,20%));border-radius:50%"><span>'+esc(ini(n))+'</span></div><div class="in"><div class="t">'+esc(n)+'</div><div class="a">Artista</div></div><b>›</b></div>'}).join(''):''}
 var apTok=0;
-function artistAlbums(n){
+function artistAlbums(n){var k='aa:'+nrm(n);return aggGet(k).then(function(c){return c&&c.length?c:artistAlbumsRaw(n,k)})}
+function artistAlbumsRaw(n,AAK){
 function pick(l,nm){var e=l.filter(function(x){return nrm(nm(x))===nrm(n)})[0];return e||l.filter(function(x){return same(nm(x),n)})[0]}
 function timeout(p,ms){return Promise.race([p,sleep(ms+8000).then(function(){throw 'timeout'})])}
 var DN=0;
@@ -1431,7 +1440,8 @@ return new Promise(function(ok){var res=[],left=6,done=false,grace=null;setTimeo
 function chk(l){left--;if(l&&l.length)res=res.concat(l);if(done)return;
 if(left<=0){done=true;clearTimeout(grace);(DN=1,ok(fin(res)))}
 else if(res.length&&!grace)grace=setTimeout(function(){if(!done){done=true;(DN=1,ok(fin(res)))}},500)}
-[fromDeezer(),fromDeezerAlb(),fromITunesS(),fromITunes(),fromAdb(),fromMB()].forEach(function(p){p.then(chk,function(){chk([])})})})}
+var srcs=[fromDeezer(),fromDeezerAlb(),fromITunesS(),fromITunes(),fromAdb(),fromMB()];srcs.forEach(function(p){p.then(chk,function(){chk([])})});
+Promise.all(srcs.map(function(p){return p.then(function(x){return x||[]},function(){return []})})).then(function(ls){var m=fin([].concat.apply([],ls));if(m.length)aggPut(AAK,m)})})}
 async function artistPage(n){ui.keep=1;hide();ui.keep=0;ui.vk='artist:'+n;var my=++apTok,ks=Object.keys(S.a).filter(function(k){return !S.a[k].tmp&&nrm(S.a[k].ar)==nrm(n)});
 var items=[];
 ks.sort(function(x,y){return String((M[y]||{}).d||'').localeCompare(String((M[x]||{}).d||''))||S.a[x].al.localeCompare(S.a[y].al)}).forEach(function(q){var a=S.a[q];items.push({al:a.al,ar:a.ar,y:String((M[q]||{}).d||'').slice(0,4),img:cvs(a,300),cu:a.cu||'',id:a.id||'',iid:a.iid||'',k:q,done:a.done})});
@@ -1706,7 +1716,7 @@ plat:'<div class="card"><b>Tus plataformas</b><div class="h">Toca las que uses. 
 +'<div class="card" style="margin-top:12px"><b>Añadir otra plataforma</b><div class="h">Busca algo en su web, copia la URL y pon {q} donde iba el texto buscado.</div><div id="svc"></div><div class="row"><input id="svn" placeholder="Nombre"><input id="svu" placeholder="https://sitio.com/search?q={q}"></div><button id="sva">Añadir plataforma</button></div>',
 look:'<div class="card"><b>Modo</b><div class="seg" id="tm"></div><b>Color</b><div class="dots" id="tc"></div><button id="trs">Restablecer</button></div>',
 imp:'<div class="card"><div class="h">CSV de Deezer, Spotify (Exportify)…</div><input type="file" id="f" multiple><div class="h">O pega un CSV, o líneas «Artista - Álbum»</div><textarea id="pt"></textarea><button class="p" id="im">Importar texto</button><div class="h" id="ms"></div></div>',
-cx:'<div class="card"><b>Proxy propio (opcional)</b><div class="h">Si tu red bloquea o limita alguna fuente, pon aquí la URL de tu proxy (Cloudflare Worker gratis). Vacío = proxies públicos.</div><input id="pxu" placeholder="https://tu-proxy.workers.dev/" autocapitalize="off" autocomplete="off"><button id="pxs">Guardar</button></div><div class="card" style="margin-top:12px"><b>Probar conexiones</b><div class="h">Comprueba qué fuentes responden en esta red, directo o con proxy.</div><button class="p" id="cxt">Probar ahora</button><div id="cxr"></div></div><div class="card" style="margin-top:12px"><b>Caché de búsquedas</b><div class="h">Guarda lo que ya buscaste (7 días) para no repetirlo: va más rápido y sirve incluso sin conexión.</div><button id="cxc">Borrar caché</button></div>',
+cx:'<div class="card"><b>Proxy propio (opcional)</b><div class="h">Si tu red bloquea o limita alguna fuente, pon aquí la URL de tu proxy (Cloudflare Worker gratis). Vacío = proxies públicos.</div><input id="pxu" placeholder="https://tu-proxy.workers.dev/" autocapitalize="off" autocomplete="off"><button id="pxs">Guardar</button></div><div class="card" style="margin-top:12px"><b>Probar conexiones</b><div class="h">Comprueba qué fuentes responden en esta red, directo o con proxy.</div><button class="p" id="cxt">Probar ahora</button><div id="cxr"></div></div><div class="card" style="margin-top:12px"><b>Caché de búsquedas</b><div class="h" id="cxs"></div><div class="h">Guarda lo que ya buscaste (7 días) para no repetirlo: va más rápido y sirve incluso sin conexión.</div><button id="cxc">Borrar caché</button></div>',
 bk:'<div class="card"><div class="h">Genera el texto, guárdalo y pégalo aquí para restaurar.</div><textarea id="bk"></textarea><div class="row"><button id="ex">Generar respaldo</button><button id="rs">Restaurar</button></div></div>'};
 h='<div class="hd"><div class="hl"><button id="x" class="cfg-bk" aria-label="Atrás">'+ICBK+'</button><div class="t">'+CFT[sub]+'</div></div></div>'+B[sub]}
 show(h);$('x').onclick=ovBack;$('sh').scrollTop=ovsy();
@@ -1737,7 +1747,8 @@ else v.split('\n').forEach(function(l){var p=l.split(/\s[-–—]\s/);if(p.lengt
 $('pt').value='';save();render();msg(n+' álbumes nuevos')}}
 else if(sub=='cx'){$('pxu').value=PXC;
 $('pxs').onclick=function(){var v=$('pxu').value.trim();if(v&&!/^https:\/\//i.test(v)){toast('Debe empezar por https://');return}PXC=v;try{localStorage.setItem('digz-px',v)}catch(e){}NH={};NCH={};toast(v?'Proxy guardado':'Proxy borrado')};
-$('cxc').onclick=function(){NCH={};SEC={};SEA={};idbClear().then(function(){toast('Caché borrada')})};
+cstat().then(function(t){var e=$('cxs');if(e)e.textContent=t});
+$('cxc').onclick=function(){NCH={};SEC={};SEA={};idbClear().then(function(){toast('Caché borrada');return cstat()}).then(function(t){var e=$('cxs');if(e)e.textContent=t})};
 $('cxt').onclick=function(){var el=$('cxr'),b=$('cxt');b.disabled=true;el.innerHTML='<div class="h">Probando…</div>';
 var T=[['Deezer','https://api.deezer.com/search/artist?q=janet&limit=1'],['iTunes','https://itunes.apple.com/search?term=janet&entity=musicArtist&limit=1'],['MusicBrainz','https://musicbrainz.org/ws/2/artist?query=janet&limit=1&fmt=json'],['TheAudioDB',ADB+'search.php?s=coldplay']];
 function t(u,o){var z=Date.now();return netGet(u+(u.indexOf('?')>-1?'&':'?')+'_='+z,12000,o).then(function(){return '✓ '+((Date.now()-z)/1000).toFixed(1)+' s'},function(){return '✗'})}
