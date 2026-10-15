@@ -420,6 +420,12 @@ body.msel #cpl .li[data-k]>div:last-child{visibility:hidden}
 #msb .mh button{border:0;background:none;padding:6px 10px;font-weight:600;color:var(--tx)}
 #msb .ma{display:grid;grid-template-columns:repeat(auto-fit,minmax(92px,1fr));gap:8px}
 #msb .ma button{line-height:1.15;padding:11px 6px;font-weight:600;font-size:14px;border-radius:14px}
+#opt{background:linear-gradient(rgba(var(--acr),.18),rgba(var(--acr),.18)),var(--bg)!important;border:1px solid rgba(var(--acr),.45)!important;-webkit-backdrop-filter:blur(18px) saturate(1.4);backdrop-filter:blur(18px) saturate(1.4);color:var(--tx)}
+#opt .seg{background:rgba(var(--acr),.10);border-color:rgba(var(--acr),.35)}#opt .seg button.on{background:rgba(var(--acr),.30);color:var(--tx)}
+#sol{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+#sol button{padding:9px 8px;border-radius:12px;font-size:13px;font-weight:600;text-align:center;line-height:1.15;color:var(--tx);background:rgba(var(--acr),.08);border:1px solid rgba(var(--acr),.28)}
+#sol button.on{background:rgba(var(--acr),.34);border-color:rgba(var(--acr),.8);font-weight:800}
+#opt #osel{background:rgba(var(--acr),.08);border:1px solid rgba(var(--acr),.28);color:var(--tx)}
 #opt #osel{display:block;width:100%;margin-top:14px;padding:12px;font-weight:600;border-radius:12px}
 #msb .ma button.dg{color:#d6336c}
 #msb .ma button:disabled{opacity:.45}
@@ -536,7 +542,7 @@ try{matchMedia('(prefers-color-scheme:dark)').addListener(function(){var t=dzLoa
 <div class="ttl"><h1>Digz</h1></div>
 <div class="seg2" id="seg"></div>
 <div class="chips" id="chips"></div>
-<div id="opt"><label>Vista</label><div class="seg" id="vs"><button data-v="g"><svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>Cuadrícula</button><button data-v="l"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>Lista</button></div><label>Ordenar por</label><select id="so"><option value="ar">Artista A-Z</option><option value="al">Álbum A-Z</option><option value="rate">Mejor nota</option><option value="t">Escuchado reciente</option></select><button id="osel" type="button">Seleccionar varios</button></div>
+<div id="opt"><label>Vista</label><div class="seg" id="vs"><button data-v="g"><svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>Cuadrícula</button><button data-v="l"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>Lista</button></div><label>Ordenar por</label><div id="sol"></div><button id="osel" type="button">Seleccionar varios</button></div>
 </header>
 <div id="list"></div>
 <div id="gauto"></div>
@@ -558,6 +564,8 @@ var ICHT='<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 21.35l-1.45-
 var ICSH='<svg class="ic" viewBox="0 0 24 24"><path fill="currentColor" d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>';
 var ICHT0='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
 function nf(s){return String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase()}
+/* Un álbum sale si alguna palabra buscada empieza una palabra de SU título (el artista solo ayuda a combinar: «charli brat») */
+function amatch(q,a){var qs=q.split(/[^\p{L}\p{N}]+/u).filter(Boolean);if(!qs.length)return true;var W=function(t){return nf(t).split(/[^\p{L}\p{N}]+/u).filter(Boolean)},wa=W(a.al),wt=W(a.ar+' '+a.al),st=function(ws,x){return ws.some(function(w){return w.indexOf(x)===0})};return qs.every(function(x){return st(wt,x)})&&qs.some(function(x){return st(wa,x)})}
 /* Búsqueda por inicio de palabra: «char» encuentra Charli, pero no 2charm ni Richard */
 function qmatch(q,t){var qs=q.split(/[^\p{L}\p{N}]+/u).filter(Boolean);if(!qs.length)return true;var ws=nf(t).split(/[^\p{L}\p{N}]+/u).filter(Boolean);return qs.every(function(x){return ws.some(function(w){return w.indexOf(x)===0})})}
 function cln(s){return nrm(nf(String(s).replace(/\(.*?\)|\[.*?\]/g,'').replace(/\b(deluxe|remaster(ed)?|edition|expanded|bonus|version)\b.*$/i,'')))}
@@ -577,7 +585,7 @@ function rmCol(a,n){colList(a);if(a.cl){a.cl=a.cl.filter(function(c){return c!=n
 function kof(ar,al){return (ar+'|'+al).toLowerCase().trim()}
 function fr(v){v=+v||0;return v%1?v.toFixed(1):String(v)}
 function toast(t){var e=$('toast');e.textContent=t;e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(function(){e.style.display='none'},2400)}
-function add(ar,al,id,mb){if(!al)return 0;var k=kof(ar,al);if(S.a[k]){if(id&&!S.a[k].id)S.a[k].id=id;if(mb&&!S.a[k].mb)S.a[k].mb=mb;return 0}S.a[k]={ar:ar||'Desconocido',al:al,done:false,rate:0,col:'',note:'',t:0,id:id||'',mb:mb||''};return 1}
+function add(ar,al,id,mb){if(!al)return 0;var k=kof(ar,al);if(S.a[k]){if(id&&!S.a[k].id)S.a[k].id=id;if(mb&&!S.a[k].mb)S.a[k].mb=mb;return 0}S.a[k]={ar:ar||'Desconocido',al:al,done:false,rate:0,col:'',note:'',t:0,id:id||'',mb:mb||'',ad:Date.now()};return 1}
 function parseCSV(t){var rows=[],row=[],c='',q=false,d=t.indexOf('\t')>-1&&t.indexOf(',')<0?'\t':(t.split(';').length>t.split(',').length?';':',');
 for(var i=0;i<t.length;i++){var ch=t[i];
 if(q){if(ch=='"'){if(t[i+1]=='"'){c+='"';i++}else q=false}else c+=ch}
@@ -1216,10 +1224,22 @@ function gk(k,t){var a=S.a[k];if(t=='ar')return a.ar;var g=gm(k)[0];return g?cap
 function view(){var ks=Object.keys(S.a),q=nf(ui.q);
 var f=ks.filter(function(k){var a=S.a[k];if(a.tmp)return false;
 if(ui.f=='todo'&&(a.done||a.fav))return false;if(ui.f=='done'&&!a.done&&!a.fav)return false;if(ui.f=='top'&&a.rate<4)return false;
-if(ui.f=='fav'&&!a.fav)return false;if(ui.ge&&!has(k,ui.ge))return false;if(ui.c&&!hasCol(a,ui.c))return false;return !q||qmatch(q,a.ar+' '+a.al)});
-var s=ui.s;f.sort(function(x,y){var a=S.a[x],b=S.a[y];
-if(s=='rate')return b.rate-a.rate||a.ar.localeCompare(b.ar);if(s=='t')return b.t-a.t;
-return (a[s]).localeCompare(b[s])||a.al.localeCompare(b.al)});return f}
+if(ui.f=='fav'&&!a.fav)return false;if(ui.ge&&!has(k,ui.ge))return false;if(ui.c&&!hasCol(a,ui.c))return false;return !q||amatch(q,a)});
+f.sort(sortCmp(curS()));return f}
+/* Opciones de orden según la sección */
+/* Orden de grupos (artistas / géneros) según sus álbumes */
+function grpSort(o,gr,s){var ix={},i=0;Object.keys(S.a).forEach(function(k){ix[k]=i++});var M={};o.forEach(function(n){var l=gr[n].map(function(k){return S.a[k]}),r=l.filter(function(a){return a.rate>0}),ti=l.map(function(a){return nf(a.al)}).sort();M[n]={mn:ti[0]||'',mx:ti[ti.length-1]||'',rt:r.length?r.reduce(function(p,a){return p+a.rate},0)/r.length:0,fv:l.filter(function(a){return a.fav}).length,t:Math.max.apply(null,l.map(function(a){return a.t||0})),ad:Math.max.apply(null,l.map(function(a){return a.ad||0})),ix:Math.max.apply(null,gr[n].map(function(k){return ix[k]}))}});
+o.sort(function(x,y){var a=M[x],b=M[y],c=0;if(s=='arz')return y.localeCompare(x);if(s=='al')c=a.mn.localeCompare(b.mn);else if(s=='alz')c=b.mx.localeCompare(a.mx);else if(s=='rate')c=b.rt-a.rt;else if(s=='fav')c=b.fv-a.fv;else if(s=='t')c=b.t-a.t;else if(s=='add')c=(b.ad-a.ad)||(b.ix-a.ix);return c||x.localeCompare(y)})}
+var SALL={ar:'Artista A-Z',arz:'Artista Z-A',al:'Álbum A-Z',alz:'Álbum Z-A',rate:'Mejor nota',fav:'Favoritos',t:'Escuchado reciente',add:'Añadido reciente',cnt:'Más álbumes'};
+function sortOpts(){var sec=vmk(),ks;if(sec=='ar'||sec=='ge')ks=['ar','arz','al','alz','rate','fav','t','add'];else if(sec=='todo')ks=['ar','arz','al','alz','add'];else if(sec=='done')ks=['ar','arz','al','alz','rate','fav','t'];else if(sec=='fav')ks=['ar','arz','al','alz','rate','t','add'];else ks=['ar','arz','al','alz','rate','fav','t','add'];
+return ks.map(function(k){return [k,sec=='ge'&&k=='ar'?'Género A-Z':sec=='ge'&&k=='arz'?'Género Z-A':SALL[k]]})}
+function defS(){return 'ar'}
+function curS(){var sec=vmk();if(sec=='ar')return ui.sa||'ar';if(sec=='ge')return ui.sg||'ar';return sortOpts().some(function(o){return o[0]==ui.s})?ui.s:'ar'}
+function sortAct(){return curS()!=defS()}
+function setS(k){var sec=vmk();if(sec=='ar')ui.sa=k;else if(sec=='ge')ui.sg=k;else ui.s=k}
+function sortCmp(s){var ix={},i=0;Object.keys(S.a).forEach(function(k){ix[k]=i++});var A=function(p,q){return p.ar.localeCompare(q.ar)||p.al.localeCompare(q.al)},L=function(p,q){return p.al.localeCompare(q.al)||p.ar.localeCompare(q.ar)};
+return function(x,y){var a=S.a[x],b=S.a[y];
+if(s=='arz')return A(b,a);if(s=='al')return L(a,b);if(s=='alz')return L(b,a);if(s=='rate')return (b.rate||0)-(a.rate||0)||A(a,b);if(s=='fav')return (b.fav?1:0)-(a.fav?1:0)||A(a,b);if(s=='t')return (b.t||0)-(a.t||0)||A(a,b);if(s=='add')return (b.ad||0)-(a.ad||0)||ix[y]-ix[x];return A(a,b)}}
 var SB=true,SBF=false,CURCOL='';
 function cv(a,c,k,sz,nb){var urls=coverURLs(a,sz),src=urls[0]||'';return '<div class="cv '+c+'" style="background:linear-gradient(145deg,hsl('+hue(a.al+a.ar)+',50%,42%),hsl('+((hue(a.al+a.ar)+50)%360)+',55%,20%))"><span>'+esc(ini(a.al))+'</span>'+(src?'<img '+(nb?'loading="eager" fetchpriority="high"':'loading="lazy"')+' decoding="async" alt="" data-alt="'+esc(urls.slice(1).join('|'))+'" data-m="'+(a.mb&&!NC[a.mb]?a.mb:'')+'" src="'+esc(src)+'" onerror="cvf(this)">':'')+(nb?'':(SB&&a.done?'<b class="ok">✓</b>':'')+(SBF&&a.fav&&c!='sm'?'<b class="fv">♥</b>':'')+(a.rate&&c!='sm'?'<b class="rt">★'+fr(a.rate)+'</b>':''))+'</div>'}
 /* ---------- Vista (cuadrícula/lista) independiente por sección ---------- */
@@ -1250,7 +1270,7 @@ function render(){var ks=Object.keys(S.a),d=0,rs=0,rn=0,fx=0;ks.forEach(function
 ks.forEach(function(k){var a=S.a[k];if(a.done)d++;if(a.rate){rs+=a.rate;rn++}});
 var se=$('st');if(se)se.innerHTML=libInfo(ks.length,d,rs,rn);
 $('seg').innerHTML=[['g','','Álbumes','all'],['g','ar','Artistas','ar'],['g','ge','Géneros','ge']].map(chipB).join('');
-$('chips').innerHTML=[['f','todo','Por escuchar','todo'],['f','done','Escuchados','done'],['k','col','Colecciones','col']].map(chipB).join('')+'<button id="ob" class="'+((ui.s!='ar')?'act ':'')+($('opt').style.display=='block'?'on':'')+'" aria-label="Vista y orden"><svg viewBox="0 0 24 24"><path d="M4 7h9M19 7h1M4 17h1M11 17h9"/><circle cx="16" cy="7" r="2.6"/><circle cx="8" cy="17" r="2.6"/></svg></button>'+(ui.ge?'<button data-x="1" class="on">'+esc(ui.ge)+' ✕</button>':'');
+$('chips').innerHTML=[['f','todo','Por escuchar','todo'],['f','done','Escuchados','done'],['k','col','Colecciones','col']].map(chipB).join('')+'<button id="ob" class="'+(sortAct()?'act ':'')+($('opt').style.display=='block'?'on':'')+'" aria-label="Vista y orden"><svg viewBox="0 0 24 24"><path d="M4 7h9M19 7h1M4 17h1M11 17h9"/><circle cx="16" cy="7" r="2.6"/><circle cx="8" cy="17" r="2.6"/></svg></button>'+(ui.ge?'<button data-x="1" class="on">'+esc(ui.ge)+' ✕</button>':'');
 
 [].forEach.call($('vs').children,function(b){b.classList.toggle('on',b.dataset.v==vm())});$('nl').classList.toggle('on',ui.f!='fav');$('fv').classList.toggle('on',ui.f=='fav');
 var f=view(),h='';
@@ -1258,20 +1278,22 @@ try{var vl=$('opt').firstElementChild;if(vl)vl.textContent='Vista · '+(VMN[vmk(
 if(ui.o)f=f.filter(inFolder);
 if(ui.g&&!ui.q&&!ui.o){var gr={},o=[],pend=0,nog=0;
 if(ui.g=='ar'){f.forEach(function(k){var n=S.a[k].ar;(gr[n]=gr[n]||(o.push(n),[])).push(k)});
-o.sort(function(x,y){return x.localeCompare(y)});
+grpSort(o,gr,curS());
 h=o.length?(vm()=='g'?'<div class="grid">'+o.map(function(n){return acard(n,gr[n].length)}).join('')+'</div>':o.map(function(n){return acard(n,gr[n].length)}).join('')):(ks.length?'<div class="empty">Nada con ese filtro.</div>':emptyLib())}
 else{f.forEach(function(k){var g=agen(k);if(!g.length){if(GX[k]&&(GX[k].v>=2||GX[k].g.length))nog++;else pend++;return}g.forEach(function(n){(gr[n]=gr[n]||(o.push(n),[])).push(k)})});
-o.sort(function(x,y){return gr[y].length-gr[x].length||x.localeCompare(y)});
+grpSort(o,gr,curS());
 h=o.length?(vm()=='g'?'<div class="grid">'+o.map(function(n){return gcard(n,gr[n].length)}).join('')+'</div>':o.map(function(n){return gcard(n,gr[n].length)}).join('')):(!ks.length?emptyLib():'<div class="empty">'+(pend?'Buscando géneros…':'Nada con ese filtro.')+'</div>');
 if(pend||nog)h+='<div class="gnote">'+(pend?'Buscando géneros de '+pend+(pend==1?' álbum…':' álbumes…'):'')+(pend&&nog?'<br>':'')+(nog?nog+(nog==1?' álbum sin género encontrado (sigue en Álbumes)':' álbumes sin género encontrado (siguen en Álbumes)'):'')+'</div>'}}
-else{var qs6=!!ui.q&&!ui.o&&!ui.qall&&f.length>6,sl=f.slice(0,qs6?6:ui.lim);
-h=(ui.q&&!ui.o?'<div class="sch">En tu biblioteca</div>':'')+(ui.o?folderHead(f):'')+(sl.length?blk(sl):ui.q?'<div class="h">Sin resultados en tu biblioteca</div>':(ks.length?'<div class="empty">Nada con ese filtro.</div>':emptyLib()));
+else{var q2=nf(ui.q||''),ag=[],ac={};if(ui.q&&!ui.o){ks.forEach(function(k){var a0=S.a[k];if(a0.tmp)return;var n=a0.ar;if(ac[n]===undefined){ac[n]=0;if(qmatch(q2,n))ag.push(n)}ac[n]++});ag.sort(function(x,y){return ac[y]-ac[x]||x.localeCompare(y)})}
+var qx=!!ui.q&&!ui.o&&(f.length>6||ag.length>3),qs6=qx&&!ui.qall,sl=f.slice(0,qs6?6:ui.lim),asl=qs6?ag.slice(0,3):ag,ash=asl.length?'<div class="sec" style="margin-top:2px">Artistas</div>'+(vm()=='g'?'<div class="grid">'+asl.map(function(n){return acard(n,ac[n])}).join('')+'</div>':asl.map(function(n){return acard(n,ac[n])}).join(''))+(sl.length?'<div class="sec">Álbumes</div>':''):'';
+h=(ui.q&&!ui.o?'<div class="sch">En tu biblioteca</div>'+ash:'')+(ui.o?folderHead(f):'')+(sl.length?blk(sl):ui.q?(asl.length?'':'<div class="h">Sin resultados en tu biblioteca</div>'):(ks.length?'<div class="empty">Nada con ese filtro.</div>':emptyLib()));
 if(ui.o&&ui.o.t=='ge'&&ui.ot=='glob')h=folderHead(f)+ggHtml(ui.o.n,f);
-else if(qs6)h+='<button class="more" id="qm">Ver más ('+(f.length-6)+')</button>';
+else if(qs6)h+='<button class="more" id="qm">Ver más ('+(Math.max(0,f.length-6)+Math.max(0,ag.length-3))+')</button>';
 else if(f.length>ui.lim)h+='<button class="more" id="mr">Ver más ('+(f.length-ui.lim)+')</button>';
+if(qx&&ui.qall)h+='<button class="more" id="ql">Ver menos</button>';
 if(ui.o&&ui.o.t=='ar'){var ai=aiOf(f);if(ai)loadA(ai)}}
 if(!ui.cv)ui.cn=0;if(!ui.q&&ui.cv)h=colsHtml();
-if(!inGlob())$('list').innerHTML=h;watch();if(ui.g=='ar'&&!ui.o&&!ui.q)aiWatch($('list'))}
+if(!inGlob())$('list').innerHTML=h;watch();if((ui.g=='ar'&&!ui.o&&!ui.q)||(ui.q&&!ui.o))aiWatch($('list'))}
 var io=window.IntersectionObserver?new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){io.unobserve(e.target);keysOf(e.target).forEach(function(k){needCover(k);need(k);needG(k,1)})}})},{rootMargin:'300px'}):null;
 function keysOf(el){if(el.dataset.ks){try{return JSON.parse(el.dataset.ks)}catch(e){return []}}return [el.dataset.k]}
 function watch(){[].forEach.call($('list').querySelectorAll('[data-k],[data-ks]'),function(el){var miss=keysOf(el).some(function(k){var a=S.a[k];return !M[k]||!GX[k]||(a&&!a.cu&&!a.cx)});if(miss){if(io)io.observe(el);else keysOf(el).forEach(function(k){needCover(k);need(k);needG(k,1)})}})}
@@ -1644,12 +1666,14 @@ $('fv').onclick=function(){navTrack(function(){ui.cv=false;ui.c='';ui.cn=0;ui.o=
 $('nl').onclick=function(){navTrack(function(){if(ui.f=='fav'){ui.f='all';ui.cv=false;ui.c=''}ui.o=null;ui.lim=120;hide();render();window.scrollTo(0,0)})};
 $('ov').onclick=function(e){if(e.target==this)hide()};
 $('q').oninput=function(){ui.q=this.value;ui.qall=0;ui.lim=120;if(inGlob())gsearch();else{render();gsearch(0,1)}};
-function obUpd(){var b=$('ob');if(b)b.classList.toggle('act',ui.s!='ar')}
-$('so').onchange=function(){ui.s=this.value;obUpd();render();closeOpt()};
+function obUpd(){var b=$('ob');if(b)b.classList.toggle('act',sortAct())}
+function solPaint(){var c=curS();$('sol').innerHTML=sortOpts().map(function(o){return '<button type="button" data-s="'+o[0]+'" class="'+(c==o[0]?'on':'')+'">'+o[1]+'</button>'}).join('')}
+solPaint();$('sol').onclick=function(e){var b=e.target.closest('button');if(!b)return;setS(b.dataset.s);solPaint();obUpd();render();closeOpt()};
+
 
 $('vs').onclick=function(e){var b=e.target.closest('button');if(!b)return;setVm(b.dataset.v);render();closeOpt()};
 $('chips').onclick=function(e){if(e.target.closest('[data-x]')){ui.ge='';render();return}var b=e.target.closest('button');if(!b)return;
-if(b.id=='ob'){var o=$('opt'),v=o.style.display=='block';if(!v)o.style.top=(b.getBoundingClientRect().bottom-$('hd').getBoundingClientRect().top+8)+'px';var os=$('osel');if(os)os.style.display=(!ui.cv&&$('list').querySelector('[data-k]'))?'':'none';o.style.display=v?'none':'block';ui.optT=Date.now();b.classList.toggle('on',!v);return}
+if(b.id=='ob'){solPaint();var o=$('opt'),v=o.style.display=='block';if(!v)o.style.top=(b.getBoundingClientRect().bottom-$('hd').getBoundingClientRect().top+8)+'px';var os=$('osel');if(os)os.style.display=(!ui.cv&&$('list').querySelector('[data-k]'))?'':'none';o.style.display=v?'none':'block';ui.optT=Date.now();b.classList.toggle('on',!v);return}
 if(b.dataset.k!==undefined){ui.cn=0;if(ui.cv||ui.c){ui.cv=false;ui.c=''}else{ui.cv=true;ui.o=null;ui.g='';ui.ge='';ui.f='all'}ui.lim=120;render();window.scrollTo(0,0);return}
 if(b.dataset.g!==undefined){ui.cv=false;if(b.dataset.g===''){ui.g='';ui.f='all';ui.ge=''}else ui.g=b.dataset.g;ui.o=null;ui.lim=120;render();return}
 if(b.dataset.f!==undefined){ui.cv=false;ui.f=ui.f==b.dataset.f?'all':b.dataset.f;ui.lim=120;render()}};
@@ -1716,7 +1740,7 @@ im.src=src}
 /* ---------- Pantalla completa de una colección ---------- */
 var ICDOTS='<svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="2" fill="currentColor" stroke="none"/><circle cx="12" cy="19" r="2" fill="currentColor" stroke="none"/></svg>';
 function colKeys(n){var ks=Object.keys(S.a).filter(function(k){return hasCol(S.a[k],n)&&!S.a[k].tmp}),s=ui.s;
-ks.sort(function(x,y){var a=S.a[x],b=S.a[y];if(s=='rate')return b.rate-a.rate||a.ar.localeCompare(b.ar);if(s=='t')return b.t-a.t;return (a[s]).localeCompare(b[s])||a.al.localeCompare(b.al)});return ks}
+ks.sort(sortCmp(s));return ks}
 function colPage(n,keepY){if(S.cols.indexOf(n)<0){hide();return}
 ui.keep=1;hide();ui.keep=0;ui.vk='col:'+n;CURCOL=n;SB=false;var ks=colKeys(n),L=vm('cd')=='l',ph=S.ci&&S.ci[n],first=ks[0]&&S.a[ks[0]],bg=ph||(first&&cvs(first,500))||'';
 show('<div class="hero colpg" data-cpn="'+esc(n)+'"><div class="hbg">'+(bg?'<img alt="" src="'+esc(bg)+'" onerror="this.remove()">':'')+'</div><div class="htop"><button id="x" class="rb" aria-label="Atrás">'+ICBK+'</button><button id="cmb" class="rb" aria-label="Más opciones">'+ICDOTS+'</button></div>'
@@ -1955,7 +1979,7 @@ if(on&&!was){window.scrollTo(0,0)}if(!on&&was){gTok++;$('gauto').innerHTML='';re
 try{new MutationObserver(f).observe(n,{attributes:true,attributeFilter:['class']})}catch(e){}q.addEventListener('input',f);f()})();
 $('qx').onclick=function(){$('q').value='';ui.q='';gTok++;$('gauto').innerHTML='';$('nav').classList.remove('qs');ui.lim=120;render()};
 $('q').onkeydown=function(e){if(e.key=='Enter')this.blur()};
-$('list').onclick=function(e){if(e.target.id=='qm'){ui.qall=1;render();return}if(e.target.id=='mr'){ui.lim+=240;render();return}
+$('list').onclick=function(e){if(e.target.id=='qm'){ui.qall=1;render();return}if(e.target.id=='ql'){ui.qall=0;render();window.scrollTo(0,0);return}if(e.target.id=='mr'){ui.lim+=240;render();return}
 var t=e.target.closest('[data-a],[data-g],[data-k],[data-gi]');if(!t)return;
 if(t.dataset.a=='tl'||t.dataset.a=='tg'){ui.ot=t.dataset.a=='tg'?'glob':'lib';render();return}
 if(t.dataset.gi!==undefined){ui.back=null;openItem(GGL[t.dataset.gi]);return}
