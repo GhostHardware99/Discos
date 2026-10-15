@@ -1,8 +1,8 @@
 /* Service worker — cambia VERSION cada vez que subas un index.html nuevo */
-var VERSION = 'v60-2026-10-15';
+var VERSION = 'v61-2026-10-15';
 var CACHE = 'app-' + VERSION;
 /* Portadas: caché propia que NO se borra al actualizar la app */
-var IMG = 'covers-v1', IMGMAX = 800, BAD = {};
+var IMG = 'covers-v1', IMGMAX = 5000, BAD = {};
 var CORE = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', function (e) {
@@ -28,19 +28,41 @@ self.addEventListener('message', function (e) {
 });
 
 /* Portadas de cualquier sitio: primero la caché; si no está, se descarga y se guarda para siempre (hasta IMGMAX). */
-function imgNet(u, cors) {
+var WES = 'https://images.weserv.nl/?w=700&we&q=88&output=jpg&url=';
+function tryFetch(u, mode, ms) {
   var ctl = ('AbortController' in self) ? new AbortController() : null;
-  var to = setTimeout(function () { if (ctl) ctl.abort(); }, 10000);
-  return fetch(u, { mode: 'cors', credentials: 'omit', signal: ctl && ctl.signal })
-    .then(function (r) { clearTimeout(to); return r; }, function (e) {
-      clearTimeout(to);
-      if (cors) throw e;
-      /* sitio sin CORS: se muestra igual, pero no se guarda (no se sabe si es una imagen válida) */
-      var c2 = ('AbortController' in self) ? new AbortController() : null;
-      var t2 = setTimeout(function () { if (c2) c2.abort(); }, 10000);
-      return fetch(u, { mode: 'no-cors', credentials: 'omit', signal: c2 && c2.signal })
-        .then(function (r) { clearTimeout(t2); return r; }, function (e2) { clearTimeout(t2); throw e2; });
+  var to = setTimeout(function () { if (ctl) ctl.abort(); }, ms);
+  return fetch(u, { mode: mode, credentials: 'omit', signal: ctl && ctl.signal })
+    .then(function (r) { clearTimeout(to); return r; }, function (e) { clearTimeout(to); throw e; });
+}
+/* 1) directo con CORS (se puede guardar)  2) si el sitio no permite CORS o está bloqueado: a través de weserv, que sí permite
+   guardar (la imagen queda en caché con su URL original)  3) último recurso: directo sin CORS (se muestra, pero no se guarda) */
+function imgNet(u, cors) {
+  var host = new URL(u).host;
+  return tryFetch(u, 'cors', 10000).catch(function (e) {
+    if (/(^|\.)weserv\.nl$/.test(host)) throw e;
+    return tryFetch(WES + encodeURIComponent(u), 'cors', 12000).then(function (r) {
+      if (!r.ok) throw new Error('wes');
+      return r;
     });
+  }).catch(function (e) {
+    if (cors) throw e;
+    return tryFetch(u, 'no-cors', 10000);
+  });
+}
+var PUTS = 0;
+/* Tope por cantidad (IMGMAX) y por espacio: si el teléfono se queda sin sitio (>75 % de la cuota), borra las más antiguas */
+function trimImgs(c) {
+  PUTS++;
+  return c.keys().then(function (ks) {
+    var over = ks.length - IMGMAX;
+    if (over > 0) return Promise.all(ks.slice(0, over).map(function (k) { return c.delete(k); }));
+    if (PUTS % 25 === 0 && self.navigator && navigator.storage && navigator.storage.estimate) {
+      return navigator.storage.estimate().then(function (e) {
+        if (e && e.quota && e.usage / e.quota > 0.75) return Promise.all(ks.slice(0, 150).map(function (k) { return c.delete(k); }));
+      });
+    }
+  });
 }
 function imgFetch(req) {
   var u = req.url, host = new URL(u).host, cors = req.mode === 'cors';
@@ -54,9 +76,7 @@ function imgFetch(req) {
         if (r.type === 'opaque') { BAD[host] = { n: 0, t: Date.now() }; return r; }
         if (r.ok) {
           BAD[host] = { n: 0, t: Date.now() };
-          c.put(u, r.clone()).then(function () {
-            return c.keys().then(function (ks) { if (ks.length > IMGMAX) return c.delete(ks[0]); });
-          }).catch(function () {});
+          c.put(u, r.clone()).then(function () { return trimImgs(c); }).catch(function () {});
           return r;
         }
         return r;
