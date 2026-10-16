@@ -781,20 +781,21 @@ function(e){gap=e=='q'?4000:1500;tries[k]=(tries[k]||0)+1;delete qd[k];if(tries[
 
 /* ---------- Respaldo de tracklist (Deezer / iTunes) y enlaces directos de canciones ---------- */
 var FBq={};
+function tmo(p,ms){return Promise.race([p,new Promise(function(_,no){setTimeout(function(){no(new Error('t'))},ms)})])}
 function hasT(k){var m=M[k];return !!(m&&m.t&&m.t.length)}
 function pickAlb(l,tk,ak,a){var c=cln(a.al),e=l.filter(function(x){return cln(tk(x))==c&&same(ak(x),a.ar)});return e[0]||l.filter(function(x){return same(tk(x),a.al)&&same(ak(x),a.ar)})[0]}
 function fbCheck(k){if(!S.a[k]||hasT(k)||FBq[k])return;fbLoad(k)}
 async function fbLoad(k,force){if(!S.a[k]||hasT(k)||(FBq[k]&&!force))return;FBq[k]=1;var a=S.a[k],o=null,r,h,id;
-/* 1) iTunes: casi siempre responde y no limita como MusicBrainz */
-try{var cid=a.iid;if(!cid){h=await itAlbum(k);if(h)cid=h.collectionId}
-if(cid){var d2=await jsonp('https://itunes.apple.com/lookup?id='+cid+'&entity=song&limit=200'),rs=d2.results||[],c0=rs[0]||{},t2=rs.filter(function(x){return x.wrapperType=='track'}).sort(function(x,y){return (x.discNumber-y.discNumber)||(x.trackNumber-y.trackNumber)}).map(function(x){return [x.trackName,Math.round((x.trackTimeMillis||0)/1000)]});
-if(t2.length)o={t:t2,d:String(c0.releaseDate||'').slice(0,10),l:'',g:c0.primaryGenreName?[c0.primaryGenreName]:[],iid:String(cid)}}}catch(e){}
-/* 2) Deezer (en su propio try: si falla, no cancela las demás fuentes) */
-if(!o)try{id=a.id;if(!id){r=await jsonp('https://api.deezer.com/search/album?limit=10&q='+qe('artist:"'+a.ar+'" album:"'+a.al+'"'));h=pickAlb(r.data||[],function(x){return x.title},function(x){return (x.artist||{}).name},a);
+/* 1) Deezer: rápido y fiable */
+try{id=a.id;if(!id){r=await jsonp('https://api.deezer.com/search/album?limit=10&q='+qe('artist:"'+a.ar+'" album:"'+a.al+'"'));h=pickAlb(r.data||[],function(x){return x.title},function(x){return (x.artist||{}).name},a);
 if(!h){r=await jsonp('https://api.deezer.com/search/album?limit=10&q='+qe(a.ar+' '+a.al));h=pickAlb(r.data||[],function(x){return x.title},function(x){return (x.artist||{}).name},a)}
 if(h)id=String(h.id)}
 if(id){var d=await jsonp('https://api.deezer.com/album/'+id),tr=await jsonp('https://api.deezer.com/album/'+id+'/tracks?limit=200'),t=(tr.data||[]).map(function(x){return [x.title,x.duration||0]});
 if(t.length)o={t:t,d:d.release_date||'',l:d.label||'',g:((d.genres||{}).data||[]).map(function(x){return x.name}).slice(0,12),id:id}}}catch(e){}
+/* 2) iTunes (solo si Deezer no dio canciones; con tope de tiempo) */
+if(!o)try{var cid=a.iid;if(!cid){h=await tmo(itAlbum(k),6000);if(h)cid=h.collectionId}
+if(cid){var d2=await tmo(jsonp('https://itunes.apple.com/lookup?id='+cid+'&entity=song&limit=200'),6000),rs=d2.results||[],c0=rs[0]||{},t2=rs.filter(function(x){return x.wrapperType=='track'}).sort(function(x,y){return (x.discNumber-y.discNumber)||(x.trackNumber-y.trackNumber)}).map(function(x){return [x.trackName,Math.round((x.trackTimeMillis||0)/1000)]});
+if(t2.length)o={t:t2,d:String(c0.releaseDate||'').slice(0,10),l:'',g:c0.primaryGenreName?[c0.primaryGenreName]:[],iid:String(cid)}}}catch(e){}
 /* 2b) TheAudioDB */
 if(!o)try{var ab=await adbGet('searchalbum.php?s='+qe(a.ar)+'&a='+qe(a.al)),a0=((ab&&ab.album)||[])[0];if(a0&&a0.idAlbum){var tj=await adbGet('track.php?m='+a0.idAlbum),tt=((tj&&tj.track)||[]).map(function(x){return [x.strTrack,Math.round((+x.intDuration||0)/1000)]}).filter(function(x){return x[0]});if(tt.length)o={t:tt,d:a0.intYearReleased?String(a0.intYearReleased):'',l:'',g:[a0.strGenre,a0.strStyle].filter(Boolean)}}}catch(e){}
 /* 3) Last.fm */
@@ -906,16 +907,16 @@ if(ok){if(ui.ge||ui.g=='ge'){clearTimeout(gRT);gRT=setTimeout(render,700)}if(cur
 else if(S.a[k]&&(gt[k]=(gt[k]||0)+1)<3)setTimeout(function(){needG(k)},5000*gt[k]);
 setTimeout(gPump,250)})}
 async function loadG(k){var a=S.a[k];if(!a)return true;var g=[],ok=0,h,r,id;
-/* iTunes: género principal del álbum */
-try{if(a.iid){var d=await jsonp('https://itunes.apple.com/lookup?id='+a.iid);h=(d.results||[])[0]}else h=await itAlbum(k);
-ok=1;if(h&&h.primaryGenreName)g.push(h.primaryGenreName)}catch(e){}
-/* Deezer: lista de géneros del álbum */
+/* Deezer: lista de géneros del álbum (primero: rápido y fiable) */
 try{id=a.id;if(!id){r=await jsonp('https://api.deezer.com/search/album?limit=10&q='+qe('artist:"'+a.ar+'" album:"'+a.al+'"'));
 var dh=pickAlb(r.data||[],function(x){return x.title},function(x){return (x.artist||{}).name},a);
 if(!dh){r=await jsonp('https://api.deezer.com/search/album?limit=10&q='+qe(a.ar+' '+a.al));dh=pickAlb(r.data||[],function(x){return x.title},function(x){return (x.artist||{}).name},a)}
 if(dh)id=String(dh.id)}
 if(id){var dz=await jsonp('https://api.deezer.com/album/'+id);ok=1;if(S.a[k]&&!S.a[k].id){S.a[k].id=id;saveSoon()}
 g=g.concat(((dz.genres||{}).data||[]).map(function(x){return x.name}))}else ok=1}catch(e){}
+/* iTunes: género principal, solo si Deezer dio menos de 2 géneros */
+if(g.length<2)try{if(a.iid){var d=await tmo(jsonp('https://itunes.apple.com/lookup?id='+a.iid),6000);h=(d.results||[])[0]}else h=await tmo(itAlbum(k),6000);
+ok=1;if(h&&h.primaryGenreName)g.push(h.primaryGenreName)}catch(e){}
 g=g.filter(function(x){return x&&!/^(music|m[uú]sica)$/i.test(x)});
 /* Fuentes extra: TheAudioDB, MusicBrainz y Last.fm (otras cuotas/IP; sirven si Deezer o iTunes no responden) */
 if(!cgn(g))try{var ax=await adbGet('searchalbum.php?s='+qe(a.ar)+'&a='+qe(a.al));ok=1;var al0=((ax&&ax.album)||[])[0];if(al0)[al0.strGenre,al0.strStyle].forEach(function(x){if(x)g.push(x)})}catch(e){}
