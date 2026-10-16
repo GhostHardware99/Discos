@@ -546,7 +546,7 @@ body.msel #up,body.kbd #up{opacity:0;pointer-events:none}
 #ov:has(.colpg):before{opacity:1}
 
 /* Superficies claras: degradado vertical (blanco arriba, color de la app abajo) */
-:root{--cg:linear-gradient(180deg,rgba(255,255,255,.9) 0%,color-mix(in srgb,rgb(var(--acr)) 15%,#fff) 100%);--cgo:linear-gradient(180deg,#fff 0%,color-mix(in srgb,rgb(var(--acr)) 14%,#fff) 100%);--bdc:rgba(var(--acr),.14)}
+:root{--cg:linear-gradient(180deg,color-mix(in srgb,rgb(var(--acr)) 15%,#fff) 0%,rgba(255,255,255,.9) 100%);--cgo:linear-gradient(180deg,color-mix(in srgb,rgb(var(--acr)) 14%,#fff) 0%,#fff 100%);--bdc:rgba(var(--acr),.14)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--cg:var(--card);--cgo:var(--card);--bdc:var(--bd)}}
 :root[data-theme="dark"]{--cg:var(--card);--cgo:var(--card);--bdc:var(--bd)}
 .cfg-g,.dfo,.sc,.card,.mn-card,.mn-3 div,details,.tb2{background:var(--cg);--bd:var(--bdc)}
