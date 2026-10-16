@@ -571,6 +571,14 @@ html[data-gd="6"]{--m1:color-mix(in srgb,rgb(var(--acr)) calc(22%*var(--k)),var(
 .cgrid{padding-bottom:70px}
 #list .li{content-visibility:auto;contain-intrinsic-size:auto 72px}
 .cfold{box-shadow:0 6px 16px -8px rgba(0,0,0,.35)}
+/* Carpetas: tarjetas lisas, sin pestaña */
+.cfold{border-radius:20px;margin-top:0;padding:10px 10px 12px;box-shadow:none;border:1px solid var(--bdc)}
+.cfold:before{display:none}
+.cfold .mos{box-shadow:none;border-radius:14px}
+/* Botones flotantes: mismo tamaño y estilo que el botón atrás */
+.cfab{gap:8px}
+.cfab .cfn,.cfab .cfs{width:42px;height:42px;padding:0;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,rgba(var(--acr),.28),rgba(var(--acr),.12));border:1px solid rgba(var(--acr),.3);color:var(--tx);box-shadow:0 2px 8px rgba(0,0,0,.18);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.cfab svg{width:22px;height:22px}
 #tgd{flex-wrap:wrap}#tgd button{flex:1 1 33%;font-size:13px;padding:9px 4px}
 .rb,.cfg-bk,.bk{width:42px;height:42px;padding:0;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex:none;background:linear-gradient(180deg,rgba(var(--acr),.28),rgba(var(--acr),.12));border:1px solid rgba(var(--acr),.3);color:var(--tx);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
 .rb svg,.cfg-bk svg,.bk svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
@@ -1505,11 +1513,17 @@ function libInfo(n,d,rs,rn){var sc=function(a,b){return '<div class="sc"><b>'+a+
 function emptyLib(){return '<div class="emp" data-em="add" role="button" tabindex="0"><div class="et">Tu biblioteca está vacía</div><div class="es">Toca aquí para buscar y añadir tu primer álbum</div><div class="eb"><button class="p" data-em="add">Buscar álbum</button><button data-em="imp">Importar CSV o lista</button></div></div>'}
 function favDone(a){if(!a.done){a.done=true;a.t=Date.now()}}
 var TABC={};
+function mk(el){[].forEach.call(el.children,function(c){c.__o=c.outerHTML;if(c.classList.contains('grid'))[].forEach.call(c.children,function(g){g.__o=g.outerHTML})})}
+function pk(a,b){var bl=[].slice.call(b.children),k;for(k=0;k<bl.length;k++){var x=a.children[k],y=bl[k];if(!x)a.appendChild(y);else if(x.__o!==y.__o)x.replaceWith(y)}while(a.children.length>bl.length)a.removeChild(a.lastElementChild)}
+function patchList(L,h){var t=document.createElement('div');t.innerHTML=h;if(L.childNodes.length!=L.children.length||t.childNodes.length!=t.children.length)return false;mk(t);
+var bl=[].slice.call(t.children),k;for(k=0;k<bl.length;k++){var x=L.children[k],y=bl[k];if(!x)L.appendChild(y);else if(x.__o!==y.__o){if(x.classList.contains('grid')&&y.classList.contains('grid')){pk(x,y);x.__o=y.__o}else x.replaceWith(y)}}
+while(L.children.length>bl.length)L.removeChild(L.lastElementChild);return true}
 function setList(h){var L=$('list'),key=(!ui.q&&!ui.o&&!ui.cv&&!(typeof MS!='undefined'&&MS))?[ui.g,ui.f,ui.ge,vm(),curS(),ui.lim].join('|'):null;
 if(key!==null&&L.__k===key&&L.__h===h)return;
 if(L.__k&&L.__k!==key){var fr=document.createDocumentFragment();while(L.firstChild)fr.appendChild(L.firstChild);TABC[L.__k]={h:L.__h,fr:fr};var ks=Object.keys(TABC);if(ks.length>4)delete TABC[ks[0]]}
+else if(key!==null&&L.__k===key&&L.__h!=null){if(patchList(L,h)){L.__h=h;return}}
 var c=key!==null&&TABC[key];
-if(c&&c.h===h){L.textContent='';L.appendChild(c.fr);delete TABC[key]}else{if(c)delete TABC[key];L.innerHTML=h}
+if(c&&c.h===h){L.textContent='';L.appendChild(c.fr);delete TABC[key]}else{if(c)delete TABC[key];L.innerHTML=h;if(key!==null)mk(L)}
 L.__k=key;L.__h=key!==null?h:null}
 function render(){var ks=Object.keys(S.a),d=0,rs=0,rn=0,fx=0;ks.forEach(function(k){var a=S.a[k];if(a.fav&&!a.done){favDone(a);fx=1}});if(fx)save();
 ks.forEach(function(k){var a=S.a[k];if(a.done)d++;if(a.rate){rs+=a.rate;rn++}});
@@ -1981,7 +1995,7 @@ if(L){h+=(ui.cn?cdraft(true):'')+colsF().map(function(c){return '<div class="cro
 else h+='<div class="cgrid">'+(ui.cn?cdraft(false):'')+colsF().map(function(c){return '<div class="cfold" data-cf="'+esc(c)+'">'+cfHeart(c)+colMos(c)+'<div class="t">'+esc(c)+'</div><div class="a">'+colCnt(c)+'</div></div>'}).join('')+'</div>';
 if(!S.cols.length&&!ui.cn)h+='<div class="emp" data-cn="new" role="button" tabindex="0"><div class="et">Aún no tienes colecciones</div><div class="es">Toca aquí para crear tu primera colección</div><div class="eb"><button class="p" data-cn="new">Crear colección</button></div></div>';
 if(S.cols.length&&ui.cqq&&!colsF().length)h+='<div class="h" style="text-align:center;margin:30px 0">Sin resultados</div>';
-if(S.cols.length&&!ui.cn)h+='<div class="cfab"><button class="cfs" data-cn="srch" aria-label="Buscar colección"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></button><button class="cfn" data-cn="new"><svg viewBox="0 0 24 24" style="width:18px;height:18px;margin-right:6px;vertical-align:-3px"><path d="M12 5v14M5 12h14"/></svg>Nueva</button></div>';
+if(S.cols.length&&!ui.cn)h+='<div class="cfab"><button class="cfs" data-cn="srch" aria-label="Buscar colección"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></button><button class="cfn" data-cn="new" aria-label="Nueva colección"><svg viewBox="0 0 24 24" ><path d="M12 5v14M5 12h14"/></svg></button></div>';
 return h}
 $('list').addEventListener('click',function(e){var em=e.target.closest('[data-em]');if(em){if(em.dataset.em=='imp')settings('imp');else $('bs').click();return}
 var t=e.target.closest('[data-cf],[data-cn],[data-cb],[data-cd],[data-cp],[data-cx]');if(!t)return;
