@@ -1,5 +1,5 @@
 /* Service worker — cambia VERSION cada vez que subas un index.html nuevo */
-var VERSION = 'v72-2026-10-16';
+var VERSION = 'v77-2026-10-16';
 var CACHE = 'app-' + VERSION;
 /* Portadas: caché propia que NO se borra al actualizar la app */
 var IMG = 'covers-v1', IMGMAX = 5000, BAD = {};
@@ -92,7 +92,7 @@ function imgFetch(req) {
       if (hit) return hit;
       var b = BAD[host];
       /* sitio que falló 3 veces seguidas en los últimos 5 min: falla al instante y la app pasa a su alternativa */
-      if (b && b.n >= 3 && Date.now() - b.t < 300000) return Response.error();
+      if (b && b.n >= 3 && Date.now() - b.t < 15000) return Response.error();
       return imgNet(u, cors, c, oc).then(function (r) {
         if (r.type === 'opaque') {
           BAD[host] = { n: 0, t: Date.now() };
