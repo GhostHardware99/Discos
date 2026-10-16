@@ -1,5 +1,5 @@
 /* Service worker — cambia VERSION cada vez que subas un index.html nuevo */
-var VERSION = 'v90-2026-10-16';
+var VERSION = 'v91-2026-10-16';
 var CACHE = 'app-' + VERSION;
 /* Portadas: caché propia que NO se borra al actualizar la app */
 var IMG = 'covers-v1', IMGMAX = 5000, BAD = {};
@@ -129,14 +129,13 @@ self.addEventListener('fetch', function (e) {
   if (isPage) {
     // Red primero: siempre carga la versión nueva si hay conexión
     e.respondWith(
-      fetch(req).then(function (res) {
-        var copy = res.clone();
-        caches.open(CACHE).then(function (c) { c.put(req, copy); });
-        return res;
-      }).catch(function () {
-        return caches.match(req).then(function (r) {
-          return r || caches.match('index.html') || caches.match('./');
-        });
+      caches.match(req).then(function (hit) {
+        hit = hit || null;
+        var net = fetch(req).then(function (res) {
+          if (res && res.ok) { var copy = res.clone(); caches.open(CACHE).then(function (c) { c.put(req, copy); }); }
+          return res;
+        }).catch(function () { return hit || caches.match('index.html') || caches.match('./'); });
+        return hit || net;
       })
     );
     return;

@@ -587,6 +587,9 @@ html[data-gd="6"]{--m1:color-mix(in srgb,rgb(var(--acr)) calc(22%*var(--k)),var(
 /* Colección: la imagen se ve detrás de la barra de estado y se degrada al subir */
 #ov:has(.colpg):before{opacity:var(--fo2,0)}
 .hero.colpg:before{content:"";position:absolute;left:0;right:0;top:0;height:calc(72px + env(safe-area-inset-top,0px));z-index:2;pointer-events:none;opacity:calc(1 - var(--fo2,0));background:linear-gradient(to bottom,rgba(0,0,0,.22),transparent)}
+html.kbcn .cgrid{padding-bottom:55vh}
+.cv img{opacity:1!important;transition:none!important}
+#ov .rb,#ov .htop .rb,.hero .rb,.rb,.cfg-bk,.bk,.cfab .cfn,.cfab .cfs{background:color-mix(in srgb,color-mix(in srgb,rgb(var(--acr)) calc(10%*var(--k)),var(--card)) 94%,transparent)!important;border:1px solid rgba(var(--acr),.22)!important;color:var(--tx)!important;box-shadow:0 1px 6px rgba(0,0,0,.14)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
 #tgd{flex-wrap:wrap}#tgd button{flex:1 1 33%;font-size:13px;padding:9px 4px}
 .rb,.cfg-bk,.bk{width:42px;height:42px;padding:0;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex:none;background:linear-gradient(180deg,rgba(var(--acr),.28),rgba(var(--acr),.12));border:1px solid rgba(var(--acr),.3);color:var(--tx);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
 .rb svg,.cfg-bk svg,.bk svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
@@ -1586,7 +1589,7 @@ if(cur&&S.a[cur]&&$('sh').querySelector('.hbg'))albumBar(cur);else dzHc(null)}
 function cleanTmp(){var ch=0;Object.keys(S.a).forEach(function(k){var t=S.a[k];if(!t||!t.tmp)return;if(t.rate||t.done||t.fav||colList(t).length||t.note)delete t.tmp;else delete S.a[k];ch=1});if(ch){save();render()}}
 function hide(){var cmx=document.getElementById('cmenu');if(cmx)cmx.remove();if(!ui.keep&&typeof MS!='undefined'&&MS)msEnd();if(!ui.keep)cleanTmp();
 if(!ui.keep){$('ov').style.display='none';$('ov').className='';OVS=[];ui.ovk=null;ui.sy=null;ui.ls=false}
-dzHc(null);ui.st=false;ui.back=null;cur=null;mbPause=false;pump()}
+if(window.DZTC0){window.DZTC=window.DZTC0;window.DZTC0=null}dzHc(null);ui.st=false;ui.back=null;cur=null;mbPause=false;pump()}
 function rs2(k){if(cur!=k||SD)return;if(ui.st){if($('spv'))stdraw(k);return}var f=document.activeElement;if(f&&(f.id=='nt'||f.id=='sc'))return;sheet(k)}
 var AD={};
 /* ---------- MOTOR DE BÚSQUEDA: Deezer (principal) + iTunes en paralelo ----------
@@ -2009,8 +2012,11 @@ $('list').addEventListener('click',function(e){var em=e.target.closest('[data-em
 var t=e.target.closest('[data-cf],[data-cn],[data-cb],[data-cd],[data-cp],[data-cx]');if(!t)return;
 if(t.dataset.cf!==undefined){colPage(t.dataset.cf)}
 else if(t.dataset.cn=='new'){ui.cn=1;ui.cnn='';ui.cnp=null;render();window.scrollTo(0,0);var i=$('cni');if(i)i.focus()}
-else if(t.dataset.cn=='srch'){ui.cqo=!ui.cqo;if(!ui.cqo)ui.cqq='';render();var cq=$('cqi');if(cq)cq.focus()}
+else if(t.dataset.cn=='srch'){if(Date.now()-(ui.cqt||0)<500)return;ui.cqo=!ui.cqo;if(!ui.cqo)ui.cqq='';render();var cq=$('cqi');if(cq)cq.focus()}
 else if(t.dataset.cn=='ph'){cnPhoto()}});
+document.addEventListener('focusout',function(e){if(!e.target||e.target.id!='cqi')return;setTimeout(function(){var q=$('cqi');if(ui.cqo&&!ui.cqq&&(!q||document.activeElement!==q)){ui.cqo=0;ui.cqt=Date.now();render()}},120)});
+document.addEventListener('focusin',function(e){var t=e.target;if(!t||t.id!='cni')return;document.documentElement.classList.add('kbcn');var go=function(){if(document.activeElement!==t)return;var card=t.closest('.cfold,.crow,.card')||t,vv=window.visualViewport,vh=vv?vv.height:innerHeight,tp=vv?vv.offsetTop:0,r=card.getBoundingClientRect(),dy=r.bottom-(tp+vh-16);if(r.top-dy<60)dy=r.top-60;if(dy>2)window.scrollBy({top:dy,behavior:'smooth'})};setTimeout(go,120);setTimeout(go,380);if(window.visualViewport)window.visualViewport.addEventListener('resize',go,{once:true})});
+document.addEventListener('focusout',function(e){if(e.target&&e.target.id=='cni')document.documentElement.classList.remove('kbcn')});
 $('list').addEventListener('input',function(e){if(e.target.id!='cqi')return;ui.cqq=e.target.value;var p=e.target.selectionStart;render();var q=$('cqi');if(q){q.focus();try{q.setSelectionRange(p,p)}catch(x){}}});
 function cnReset(){ui.cn=0;ui.cnn='';ui.cnp=null}
 function cnCommit(){if(!ui.cn)return;var v=(ui.cnn||'').trim();
@@ -2069,7 +2075,7 @@ function colFade(){var sh=$('sh');sh.onscroll=function(){colBarUpd()}}
 var CC={};
 function colBarUpd(){var sh=$('sh'),q=sh.querySelector('.colpg .ccv');if(!q||!CC.rows)return;var H=q.offsetHeight||1,y=Math.max(0,sh.scrollTop),bg=hx3(window.DZBG),c;
 if(y>=H)c=bg;else{var i=Math.min(CC.rows.length-1,Math.floor(y/H*CC.rows.length)),t=Math.max(0,Math.min(1,(y-(H-170))/170)),a=1-t*t*(3-2*t);c=dzMix(bg,CC.rows[i],a)}
-dzBar();document.documentElement.style.setProperty('--hcr',dzRgbs(window.DZTC))}
+window.DZTC0=window.DZTC0||window.DZTC;window.DZTC=dzHex(c);dzBar();document.documentElement.style.setProperty('--hcr',dzRgbs(window.DZTC))}
 function colBar(bg,n){CC={};if(!bg)return;var im=new Image();if(bg.indexOf('data:')!==0)im.crossOrigin='anonymous';
 im.onload=function(){try{var R=96,c=document.createElement('canvas');c.width=24;c.height=R;var x=c.getContext('2d');x.drawImage(im,0,0,24,R);var d=x.getImageData(0,0,24,R).data,rows=[];
 for(var r=0;r<R;r++){var a=0,g=0,b=0;for(var k=0;k<24;k++){var o=(r*24+k)*4;a+=d[o];g+=d[o+1];b+=d[o+2]}rows.push([Math.round(a/24),Math.round(g/24),Math.round(b/24)])}
