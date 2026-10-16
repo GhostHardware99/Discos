@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
 <meta name="theme-color" content="#0d0d0f">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Digz">
 <link rel="manifest" href="manifest.webmanifest">
@@ -541,6 +542,8 @@ body.msel #up,body.kbd #up{opacity:0;pointer-events:none}
 .cpk-in input{min-width:0;flex:1;text-align:center;font-weight:700;font-variant-numeric:tabular-nums;padding:9px 4px;border-radius:12px}
 .cpk-sw{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}.cpk-sw button{width:32px;height:32px;padding:0;border-radius:50%;border:2px solid rgba(255,255,255,.6);box-shadow:0 0 0 1px var(--bd)}
 .cpk-bt{display:flex;gap:8px;margin-top:16px}.cpk-bt button{flex:1}
+#ov.full:before{opacity:var(--fo2,0)}
+#ov:has(.colpg):before{opacity:1}
 </style>
 <script>
 /* Tema: modo claro/oscuro y color. Se aplica antes de pintar para evitar parpadeos */
@@ -2212,6 +2215,7 @@ function ovOpen(e){var k=e.k,i=k.indexOf(':'),t=i<0?k:k.slice(0,i),v=i<0?'':k.sl
 if((t=='album'||t=='studio')&&!S.a[v])return false;
 ui.sy={k:k,v:e.y||0};ui.popping=1;
 try{if(t=='settings')settings(v);else if(t=='stats'||t=='statshare')stats();else if(t=='catalog')catalog(ui.cqv);else if(t=='artist')artistPage(v);else if(t=='genre')genrePage(v);else if(t=='col')colPage(v);else if(t=='album'){ui.st=false;sheet(v)}else if(t=='studio')studio(v);else return false}finally{ui.popping=0}
+setTimeout(function(){if(ui.sy&&ui.sy.k===k)ui.sy=null},1500);
 return true}
 function ovBack(){while(OVS.length){var e=OVS.pop();if(ovOpen(e))return}hide()}
 function snap(){return {cv:ui.cv?1:0,t:ui.f=='fav'?1:0,f:ui.f,g:ui.g,ge:ui.ge,o:ui.o?JSON.parse(JSON.stringify(ui.o)):null,ot:ui.ot,qs:$('nav').classList.contains('qs')?1:0,sy:window.scrollY||0}}

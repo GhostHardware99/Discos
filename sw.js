@@ -1,16 +1,16 @@
 /* Service worker — cambia VERSION cada vez que subas un index.html nuevo */
-var VERSION = 'v67-2026-10-16';
+var VERSION = 'v68-2026-10-15';
 var CACHE = 'app-' + VERSION;
 /* Portadas: caché propia que NO se borra al actualizar la app */
 var IMG = 'covers-v1', IMGMAX = 5000, BAD = {};
 /* Portadas «opacas» (sitios sin CORS cuando no hay proxy): se guardan aparte con tope bajo, porque el navegador cuenta cada una como ~7 MB de cuota */
 var OPQ = 'covers-opq-v1', OPQMAX = 200;
-var CORE = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png'];
+var CORE = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png'];
 
 self.addEventListener('install', function (e) {
   e.waitUntil(
     caches.open(CACHE)
-      .then(function (c) { return c.addAll(CORE).catch(function () {}); })
+      .then(function (c) { return Promise.all(CORE.map(function (u) { return c.add(u).catch(function () {}); })); })
       .then(function () { return self.skipWaiting(); })
   );
 });
