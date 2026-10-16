@@ -1,7 +1,7 @@
 // Proxy CORS propio para Digz (Cloudflare Workers, plan gratis).
 // Uso en la app: Ajustes > Conexión y fuentes > Proxy propio = https://TU-WORKER.workers.dev/
 // >>> ESCRIBE TU CORREO ENTRE LAS COMILLAS (MusicBrainz lo pide). Es lo único que debes cambiar. <<<
-const CONTACT_EMAIL = 'tu-correo@ejemplo.com';
+const CONTACT_EMAIL = 'econoniso2008@gmail.com';
 const OK = ['api.deezer.com','itunes.apple.com','musicbrainz.org','www.theaudiodb.com',
   'ws.audioscrobbler.com','coverartarchive.org','en.wikipedia.org','es.wikipedia.org'];
 // Solo tu app (GitHub Pages) puede usar este proxy
