@@ -11,7 +11,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-192.png">
 <title>Digz</title>
-<script>try{document.documentElement.dataset.gd=localStorage.getItem("dzgd")||"1"}catch(e){}</script>
+<script>try{document.documentElement.dataset.gd=localStorage.getItem("dzgd2")||"1"}catch(e){}</script>
 <style>
 :root{--bg:#f4f3ef;--card:#fff;--tx:#18181a;--mut:#74726b;--bd:#e4e2da;--so:#d3d1c8;--sx:#bcb9ae;--ac:#8e8e93;--acr:142,142,147;--act:#727276;--onac:#fff;--ac2:#efeff0;--st:#f5b301;--gl:rgba(0,0,0,.05);--glb:rgba(0,0,0,.09);--navbg:rgba(255,255,255,.82);--g1:.3;--g2:.1;box-sizing:border-box}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d0d0f;--card:#18181b;--tx:#f3f3f0;--mut:#9a9890;--bd:#2a2a2d;--so:#3a3a3e;--sx:#3a3a3e;--ac2:#2b2b2e;--act:#8e8e93;--gl:rgba(255,255,255,.06);--glb:rgba(255,255,255,.1);--navbg:rgba(24,24,27,.78);--g1:.34;--g2:.12}}
@@ -547,20 +547,19 @@ body.msel #up,body.kbd #up{opacity:0;pointer-events:none}
 #ov:has(.colpg):before{opacity:1}
 
 /* Superficies claras: degradado vertical (blanco arriba, color de la app abajo) */
-:root{--cg:linear-gradient(180deg,color-mix(in srgb,rgb(var(--acr)) 15%,#fff) 0%,rgba(255,255,255,.9) 100%);--cgo:linear-gradient(180deg,color-mix(in srgb,rgb(var(--acr)) 14%,#fff) 0%,#fff 100%);--bdc:rgba(var(--acr),.14)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--cg:var(--card);--cgo:var(--card);--bdc:var(--bd)}}
-:root[data-theme="dark"]{--cg:var(--card);--cgo:var(--card);--bdc:var(--bd)}
 .cfg-g,.dfo,.sc,.card,.mn-card,.mn-3 div,details,.tb2{background:var(--cg);--bd:var(--bdc)}
 .lpc,.lsh,.cmenu{background:var(--cgo);--bd:var(--bdc)}
 /* === Diseño v2: degradados elegibles (data-gd), claro y oscuro === */
 :root{--k:1;--bdc:rgba(var(--acr),.2)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--k:1.3;--bdc:rgba(var(--acr),.28)}}
 :root[data-theme="dark"]{--k:1.3;--bdc:rgba(var(--acr),.28)}
-:root{--m1:color-mix(in srgb,rgb(var(--acr)) calc(20%*var(--k)),var(--card));--m2:color-mix(in srgb,rgb(var(--acr)) calc(5%*var(--k)),var(--card));--cg:linear-gradient(160deg,var(--m1),var(--m2));--cgo:var(--cg)}
-html[data-gd="2"]{--m1:color-mix(in srgb,rgb(var(--acr)) calc(15%*var(--k)),var(--card));--m2:var(--card);--cg:linear-gradient(180deg,var(--m1),var(--m2))}
-html[data-gd="3"]{--m1:color-mix(in srgb,rgb(var(--acr)) calc(34%*var(--k)),var(--card));--m2:color-mix(in srgb,rgb(var(--acr)) calc(10%*var(--k)),var(--card));--cg:linear-gradient(160deg,var(--m1),var(--m2))}
-html[data-gd="4"]{--m1:color-mix(in srgb,rgb(var(--acr)) calc(32%*var(--k)),var(--card));--m2:color-mix(in srgb,rgb(var(--acr)) calc(6%*var(--k)),var(--card));--cg:radial-gradient(120% 100% at 0% 0%,var(--m1),var(--m2) 70%)}
-html[data-gd="5"]{--m1:color-mix(in srgb,rgb(var(--acr)) calc(26%*var(--k)),var(--card));--m2:color-mix(in srgb,rgb(var(--acr)) calc(14%*var(--k)),var(--card));--cg:linear-gradient(135deg,var(--m1),var(--card) 55%,var(--m2))}
+:root{--m1:color-mix(in srgb,rgb(var(--acr)) calc(10%*var(--k)),var(--card));--m2:color-mix(in srgb,rgb(var(--acr)) calc(10%*var(--k)),var(--card));--cg:var(--m1);--cgo:var(--cg)}
+html[data-gd="2"]{--m1:var(--card);--m2:var(--card);--cg:var(--card)}
+html[data-gd="3"]{--m1:color-mix(in srgb,rgb(var(--acr)) calc(15%*var(--k)),transparent);--m2:var(--m1);--cg:var(--m1)}
+html[data-gd="3"] .cfg-g,html[data-gd="3"] .dfo,html[data-gd="3"] .sc,html[data-gd="3"] .card,html[data-gd="3"] .cfold,html[data-gd="3"] .crow[data-cf],html[data-gd="3"] .tb2{-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+html[data-gd="4"]{--m1:color-mix(in srgb,rgb(var(--acr)) calc(16%*var(--k)),var(--card));--m2:color-mix(in srgb,rgb(var(--acr)) calc(4%*var(--k)),var(--card));--cg:linear-gradient(180deg,var(--m1),var(--m2))}
+html[data-gd="5"]{--m1:color-mix(in srgb,rgb(var(--acr)) calc(28%*var(--k)),var(--card));--m2:color-mix(in srgb,rgb(var(--acr)) calc(5%*var(--k)),var(--card));--cg:radial-gradient(130% 90% at 50% -10%,var(--m1),var(--m2) 75%)}
+html[data-gd="6"]{--m1:color-mix(in srgb,rgb(var(--acr)) calc(22%*var(--k)),var(--card));--m2:color-mix(in srgb,rgb(var(--acr)) calc(6%*var(--k)),var(--card));--cg:linear-gradient(120deg,var(--m1),var(--m2) 60%,color-mix(in srgb,rgb(var(--acr)) calc(14%*var(--k)),var(--card)))}
 .cfold,.crow[data-cf]{background:var(--cg);border-color:var(--bdc)}
 .cfold:before{background:var(--m1);border-color:var(--bdc)}
 .cfab{position:fixed;right:16px;bottom:calc(88px + env(safe-area-inset-bottom,0px));z-index:5;display:flex;gap:10px;align-items:center}
@@ -570,9 +569,9 @@ html[data-gd="5"]{--m1:color-mix(in srgb,rgb(var(--acr)) calc(26%*var(--k)),var(
 .cfab svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 .cqb{flex:1}.cqb input{border-radius:14px;background:var(--cg);border-color:var(--bdc)}
 .cgrid{padding-bottom:70px}
-#list .ac,#list .tl,#list .agr>*{content-visibility:auto;contain-intrinsic-size:auto 200px}
 #list .li{content-visibility:auto;contain-intrinsic-size:auto 72px}
-#tgd button{font-size:12.5px;padding:8px 4px}
+.cfold{box-shadow:0 6px 16px -8px rgba(0,0,0,.35)}
+#tgd{flex-wrap:wrap}#tgd button{flex:1 1 33%;font-size:13px;padding:9px 4px}
 .rb,.cfg-bk,.bk{width:42px;height:42px;padding:0;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex:none;background:linear-gradient(180deg,rgba(var(--acr),.28),rgba(var(--acr),.12));border:1px solid rgba(var(--acr),.3);color:var(--tx);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
 .rb svg,.cfg-bk svg,.bk svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
 .seg,.tb2{background:rgba(var(--acr),.08);border-color:rgba(var(--acr),.22)}
@@ -1505,6 +1504,13 @@ function chipB(c){var on=c[0]=='k'?(!!ui.cv||!!ui.c):c[0]=='g'?(c[1]===''?(!ui.g
 function libInfo(n,d,rs,rn){var sc=function(a,b){return '<div class="sc"><b>'+a+'</b><span>'+b+'</span></div>'};return '<div class="sinfo">'+sc(n,'Álbumes')+sc(d,'Escuchados')+sc(n-d,'Por escuchar')+'</div>'+(q2.length>2?'<div class="h" style="margin-top:4px">Cargando portadas ('+q2.length+')…</div>':(gq.length>2?'<div class="h" style="margin-top:4px">Cargando géneros ('+gq.length+')…</div>':''))}
 function emptyLib(){return '<div class="emp" data-em="add" role="button" tabindex="0"><div class="et">Tu biblioteca está vacía</div><div class="es">Toca aquí para buscar y añadir tu primer álbum</div><div class="eb"><button class="p" data-em="add">Buscar álbum</button><button data-em="imp">Importar CSV o lista</button></div></div>'}
 function favDone(a){if(!a.done){a.done=true;a.t=Date.now()}}
+var TABC={};
+function setList(h){var L=$('list'),key=(!ui.q&&!ui.o&&!ui.cv&&!(typeof MS!='undefined'&&MS))?[ui.g,ui.f,ui.ge,vm(),curS(),ui.lim].join('|'):null;
+if(key!==null&&L.__k===key&&L.__h===h)return;
+if(L.__k&&L.__k!==key){var fr=document.createDocumentFragment();while(L.firstChild)fr.appendChild(L.firstChild);TABC[L.__k]={h:L.__h,fr:fr};var ks=Object.keys(TABC);if(ks.length>4)delete TABC[ks[0]]}
+var c=key!==null&&TABC[key];
+if(c&&c.h===h){L.textContent='';L.appendChild(c.fr);delete TABC[key]}else{if(c)delete TABC[key];L.innerHTML=h}
+L.__k=key;L.__h=key!==null?h:null}
 function render(){var ks=Object.keys(S.a),d=0,rs=0,rn=0,fx=0;ks.forEach(function(k){var a=S.a[k];if(a.fav&&!a.done){favDone(a);fx=1}});if(fx)save();
 ks.forEach(function(k){var a=S.a[k];if(a.done)d++;if(a.rate){rs+=a.rate;rn++}});
 var se=$('st');if(se)se.innerHTML=libInfo(ks.length,d,rs,rn);
@@ -1532,7 +1538,7 @@ else if(f.length>ui.lim)h+='<button class="more" id="mr">Ver más ('+(f.length-u
 if(qx&&ui.qall)h+='<button class="more" id="ql">Ver menos</button>';
 if(ui.o&&ui.o.t=='ar'){var ai=aiOf(f);if(ai)loadA(ai)}}
 if(!ui.cv)ui.cn=0;if(!ui.q&&ui.cv)h=colsHtml();
-if(!inGlob())$('list').innerHTML=h;watch();if((ui.g=='ar'&&!ui.o&&!ui.q)||(ui.q&&!ui.o))aiWatch($('list'))}
+if(!inGlob())setList(h);watch();if((ui.g=='ar'&&!ui.o&&!ui.q)||(ui.q&&!ui.o))aiWatch($('list'))}
 var io=window.IntersectionObserver?new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){io.unobserve(e.target);keysOf(e.target).forEach(function(k){needCover(k);need(k);needG(k,1)})}})},{rootMargin:'300px'}):null;
 function keysOf(el){if(el.dataset.ks){try{return JSON.parse(el.dataset.ks)}catch(e){return []}}return [el.dataset.k]}
 function watch(){[].forEach.call($('list').querySelectorAll('[data-k],[data-ks]'),function(el){var miss=keysOf(el).some(function(k){var a=S.a[k];return !M[k]||!GX[k]||(a&&!dzImg(a)&&!(a.dzx&&(a.cu||a.cx||a.img)))});if(miss){if(io)io.observe(el);else keysOf(el).forEach(function(k){needCover(k);need(k);needG(k,1)})}})}
@@ -1849,9 +1855,9 @@ tc.innerHTML=DZC.map(function(c){return '<button class="dot'+(t.c.toLowerCase()=
 $('tcu').onclick=function(){dzPickColor(t.c,function(v){t.c=v;dzSave(t);dzApply(t);draw()},'Color de la app')}}
 tm.onclick=function(e){var b=e.target.closest('button');if(!b)return;t.m=b.dataset.m;dzSave(t);dzApply(t);draw()};
 tc.onclick=function(e){var b=e.target.closest('button[data-c]');if(!b)return;t.c=b.dataset.c;dzSave(t);dzApply(t);draw()};
-var GN=['Suave','Clásico','Intenso','Brillo','Doble'],tg=$("tgd");function gdr(){var g=document.documentElement.dataset.gd||'1';tg.innerHTML=GN.map(function(n,i){return '<button data-gd="'+(i+1)+'" class="'+(g==i+1?'on':'')+'">'+n+'</button>'}).join('')}
-tg.onclick=function(e){var b=e.target.closest('button');if(!b)return;try{localStorage.setItem('dzgd',b.dataset.gd)}catch(x){}document.documentElement.dataset.gd=b.dataset.gd;gdr()};gdr();
-$('trs').onclick=function(){try{localStorage.removeItem('dzgd')}catch(x){}document.documentElement.dataset.gd='1';gdr();t={m:DZD.m,c:DZD.c};dzSave(t);dzApply(t);draw()};
+var GN=['Sólido','Neutro','Cristal','Suave','Brillo','Dúo'],tg=$("tgd");function gdr(){var g=document.documentElement.dataset.gd||'1';tg.innerHTML=GN.map(function(n,i){return '<button data-gd="'+(i+1)+'" class="'+(g==i+1?'on':'')+'">'+n+'</button>'}).join('')}
+tg.onclick=function(e){var b=e.target.closest('button');if(!b)return;try{localStorage.setItem('dzgd2',b.dataset.gd)}catch(x){}document.documentElement.dataset.gd=b.dataset.gd;gdr()};gdr();
+$('trs').onclick=function(){try{localStorage.removeItem('dzgd2')}catch(x){}document.documentElement.dataset.gd='1';gdr();t={m:DZD.m,c:DZD.c};dzSave(t);dzApply(t);draw()};
 draw()}
 var CHV='<svg class="cfg-ch" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>';
 var CFI={fm:'<path d="M3 12h3l3-7 4 14 3-7h5"/>',pl:'<circle cx="12" cy="12" r="9"/><path d="M10 8.5l5 3.5-5 3.5z"/>',lk:'<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4"/>',im:'<path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19h14"/>',co:'<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',rs:'<path d="M5 20V11M12 20V4M19 20v-6"/>',bk:'<path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/>',ld:'<path d="M20 11a8 8 0 0 0-14.5-4M4 4v4h4M4 13a8 8 0 0 0 14.5 4M20 20v-4h-4"/>',cl:'<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/>'};
@@ -1880,7 +1886,7 @@ lastfm:'<div class="card"><div class="h" id="lfs">'+(conn?'✓ Conectado como '+
 +'<button class="p" id="lcon">'+(conn?'Volver a sincronizar':'Conectar')+'</button></div>',
 plat:'<div class="card"><b>Tus plataformas</b><div class="h">Toca las que uses. Saldrán en cada álbum y canción.</div><div class="chips wrap" id="svl"></div></div>'
 +'<div class="card" style="margin-top:12px"><b>Añadir otra plataforma</b><div class="h">Busca algo en su web, copia la URL y pon {q} donde iba el texto buscado.</div><div id="svc"></div><div class="row"><input id="svn" placeholder="Nombre"><input id="svu" placeholder="https://sitio.com/search?q={q}"></div><button id="sva">Añadir plataforma</button></div>',
-look:'<div class="card"><b>Modo</b><div class="seg" id="tm"></div><b>Color</b><div class="dots" id="tc"></div><b>Degradado</b><div class="seg" id="tgd"></div><button id="trs">Restablecer</button></div>',
+look:'<div class="card"><b>Modo</b><div class="seg" id="tm"></div><b>Color</b><div class="dots" id="tc"></div><b>Estilo de tarjetas</b><div class="seg" id="tgd"></div><button id="trs">Restablecer</button></div>',
 imp:'<div class="card"><div class="h">CSV de Deezer, Spotify (Exportify)…</div><input type="file" id="f" multiple><div class="h">O pega un CSV, o líneas «Artista - Álbum»</div><textarea id="pt"></textarea><button class="p" id="im">Importar texto</button><div class="h" id="ms"></div></div>',
 cx:'<div class="card"><b>Proxy propio (opcional)</b><div class="h">Si tu red bloquea o limita alguna fuente, pon aquí la URL de tu proxy (Cloudflare Worker gratis). Vacío = proxies públicos.</div><input id="pxu" placeholder="https://tu-proxy.workers.dev/" autocapitalize="off" autocomplete="off"><button id="pxs">Guardar</button></div><div class="card" style="margin-top:12px"><b>Probar conexiones</b><div class="h">Comprueba qué fuentes responden en esta red, directo o con proxy.</div><button class="p" id="cxt">Probar ahora</button><div id="cxr"></div></div><div class="card" style="margin-top:12px"><b>Caché de búsquedas</b><div class="h" id="cxs"></div><div class="h">Guarda lo que ya buscaste (7 días) para no repetirlo: va más rápido y sirve incluso sin conexión.</div><button id="cxc">Borrar caché</button></div>',
 bk:'<div class="card"><div class="h">Genera el texto, guárdalo y pégalo aquí para restaurar.</div><textarea id="bk"></textarea><div class="row"><button id="ex">Generar respaldo</button><button id="rs">Restaurar</button></div></div>'};
