@@ -2,7 +2,7 @@
 // Uso en la app: Ajustes > Conexión y fuentes > Proxy propio = https://TU-WORKER.workers.dev/
 // >>> ESCRIBE TU CORREO ENTRE LAS COMILLAS (MusicBrainz lo pide). Es lo único que debes cambiar. <<<
 const CONTACT_EMAIL = 'econoniso2008@gmail.com';
-const OK = ['api.deezer.com','itunes.apple.com','musicbrainz.org','www.theaudiodb.com',
+const OK = ['api.deezer.com','itunes.apple.com','musicbrainz.org','www.theaudiodb.com','api.discogs.com',
   'ws.audioscrobbler.com','coverartarchive.org','en.wikipedia.org','es.wikipedia.org'];
 // Solo tu app (GitHub Pages) puede usar este proxy
 const ORIGIN = 'https://ghosthardware99.github.io';
