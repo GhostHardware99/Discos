@@ -579,6 +579,14 @@ html[data-gd="6"]{--m1:color-mix(in srgb,rgb(var(--acr)) calc(22%*var(--k)),var(
 .cfab{gap:8px}
 .cfab .cfn,.cfab .cfs{width:42px;height:42px;padding:0;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,rgba(var(--acr),.28),rgba(var(--acr),.12));border:1px solid rgba(var(--acr),.3);color:var(--tx);box-shadow:0 2px 8px rgba(0,0,0,.18);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
 .cfab svg{width:22px;height:22px}
+/* Botones y barra más claros, acordes al tema (claro y oscuro) */
+.rb,.cfg-bk,.bk,.cfab .cfn,.cfab .cfs{background:color-mix(in srgb,color-mix(in srgb,rgb(var(--acr)) calc(10%*var(--k)),var(--card)) 92%,transparent);border:1px solid rgba(var(--acr),.22);color:var(--tx);box-shadow:0 1px 6px rgba(0,0,0,.14)}
+.seg button.on,.tb2 button.on{background:color-mix(in srgb,rgb(var(--acr)) calc(14%*var(--k)),var(--card));box-shadow:inset 0 0 0 1px rgba(var(--acr),.4)}
+#nav{background:color-mix(in srgb,color-mix(in srgb,rgb(var(--acr)) calc(9%*var(--k)),var(--card)) 90%,transparent);border-color:rgba(var(--acr),.25)}
+#nav button.on{background:color-mix(in srgb,rgb(var(--acr)) calc(18%*var(--k)),var(--card));box-shadow:inset 0 0 0 1px rgba(var(--acr),.32)}
+/* Colección: la imagen se ve detrás de la barra de estado y se degrada al subir */
+#ov:has(.colpg):before{opacity:var(--fo2,0)}
+.hero.colpg:before{content:"";position:absolute;left:0;right:0;top:0;height:calc(72px + env(safe-area-inset-top,0px));z-index:2;pointer-events:none;opacity:calc(1 - var(--fo2,0));background:linear-gradient(to bottom,rgba(0,0,0,.22),transparent)}
 #tgd{flex-wrap:wrap}#tgd button{flex:1 1 33%;font-size:13px;padding:9px 4px}
 .rb,.cfg-bk,.bk{width:42px;height:42px;padding:0;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex:none;background:linear-gradient(180deg,rgba(var(--acr),.28),rgba(var(--acr),.12));border:1px solid rgba(var(--acr),.3);color:var(--tx);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
 .rb svg,.cfg-bk svg,.bk svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
