@@ -880,10 +880,11 @@ return l.map(function(x,i){return [sc(x),i,x]}).sort(function(x,y){return x[0]-y
 function seAdbArt(v){return adbGet('search.php?s='+qe(v)).then(function(d){return (d.artists||[]).map(function(x){return x.strArtist}).filter(Boolean)})}
 function seMbArt(v){var w=v.toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').split(' ').filter(Boolean).slice(0,6);if(!w.length)return Promise.resolve([]);
 return netGet('https://musicbrainz.org/ws/2/artist?limit=8&query='+encodeURIComponent('artist:('+w.map(function(x,i){return esq(x)+(i==w.length-1&&x.length>=2?'*':'')}).join(' AND ')+')')+'&fmt=json',12000).then(function(d){return (d.artists||[]).map(function(x){return x.name}).filter(Boolean)})}
-async function mbGen(a){var s1=await mbq('release-group?limit=8&query='+encodeURIComponent('releasegroup:"'+esq(a.al)+'" AND artist:"'+esq(a.ar)+'"')),m=rg(a,s1['release-groups']||[]),g=m?gs(m):[];
-if(!g.length){var s2=await mbq('artist?limit=5&query='+encodeURIComponent('artist:"'+esq(a.ar)+'"')),ar=(s2.artists||[]).filter(function(x){return nrm(x.name)===nrm(a.ar)})[0];if(ar)g=gs(ar)}
+async function mbGen(a,noArt){var s1=await mbq('release-group?limit=8&query='+encodeURIComponent('releasegroup:"'+esq(a.al)+'" AND artist:"'+esq(a.ar)+'"')),m=rg(a,s1['release-groups']||[]),g=m?gs(m):[];
+if(!g.length&&!noArt){var s2=await mbq('artist?limit=5&query='+encodeURIComponent('artist:"'+esq(a.ar)+'"')),ar=(s2.artists||[]).filter(function(x){return nrm(x.name)===nrm(a.ar)})[0];if(ar)g=gs(ar)}
 return g}
 function dOK(h){var p=NH[h];return !!(p&&p.r=='jp'&&Date.now()-p.t<600000)}
+function cgc(g){var s={};g.forEach(function(x){var c=gcan(x);if(c)s[c.n]=1});return Object.keys(s).length}
 function cgn(g){return g.some(function(x){return gcan(x)})}
 function nrm(s){return String(s).toLowerCase().replace(/[^\p{L}\p{N}]/gu,'')}
 /* Nombre de artista tolerante: «æspa» = «aespa», acentos, (nombre en coreano), «A feat. B», «A & B» */
@@ -1061,7 +1062,7 @@ delete wq[k];if(W[k])rs2(k)}
 var AGC={},GX={},gq=[],gqd={},gbz=0,gt={},gRT=0;
 try{GX=JSON.parse(localStorage.getItem('digz-gx2')||'{}');Object.keys(GX).forEach(function(k){if(GX[k]&&GX[k].v>=3&&!(GX[k].g||[]).length)delete GX[k]})}catch(e){}
 function saveGX(){clearTimeout(saveGX.t);saveGX.t=setTimeout(function(){try{localStorage.setItem('digz-gx2',JSON.stringify(GX))}catch(e){}},1500)}
-function needG(k,front){if(!S.a[k]||(GX[k]&&(GX[k].v>=3||gAuto(k).length>=2||(GX[k].v==2&&Date.now()-GX[k].t<86400000))))return;if(gqd[k]){if(front){var i=gq.indexOf(k);if(i>0){gq.splice(i,1);gq.unshift(k)}}return}
+function needG(k,front){if(!S.a[k]||(GX[k]&&(GX[k].v>=4||gAuto(k).length>=2||(GX[k].v==2&&Date.now()-GX[k].t<86400000))))return;if(gqd[k]){if(front){var i=gq.indexOf(k);if(i>0){gq.splice(i,1);gq.unshift(k)}}return}
 gqd[k]=1;front?gq.unshift(k):gq.push(k);gPump()}
 var gDirty=0;
 function gPump(){if(gbz||!gq.length)return;gbz=1;var k=gq.shift();
@@ -1093,13 +1094,14 @@ g=g.concat(((dz.genres||{}).data||[]).map(function(x){return x.name}))}else ok=1
 if(!dcg.length&&g.length<2)try{if(a.iid){var d=await tmo(jsonp('https://itunes.apple.com/lookup?id='+a.iid),6000);h=(d.results||[])[0]}else h=await tmo(itAlbum(k),6000);
 ok=1;if(h&&h.primaryGenreName)g.push(h.primaryGenreName)}catch(e){}
 g=g.filter(function(x){return x&&!/^(music|m[uú]sica)$/i.test(x)});
-/* Fuentes extra: TheAudioDB, MusicBrainz y Last.fm (otras cuotas/IP; sirven si Deezer o iTunes no responden) */
-if(!cgn(g))try{var ax=await adbGet('searchalbum.php?s='+qe(a.ar)+'&a='+qe(a.al));ok=1;var al0=((ax&&ax.album)||[])[0];if(al0)[al0.strGenre,al0.strStyle].forEach(function(x){if(x)g.push(x)})}catch(e){}
-if(!cgn(g))try{var mg=await mbGen(a);ok=1;g=g.concat(mg)}catch(e){}
-if(!cgn(g)&&lfKey())try{var lj=await lf('album.gettoptags',{artist:a.ar,album:a.al,autocorrect:1});ok=1;g=g.concat(tg((lj.toptags||{}).tag))}catch(e){}
+/* Si hay menos de 2 géneros distintos, se completa con los del propio ÁLBUM (nunca con los del artista):
+   1) MusicBrainz (ya cargado o buscándolo)  2) TheAudioDB (Last.fm no se usa para los géneros) */
+if(cgc(g)<2&&M[k]&&M[k].g&&M[k].g.length)g=g.concat(M[k].g.slice(0,6));
+if(cgc(g)<2)try{var mg=await mbGen(a,1);ok=1;g=g.concat(mg.slice(0,6))}catch(e){}
+if(cgc(g)<2)try{var ax=await adbGet('searchalbum.php?s='+qe(a.ar)+'&a='+qe(a.al));ok=1;var al0=((ax&&ax.album)||[])[0];if(al0)[al0.strGenre,al0.strStyle].forEach(function(x){if(x)g.push(x)})}catch(e){}
 if(!S.a[k])return true;if(!ok)return false;
 var cg={};g.forEach(function(x){var c=gcan(x);if(c)cg[c.n]=1});
-var fg=gcl(g).slice(0,12);GX[k]={g:fg,t:Date.now(),v:cgn(fg)?3:2};saveGX();return true}
+var fg=gcl(g).slice(0,12);GX[k]={g:fg,t:Date.now(),v:cgn(fg)?4:2};saveGX();return true}
 function bulkG(){Object.keys(S.a).forEach(function(k){if(!S.a[k].tmp)needG(k)})}
 
 /* ---------- Last.fm ---------- */
@@ -1511,7 +1513,7 @@ var GMAP=[
 [/country|folk|americana|bluegrass|singer|songwriter|acoustic|acustic/,'Folk / Country','mount',95],
 [/reggae|dancehall|\bska\b|\bdub\b/,'Reggae','leaf',130],
 [/classic|clasic|opera|orchestr|orquest|baroque|chamber|piano/,'Clásica','crown',45],
-[/soundtrack|banda sonora|film|\bscore\b|\bost\b|video game|musical/,'Bandas sonoras','film',250],
+[/soundtrack|bandas? sonora|film|\bscore\b|\bost\b|video game|musical/,'Bandas sonoras','film',250],
 [/ambient|new age|chill|lo[\s-]?fi|easy listening|relax|downtempo|meditation/,'Ambient','cloud',170],
 [/world|afro|mundo|african|asian|indian|bollywood|flamenco|celtic|arab/,'Mundo','globe',155],
 [/children|kids|infantil|nino|holiday|navidad/,'Infantil','smile',48],
@@ -1521,6 +1523,18 @@ var GBAD=/^(music|musica|musique|various|varios|other|otros|unknown|desconocido|
 function gcan(raw){var l=nf(String(raw||'')).trim();if(!l||GBAD.test(l)||JUNK.test(raw))return null;
 for(var i=0;i<GMAP.length;i++)if(GMAP[i][0].test(l))return {n:GMAP[i][1],i:GMAP[i][2],h:GMAP[i][3]};
 if(l.length<3||l.length>28)return null;return {n:cap(raw),i:'tag',h:hue(l)}}
+var GSTAT=["Contemporary R&B", "Neo Soul", "Alternative R&B", "Funk", "Disco", "Motown", "Gospel", "Trap", "Boom Bap", "Cloud Rap", "Conscious Hip Hop", "Gangsta Rap", "Drill", "UK Drill", "Grime", "Phonk", "Emo Rap", "Pop Rap", "Latin Trap", "Reggaeton", "Latin Pop", "Salsa", "Bachata", "Cumbia", "Merengue", "Bossa Nova", "MPB", "Regional Mexicano", "Corridos Tumbados", "Trova", "Son Cubano", "Timba", "Pop Rock", "Indie Pop", "Synthpop", "Electropop", "Dance Pop", "Teen Pop", "K-Pop", "J-Pop", "C-Pop", "Art Pop", "Dream Pop", "Bedroom Pop", "Hyperpop", "Chamber Pop", "Baroque Pop", "Power Pop", "Sunshine Pop", "Indie Rock", "Alternative Rock", "Hard Rock", "Classic Rock", "Progressive Rock", "Psychedelic Rock", "Garage Rock", "Folk Rock", "Soft Rock", "Glam Rock", "Art Rock", "Krautrock", "Math Rock", "Post-Rock", "Post-Punk", "New Wave", "Shoegaze", "Grunge", "Britpop", "Emo", "Midwest Emo", "Pop Punk", "Punk Rock", "Hardcore Punk", "Post-Hardcore", "Screamo", "Heavy Metal", "Thrash Metal", "Death Metal", "Black Metal", "Doom Metal", "Power Metal", "Progressive Metal", "Nu Metal", "Metalcore", "Deathcore", "Symphonic Metal", "Industrial Metal", "House", "Deep House", "Tech House", "Progressive House", "French House", "Techno", "Minimal Techno", "Trance", "Drum and Bass", "Jungle", "Dubstep", "Brostep", "UK Garage", "Breakbeat", "IDM", "Synthwave", "Vaporwave", "Future Bass", "Electro", "EDM", "Big Beat", "Trip Hop", "Downtempo", "Chillout", "Lo-Fi", "Ambient", "Dark Ambient", "Drone", "New Age", "Noise", "Industrial", "Experimental", "Avant-Garde", "Art Punk", "Cool Jazz", "Bebop", "Hard Bop", "Free Jazz", "Jazz Fusion", "Smooth Jazz", "Swing", "Big Band", "Vocal Jazz", "Acid Jazz", "Delta Blues", "Chicago Blues", "Blues Rock", "Country", "Country Pop", "Outlaw Country", "Bluegrass", "Americana", "Alt-Country", "Singer-Songwriter", "Indie Folk", "Folk", "Folk Pop", "Freak Folk", "Reggae", "Dancehall", "Dub", "Ska", "Rocksteady", "Afrobeats", "Afropop", "Highlife", "Afrobeat", "Amapiano", "Flamenco", "Fado", "Celtic", "Bollywood", "Soundtrack", "Film Score", "Video Game Music", "Musical", "Classical", "Baroque", "Opera", "Minimalism", "Contemporary Classical", "Orchestral", "Piano", "Easy Listening", "Lounge", "Exotica", "Children's Music", "Christmas", "Spoken Word", "Comedy", "Instrumental", "A Cappella", "Lofi Hip Hop", "Jazz Rap", "Hip Hop", "Rap", "R&B", "Soul", "Pop", "Rock", "Metal", "Punk", "Jazz", "Blues", "Electronic", "Dance", "Latin", "World"];
+/* Géneros propios: se guardan con el nombre EXACTO que se escribe (p. ej. «Contemporary R&B»), sin convertirlos a las categorías generales. */
+function gfmt(s){return cap(String(s).trim().replace(/\s+/g,' ')).replace(/&([a-z])/g,function(m,c){return '&'+c.toUpperCase()})}
+function gman(raw){var v=String(raw||'').trim();if(v.length<2||v.length>40||GBAD.test(nf(v))||/^_/.test(v))return null;
+var lab=null;GMAP.forEach(function(m){if(!lab&&nrm(m[1])==nrm(v))lab=m[1]});var c=gcan(v)||{};
+return {n:lab||gfmt(v),i:c.i||'tag',h:(c.h!=null?c.h:hue(nf(v)))}}
+/* Lista completa de géneros de MusicBrainz (≈2000): se descarga una vez en segundo plano y se guarda 30 días */
+var MBG=null,MBGP=null,MBGCB=null;
+function mbGenres(){if(MBG&&MBG.done)return Promise.resolve(MBG);if(MBGP)return MBGP;
+MBGP=idbGet('digz-mbgenres').then(function(c){if(c&&c.d&&c.d.length>200&&Date.now()-c.t<30*864e5){MBG=c.d;MBG.done=1;return c.d}
+return (async function(){var out=[];for(var off=0;off<3000;off+=100){var d=await mbq('genre/all?limit=100&offset='+off),l=(d&&d.genres)||[];l.forEach(function(g){if(g.name)out.push(g.name)});MBG=out.slice();if(MBGCB)try{MBGCB()}catch(e){}if(l.length<100)break}
+if(out.length>200){idbPut('digz-mbgenres',{d:out,t:Date.now()});MBG=out;MBG.done=1}return out})()}).catch(function(){MBGP=null;return MBG||[]});return MBGP}
 var GCI={};
 /* Géneros reales de un álbum (hasta 3, canónicos). Usa iTunes/Deezer, MusicBrainz y Last.fm; si no hay, hereda del mismo artista */
 function agen(k,noArt){return S.a[k]?gm(k):[]}
@@ -1531,28 +1545,32 @@ return h}
 /* ---------- Añadir género: cartel con lista, igual que «Añadir álbumes» de las colecciones ---------- */
 function genDlg(k){var a=S.a[k];if(!a)return;var old=document.querySelector('.cedw.gdlg');if(old)old.remove();
 var sel={},w=document.createElement('div');w.className='cedw dzmod gdlg';w.style.zIndex=55;
-w.innerHTML='<div class="cedb cadd"><div class="cedt">Añadir género</div><input id="gdi" type="search" placeholder="Busca o escribe un género" maxlength="28" autocomplete="off" enterkeyhint="done"><div class="calst"></div><div class="row"><button id="gdc" style="flex:1">Cancelar</button><button class="p" id="gdk" style="flex:1">Añadir</button></div></div>';
+w.innerHTML='<div class="cedb cadd"><div class="cedt">Añadir género</div><input id="gdi" type="search" placeholder="Busca o escribe un género" maxlength="40" autocomplete="off" enterkeyhint="done"><div class="calst"></div><div class="row"><button id="gdc" style="flex:1">Cancelar</button><button class="p" id="gdk" style="flex:1">Añadir</button></div></div>';
 document.body.appendChild(w);
 var q=w.querySelector('#gdi'),L=w.querySelector('.calst'),ok=w.querySelector('#gdk');
 var have={};gm(k).forEach(function(x){have[nrm(x)]=1});
-var all=[],sn={};GMAP.forEach(function(m){if(!sn[m[1]]&&!have[nrm(m[1])]){sn[m[1]]=1;all.push(m[1])}});all.sort(function(x,y){return x.localeCompare(y)});
+var all=[],sn={};GMAP.map(function(m){return m[1]}).concat(GSTAT).forEach(function(n){var z=nrm(n);if(!sn[z]&&!have[z]){sn[z]=1;all.push(n)}});all.sort(function(x,y){return x.localeCompare(y)});
+MBGCB=function(){if(w.isConnected&&q.value.trim())paint()};mbGenres().then(function(){if(w.isConnected&&q.value.trim())paint()});
 function row(n,sub){var c=GCI[n]||gcan(n)||{i:'tag',h:hue(n)};return '<div class="li cal'+(sel[n]?' on':'')+'" data-gn="'+esc(n)+'">'+genTile(n)+'<div class="in"><div class="t">'+esc(n)+'</div>'+(sub?'<div class="a">'+sub+'</div>':'')+'</div><span class="cchk">'+(sel[n]?'✓':'')+'</span></div>'}
 function btn(){var c=Object.keys(sel).length;ok.textContent=c?'Añadir ('+c+')':'Añadir';ok.disabled=!c;ok.style.opacity=c?1:.5}
-function paint(){var v=q.value.trim(),f=nf(v),h='',cu=null;
-if(v){var gc=gcan(cap(v));if(gc&&!have[nrm(gc.n)]&&all.indexOf(gc.n)<0)cu=gc.n}
+function paint(){var v=q.value.trim(),f=nf(v),h='',cu=null,dup=false;
 var l=all.filter(function(n){return !f||nf(n).indexOf(f)>-1});
+if(f&&MBG){var ex={};all.forEach(function(n){ex[nrm(n)]=1});var extra=[];for(var i=0;i<MBG.length&&extra.length<80;i++){var n2=gfmt(MBG[i]),z2=nrm(n2);if(ex[z2]||have[z2])continue;if(nf(n2).indexOf(f)>-1){ex[z2]=1;extra.push(n2)}}l=l.concat(extra)}
+if(f)l.sort(function(x,y){return (nf(x).indexOf(f)==0?0:1)-(nf(y).indexOf(f)==0?0:1)||x.localeCompare(y)});
+l=l.slice(0,150);
+if(v){var g2=gman(v);if(g2){var zz=nrm(g2.n);if(have[zz])dup=true;else if(!l.some(function(n){return nrm(n)==zz}))cu=g2.n}}
 if(cu)h+=row(cu,'Género propio');
 h+=l.map(function(n){return row(n,'')}).join('');
-if(!h)h='<div class="h" style="text-align:center;padding:20px">'+(v?'Género no válido':'No hay más géneros para añadir')+'</div>';
+if(!h)h='<div class="h" style="text-align:center;padding:20px">'+(dup?'Este álbum ya tiene ese género':(v?'Género no válido':'No hay más géneros para añadir'))+'</div>';
 L.innerHTML=h;btn()}
 paint();
 q.oninput=paint;
-q.onkeydown=function(e){if(e.key=='Enter'){e.preventDefault();var v=q.value.trim(),gc=v?gcan(cap(v)):null;if(gc&&!have[nrm(gc.n)]){sel[gc.n]=1;q.value='';paint()}q.blur()}};
+q.onkeydown=function(e){if(e.key=='Enter'){e.preventDefault();var v=q.value.trim(),gc=v?gman(v):null;if(gc&&!have[nrm(gc.n)]){sel[gc.n]=1;q.value='';paint()}q.blur()}};
 L.onclick=function(e){var r=e.target.closest('[data-gn]');if(!r)return;var n=r.dataset.gn;if(sel[n])delete sel[n];else sel[n]=1;r.classList.toggle('on',!!sel[n]);r.querySelector('.cchk').textContent=sel[n]?'✓':'';btn()};
 w.onclick=function(e){if(e.target===w)w.remove()};
 w.querySelector('#gdc').onclick=function(){w.remove()};
 ok.onclick=function(){var ns=Object.keys(sel);if(!ns.length)return;a.mg=a.mg||[];
-ns.forEach(function(n){var gc=gcan(n);if(!gc)return;if(!a.mg.some(function(x){return nrm(x)==nrm(gc.n)}))a.mg.push(gc.n);a.hg=(a.hg||[]).filter(function(x){return nrm(x)!=nrm(gc.n)})});
+ns.forEach(function(n){var gc=gman(n);if(!gc)return;if(!a.mg.some(function(x){return nrm(x)==nrm(gc.n)}))a.mg.push(gc.n);a.hg=(a.hg||[]).filter(function(x){return nrm(x)!=nrm(gc.n)})});
 ui.ga='';save();w.remove();render();sheet(k);toast(ns.length==1?'Género añadido':'Géneros añadidos')}}
 function genTile(n,sm){var c=GCI[n]||gcan(n)||{i:'tag',h:hue(n)};return '<div class="gt" style="background:linear-gradient(145deg,hsl('+c.h+',58%,44%),hsl('+((c.h+40)%360)+',62%,22%))">'+(GI[c.i]||GI.tag)+'</div>'}
 function gcard(n,cnt){var ct=cnt+(cnt==1?' álbum':' álbumes'),at='data-g="'+esc(n)+'" data-t="ge"';
@@ -1595,8 +1613,14 @@ var GGL=[];
 
 /* ---------- Biblioteca ---------- */
 function gcl(l){var s={};return (l||[]).filter(function(x){var n=nrm(x||'');if(!n||JUNK.test(x)||s[n])return false;s[n]=1;return true})}
-function gAuto(k){var s={},o=[];((GX[k]&&GX[k].g)||[]).forEach(function(x){var c=gcan(x),n=c?c.n:null;if(!n)return;var z=nrm(n);if(s[z])return;s[z]=1;GCI[n]=c;o.push(n)});return o}
-function gm(k){var a=S.a[k],s={},o=[];if(!a)return o;var hg={};(a.hg||[]).forEach(function(x){hg[nrm(x)]=1});(a.mg||[]).forEach(function(x){var c=gcan(x);if(!c)return;var z=nrm(c.n);if(s[z])return;s[z]=1;GCI[c.n]=c;o.push(c.n)});var n=0;gAuto(k).forEach(function(x){var z=nrm(x);if(s[z]||hg[z]||n>=3)return;s[z]=1;n++;o.push(x)});return o}
+var GGEN=/^(hip[\s-]?hop|rap|r\s?&\s?b|rnb|soul|pop|rock|electronic|electronica|electro|dance|metal|punk|jazz|blues|country|folk|reggae|classical|latin|world|alternative|indie|funk|music|[a-z]+\s?\/\s?[a-z]+)$/;
+function gtok(x){return nf(x).split(/[^a-z0-9]+/).filter(Boolean)}
+function gAuto(k){var s={},o=[],raw=(GX[k]&&GX[k].g)||[];raw.forEach(function(x){var c=gcan(x),n=c?c.n:null;if(!n)return;var z=nrm(n);if(s[z])return;s[z]=1;GCI[n]=c;o.push(n)});
+/* Solo géneros reales del álbum que aporten algo distinto: «Pop Rap» junto a «Hip Hop / Rap» sí; «Hip Hop» o «Rap» (lo mismo) no */
+if(o.length<2)raw.forEach(function(x){if(o.length>=2||!x)return;var m=gman(x);if(!m||GGEN.test(nf(x).trim()))return;var z=nrm(m.n);if(s[z])return;
+var tk=gtok(x),dup=o.some(function(n){var nt=gtok(n);return tk.every(function(t){return nt.indexOf(t)>-1})});if(dup)return;s[z]=1;GCI[m.n]=m;o.push(m.n)});
+return o}
+function gm(k){var a=S.a[k],s={},o=[];if(!a)return o;var hg={};(a.hg||[]).forEach(function(x){hg[nrm(x)]=1});(a.mg||[]).forEach(function(x){var c=gman(x);if(!c)return;var z=nrm(c.n);if(s[z])return;s[z]=1;GCI[c.n]=c;o.push(c.n)});var n=0;gAuto(k).forEach(function(x){var z=nrm(x);if(s[z]||hg[z]||n>=3)return;s[z]=1;n++;o.push(x)});return o}
 function gl(k){return gm(k)}
 function gmx(k){return gm(k)}
 function has(k,g){var n=nrm(g);if(!n)return false;var c=gcan(g);if(c&&agen(k).indexOf(c.n)>-1)return true;return gl(k).some(function(x){return nrm(x)===n})}
@@ -1929,7 +1953,7 @@ var u2={};for(var z in u)u2[z]=u[z];if(a.mb)u2.mb='https://musicbrainz.org/relea
 var AL=albumLinks(k);AL.splice(AL.length-1,0,['MusicBrainz','mb','']);if(!a.mb)AL=AL.filter(function(x){return x[1]!='mb'});
 var meta=!m?'<div class="h">'+(tries[k]>=4?'No pude conectar con MusicBrainz.':'Cargando datos del álbum…')+'</div>':m.x?'<div class="h">No encontré este álbum en MusicBrainz.</div>':(function(){var p=[(m.d||'').slice(0,4),m.t&&m.t.length?m.t.length+' canciones':'',m.l].filter(Boolean);return (p.length?'<div class="h">'+esc(p.join(' • '))+'</div>':'')})(),
 mg=gmx(k),gtl=mg.length?'<div class="h">'+esc(mg.slice(0,2).map(cap).join(' • '))+'</div>':'',gen=mg.length?'<div class="gn">'+mg.map(function(x){return '<span role="button" tabindex="0" data-a="ge" data-ge="'+esc(x)+'" aria-label="Ver álbumes del género '+esc(x)+'">'+esc(cap(x))+'</span>'}).join('')+'</div>':'',
-lfx=lc?'<div class="h">Last.fm'+(lc.pc?' · '+lc.pc+' reproducciones tuyas':'')+(lc.ls?' · '+lc.ls.toLocaleString()+' oyentes':'')+'</div>'+(gcl(lc.g).length?'<div class="gn">'+gcl(lc.g).map(function(x){return '<span role="button" tabindex="0" data-a="ge" data-ge="'+esc(x)+'" aria-label="Ver álbumes del género '+esc(x)+'">'+esc(cap(x))+'</span>'}).join('')+'</div>':''):(lfKey()&&LF.u?'<div class="h">Cargando etiquetas de Last.fm…</div>':''),
+lfx=lc?((lc.pc||lc.ls)?'<div class="h">Last.fm'+(lc.pc?' · '+lc.pc+' reproducciones tuyas':'')+(lc.ls?' · '+lc.ls.toLocaleString()+' oyentes':'')+'</div>':''):'',
 tl='';var hast=!!(m&&m.t&&m.t.length),mbp=(!m&&!(tries[k]>=4))||(m&&a.mb&&!m.x&&!m.t&&tq[k]!=2),ldg=FBq[k]==1||mbp;
 if(hast){tl='<div class="tk">'+m.t.map(function(t,i){var s=t[1]||0,r=(a.tr||{})[i],f=(a.tf||{})[i],row='<div class="tr1" data-a="trk" data-i="'+i+'"><span class="n">'+(i+1)+'</span><span class="nm">'+esc(t[0])+(s?'<span class="tdu">'+Math.floor(s/60)+':'+('0'+s%60).slice(-2)+'</span>':'')+'</span>'+(r?'<span class="rv3" aria-label="Puntuación '+fr(r)+' de 5">★ '+fr(r)+'</span>':'')+'<span class="tfh'+(f?' on':'')+'" data-a="tfv" data-i="'+i+'" aria-label="Canción favorita">'+(f?ICHT:ICHT0)+'</span></div>';
 if(ui.tk===i)row+='<div class="tp">'+stars(r||0,'trr','data-i="'+i+'"',1)+'</div>';
@@ -1994,7 +2018,7 @@ else if(ac=='addl'){delete a.tmp;save();render();sheet(k)}
 else if(ac=='ge'){goGenre(t.dataset.ge)}
 else if(ac=='gadd'){genDlg(k)}
 else if(ac=='gcn'){ui.ga='';sheet(k)}
-else if(ac=='gsv'){var gv=$('gin')?$('gin').value.trim():'',gc=gv?gcan(cap(gv)):null;if(!gc){toast(gv?'Género no válido':'Escribe un género');return}
+else if(ac=='gsv'){var gv=$('gin')?$('gin').value.trim():'',gc=gv?gman(gv):null;if(!gc){toast(gv?'Género no válido':'Escribe un género');return}
 a.mg=a.mg||[];if(!a.mg.some(function(x){return nrm(x)==nrm(gc.n)}))a.mg.push(gc.n);a.hg=(a.hg||[]).filter(function(x){return nrm(x)!=nrm(gc.n)});ui.ga='';save();render();sheet(k);toast('Género añadido')}
 else if(ac=='grm'){var gn=t.dataset.g,gz=nrm(gn);if((a.mg||[]).some(function(x){return nrm(x)==gz}))a.mg=a.mg.filter(function(x){return nrm(x)!=gz});else{a.hg=a.hg||[];if(!a.hg.some(function(x){return nrm(x)==gz}))a.hg.push(gn)}save();render();sheet(k);toast('Género quitado')}
 else if(ac=='shi'){ui.sm=false;studio(k)}
