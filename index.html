@@ -620,7 +620,10 @@ if(a&&a.mb&&!NC[a.mb])out.push(covurl(a.mb,mz));
 if(a&&a.cu)out.push(String(a.cu));if(a&&a.img)out.push(String(a.img));
 return out.filter(function(x,i,l){return x&&l.indexOf(x)===i})}
 function cvs(a,sz){return coverURLs(a,sz)[0]||''}
-function cvf(im){var tried=(im.dataset.tried||'').split('|').filter(Boolean),alts=(im.dataset.alt||'').split('|').filter(Boolean),m=im.dataset.m;if(im.src&&im.src.indexOf('http')===0&&tried.indexOf(im.src)<0)tried.push(im.src);var next=alts.filter(function(u){return tried.indexOf(u)<0})[0];if(!next&&m&&!im.dataset.t&&!NC[m]){im.dataset.t=1;next=covurl(m,250)}if(next){im.dataset.tried=tried.join('|');im.src=next;return}ncv(im)}
+function cvf(im){var tried=(im.dataset.tried||'').split('|').filter(Boolean),alts=(im.dataset.alt||'').split('|').filter(Boolean),m=im.dataset.m;if(im.src&&im.src.indexOf('http')===0&&tried.indexOf(im.src)<0)tried.push(im.src);if(!im.dataset.best&&im.src&&im.src.indexOf('http')===0)im.dataset.best=im.src;var next=alts.filter(function(u){return tried.indexOf(u)<0})[0];if(!next&&m&&!im.dataset.t&&!NC[m]){im.dataset.t=1;next=covurl(m,250)}if(next){im.dataset.tried=tried.join('|');im.src=next;cvRetry(im);return}ncv(im)}
+/* Si la portada buena falló y se mostró una de menor calidad, se reintenta la buena más tarde y se cambia sola cuando carga */
+function cvRetry(im){var b=im.dataset.best;if(!b)return;var n=+im.dataset.rn||0;if(n>=3)return;im.dataset.rn=n+1;
+setTimeout(function(){if(!im.isConnected||im.src===b)return;var t=new Image();t.onload=function(){if(im.isConnected&&t.naturalWidth>(im.naturalWidth||0))im.src=b};t.onerror=function(){cvRetry(im)};t.src=b},[8000,40000,320000][n])}
 function cutT(s,n){if(s.length<=n)return s;var c=s.slice(0,n),i=Math.max(c.lastIndexOf('. '),c.lastIndexOf('.\n'));return (i>n*.6?c.slice(0,i+1):c)+(i>n*.6?'':'…')}
 function lfw(s,u){s=String(s).replace(/<a [^>]*>.*?<\/a>/g,'').replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim();s=s.replace(/User-contributed text.*$/i,'').trim();return s.length>40?{t:cutT(s,9000),u:u||''}:null}
 function $(i){return document.getElementById(i)}
@@ -1518,12 +1521,15 @@ var hd=setTimeout(fin,13000);
 function chk(l){left--;if(l&&l.length)res=res.concat(l);if(left<=0)fin();else if(res.length&&!gr)gr=setTimeout(fin,grace)}
 fns.forEach(function(f){var p;try{p=f()}catch(e){p=Promise.reject(e)}p.then(chk,function(){chk([])})})})}
 function qnorm(v){return String(v).normalize('NFC').toLowerCase().replace(/\s+/g,' ').trim()}
+function seExact(l,v){var q=nrm(v),c=cln(v)||q;if(!q||!l.length)return l;var wb;try{wb=new RegExp('^'+String(v).trim().replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(?![\\p{L}\\p{N}])','iu')}catch(e){return l}
+function sc(x){var t=cln(x.al);if(t==c||t==q||nrm(x.ar)==q)return 0;if(wb.test(String(x.al).trim()))return 1;return 4}
+var ok=l.filter(function(x){return sc(x)<4});return ok.length?ok:l}
 function seAlbums(v,again){v=qnorm(v);var k=v;if(SEC[k])return Promise.resolve(SEC[k]);var st=false;
-return seRace([function(){return seDzAlb(v)},function(){return seItAlb(v)},lazy(function(){return seAdbAlb(v)},1500,function(){return st||dOK('api.deezer.com')||dOK('itunes.apple.com')}),lazy(function(){return seMbAlb(v)},1800,function(){return st||dOK('api.deezer.com')||dOK('itunes.apple.com')})],seMerge,400).then(function(l){st=true;l=seRank(l,v);if(l.length){SEC[k]=l;return l}if(!again&&v)return seAlbums(cap(v),1);return l})}
+return seRace([function(){return seDzAlb(v)},function(){return seItAlb(v)},lazy(function(){return seAdbAlb(v)},1500,function(){return st}),lazy(function(){return seMbAlb(v)},1800,function(){return st})],seMerge,400).then(function(l){st=true;l=seExact(seRank(l,v),v);if(l.length)SEC[k]=l;return l})}
 function seDzArt(v){return jsonp('https://api.deezer.com/search/artist?limit=8&q='+encodeURIComponent(v),5000).then(function(d){return (d.data||[]).map(function(x){return x.name}).filter(Boolean)})}
 function seItArt(v){return jsonp('https://itunes.apple.com/search?media=music&entity=musicArtist&limit=8&term='+encodeURIComponent(v),5000).then(function(d){return (d.results||[]).map(function(x){return x.artistName}).filter(Boolean)})}
 function buscarArt(v){v=qnorm(v);var k=v;if(SEA[k])return Promise.resolve(SEA[k]);var st=false;
-return seRace([function(){return seDzArt(v)},function(){return seItArt(v)},lazy(function(){return seAdbArt(v)},1500,function(){return st||dOK('api.deezer.com')||dOK('itunes.apple.com')}),lazy(function(){return seMbArt(v)},1800,function(){return st||dOK('api.deezer.com')||dOK('itunes.apple.com')})],function(l){var o=[],s={};l.forEach(function(n){var z=nrm(n);if(n&&!s[z]&&same(n,v)){s[z]=1;o.push(n)}});return o.slice(0,4)},400).then(function(l){st=true;if(l.length)SEA[k]=l;return l})}
+return seRace([function(){return seDzArt(v)},function(){return seItArt(v)},lazy(function(){return seAdbArt(v)},1500,function(){return st}),lazy(function(){return seMbArt(v)},1800,function(){return st})],function(l){var o=[],s={};l.forEach(function(n){var z=nrm(n);if(n&&!s[z]&&same(n,v)){s[z]=1;o.push(n)}});var e=o.filter(function(n){return nrm(n)==nrm(v)});return (e.length?e:o).slice(0,4)},400).then(function(l){st=true;if(l.length)SEA[k]=l;return l})}
 /* Mantiene el formato que ya usa la interfaz (objetos tipo «release-group») */
 function buscarMB(v){return seAlbums(v).then(function(l){return {'release-groups':l.map(function(x){return {title:x.al,'artist-credit':[{name:x.ar}],'first-release-date':x.y||'',id:x.mb||'','primary-type':x.type=='ep'?'EP':'Album',_cu:x.cu||x.img||'',_did:x.id,_iid:x.iid}})}})}
 
