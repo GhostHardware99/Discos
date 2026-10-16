@@ -1,5 +1,5 @@
 /* Service worker — cambia VERSION cada vez que subas un index.html nuevo */
-var VERSION = 'v106-2026-10-16';
+var VERSION = 'v107-2026-10-16';
 var CACHE = 'app-' + VERSION;
 /* Portadas: caché propia que NO se borra al actualizar la app */
 var IMG = 'covers-v1', IMGMAX = 5000, BAD = {};
@@ -30,7 +30,7 @@ self.addEventListener('message', function (e) {
 });
 
 /* Portadas de cualquier sitio: primero la caché; si no está, se descarga y se guarda para siempre (hasta IMGMAX). */
-var WES = 'https://images.weserv.nl/?w=800&we&q=86&output=jpg&url=';
+var WES = 'https://images.weserv.nl/?w=1200&we&q=88&output=jpg&url=';
 function tryFetch(u, mode, ms) {
   var ctl = ('AbortController' in self) ? new AbortController() : null;
   var to = setTimeout(function () { if (ctl) ctl.abort(); }, ms);
