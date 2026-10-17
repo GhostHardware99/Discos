@@ -1241,7 +1241,7 @@ x.fillStyle='#fff';
 if(o.lines){x.font='bold 84px sans-serif';y=170;wrapT(x,o.t,W2-160,2).forEach(function(l){x.fillText(l,80,y);y+=96});
 x.font='40px sans-serif';x.fillStyle='rgba(255,255,255,.7)';x.fillText(o.s,80,y);y+=90;
 o.lines.slice(0,9).forEach(function(l){x.fillStyle='#f5b301';x.font='bold 44px sans-serif';x.fillText(l[0],80,y);x.fillStyle='#fff';x.font='44px sans-serif';x.fillText(wrapT(x,l[1],W2-320,1)[0]||'',250,y);y+=84})}
-else{var im=o.cover?await loadImg(o.cover):null,Z=760,X=(W2-Z)/2;
+else{var im=o.im||(o.cover?await loadImg(o.cover):null),Z=760,X=(W2-Z)/2;
 x.save();rr(x,X,90,Z,Z,28);x.clip();
 if(im)x.drawImage(im,X,90,Z,Z);else{var g2=x.createLinearGradient(X,90,X+Z,90+Z);g2.addColorStop(0,'hsl('+o.h+',50%,42%)');g2.addColorStop(1,'hsl('+((o.h+50)%360)+',55%,20%)');x.fillStyle=g2;x.fillRect(X,90,Z,Z);x.fillStyle='rgba(255,255,255,.9)';x.font='bold 220px sans-serif';x.textAlign='center';x.fillText(o.ini||'?',W2/2,90+Z/2+75);x.textAlign='left'}
 x.restore();y=90+Z+90;x.fillStyle='#fff';x.font='bold 62px sans-serif';
@@ -1249,16 +1249,17 @@ wrapT(x,o.t,W2-160,2).forEach(function(l){x.fillText(l,80,y);y+=72});
 x.font='42px sans-serif';x.fillStyle='rgba(255,255,255,.7)';x.fillText(o.s,80,y+6);y+=88;
 if(o.r){x.fillStyle='#f5b301';x.font='bold 72px sans-serif';x.fillText('★ '+fr(o.r)+' / 5',80,y)}}
 x.fillStyle='rgba(255,255,255,.55)';x.font='bold 34px sans-serif';x.fillText('Digz',80,H-60);return c}
-async function shareCanvas(c,name,title){name=String(name).replace(/\.png$/i,'.jpg');var b=await new Promise(function(ok){c.toBlob(ok,'image/jpeg',.95)}),f=new File([b],name,{type:'image/jpeg'});
+async function saveFile(f){try{if(window.showSaveFilePicker){var h=await showSaveFilePicker({suggestedName:f.name,types:[{description:'Imagen JPEG',accept:{'image/jpeg':['.jpg']}}]}),w=await h.createWritable();await w.write(f);await w.close();toast('Imagen guardada');return}}catch(e){if(e&&e.name=='AbortError')return}var u=URL.createObjectURL(f),l=document.createElement('a');l.href=u;l.download=f.name;document.body.appendChild(l);l.click();l.remove();setTimeout(function(){URL.revokeObjectURL(u)},60000);toast('Imagen guardada en Descargas')}
+async function shareCanvas(c,name,title){name=String(name).replace(/\.png$/i,'.jpg');var b=await new Promise(function(ok){c.toBlob(ok,'image/jpeg',.97)}),f=new File([b],name,{type:'image/jpeg'});
 try{if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:title});return}}catch(e){if(e&&e.name=='AbortError')return}
-var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;a.click();toast('Imagen descargada')}
+return saveFile(f)}
 function albumUrl(k){var a=S.a[k],m=M[k]||{},u=m.u||{},en=SV.filter(function(s){return s.on}),i;
 for(i=0;i<en.length;i++){var key=PK[en[i].n];if(key&&u[key])return u[key]}
 var any=['spotify','deezer','apple','ytm','tidal','bandcamp'];for(i=0;i<any.length;i++)if(u[any[i]])return u[any[i]];
 if(a.mb)return 'https://musicbrainz.org/release-group/'+a.mb;
 return en.length?svUrl(en[0],a):''}
 async function shareAlbum(k,img){var a=S.a[k];
-if(img){toast('Preparando imagen…');var c=await card({t:a.al,s:a.ar,r:a.rate,h:hue(a.al+a.ar),cover:a.mb&&!NC[a.mb]?covurl(a.mb,500):'',ini:ini(a.al)});return shareCanvas(c,'digz-album.png',a.al+' — '+a.ar)}
+if(img){toast('Preparando imagen…');var bim=await loadCover(k),c=await card({t:a.al,s:a.ar,r:a.rate,h:hue(a.al+a.ar),im:bim,cover:bim?'':(a.mb&&!NC[a.mb]?covurl(a.mb,500):''),ini:ini(a.al)});return shareCanvas(c,'digz-album.png',a.al+' — '+a.ar)}
 return shareTxt(a.al,a.al+' — '+a.ar+(a.rate?' · ★'+fr(a.rate)+'/5':''),albumUrl(k))}
 function folderKeys(){return view().filter(inFolder)}
 async function shareArtist(img){if(!ui.o||ui.o.t!='ar')return;var ks=folderKeys(),n=ui.o.n,ai=aiOf(ks),u=(ai&&AR[ai]&&AR[ai].u)||{},rs=0,rn=0;
@@ -1504,10 +1505,10 @@ x.textAlign='center';x.fillStyle=th.x;x.font='bold 40px '+F;x.fillText(LF.u?'@'+
 async function meLoad(D){var ss=meSecs(D),ks=[];ss.forEach(function(s){if(s.al&&RS.s[s.id])meChosen(s).forEach(function(o){if(ks.indexOf(o.k)<0)ks.push(o.k)})});
 await Promise.all(ks.map(async function(k){if(RSim[k]===undefined)RSim[k]=(await loadCover(k,420))||false}))}
 async function mdraw(){var my=++rsTok;if(!$('mpv'))return;var D=meData();
-function paint(){var c=meCanvas(D),p=$('mpv');p.src=shPrev(c);p.style.display='block';
+function paint(pre){var c=meCanvas(D),p=$('mpv');p.src=shPrev(c);p.style.display='block';
 var h=$('mhint');if(h){var m=[];if(rsCut)m.push('En este formato no caben '+rsCut+' sección'+(rsCut>1?'es':'')+' más.');if(rsRows)m.push('Se muestran menos elementos de los elegidos.');if(m.length)m.push('Prueba con Historia o comparte por separado.');h.textContent=m.join(' ')}
-c.toBlob(function(b){if(my==rsTok&&b)rsFile=new File([b],'digz-resumen.jpg',{type:'image/jpeg'})},'image/jpeg',.95)}
-rsFile=null;paint();await meLoad(D);if(my!=rsTok||!$('mpv'))return;paint()}
+if(pre)return;c.toBlob(function(b){if(my==rsTok&&b)rsFile=new File([b],'digz-resumen.jpg',{type:'image/jpeg'})},'image/jpeg',.97)}
+rsFile=null;paint(1);await meLoad(D);if(my!=rsTok||!$('mpv'))return;paint()}
 /* only = id de una sección (para compartir solo esa); sin argumento = empieza solo con Álbumes favoritos */
 function meStudio(only){rsFile=null;ui.vk='statshare';var D=meData(),ss=meSecs(D).filter(function(s){return s.l.length});
 RS.s={};RS.pk={};if(only=='all')ss.forEach(function(s){RS.s[s.id]=1});else if(only&&typeof only=='string')RS.s[only]=1;else{var f0=ss.filter(function(s){return s.id=='a'})[0]||ss[0];if(f0)RS.s[f0.id]=1}
@@ -1542,7 +1543,7 @@ var tmr=0;function later(){clearTimeout(tmr);tmr=setTimeout(mdraw,120)}
 $('mcc').onclick=function(){dzPickColor(RS.c1||dzLoad().c,function(v){RS.c1=v;RS.t='custom';hl('t');$('mcc').firstChild.style.background=v;later()},'Color de la imagen')};
 $('mg2').onclick=function(){dzPickColor(RS.g2||'#222222',function(v){RS.g2=v;$('mg2').firstChild.style.background=v;later()},'Color final del fondo')};
 $('mg2a').onclick=function(){RS.g2=null;$('mg2').firstChild.style.background='linear-gradient(135deg,#888,#222)';mdraw()};
-$('mdl').onclick=function(){if(!rsFile){toast('Preparando imagen…');return}var u=URL.createObjectURL(rsFile),l=document.createElement('a');l.href=u;l.download=rsFile.name;l.click();toast('Imagen guardada')};
+$('mdl').onclick=function(){if(!rsFile){toast('Preparando imagen…');return}saveFile(rsFile)};
 mdraw()}
 
 
@@ -1963,7 +1964,7 @@ function pxu(u){return 'https://images.weserv.nl/?w=1400&we&q=90&output=jpg&url=
 /* Devuelve la mejor portada disponible (≥ min px: sale enseguida; si no, espera un poco por una mejor y usa la más grande que haya cargado) */
 function loadCover(k,min){min=min||900;var cs=covCands(k);if(!cs.length)return Promise.resolve(null);return new Promise(function(ok){var d=0,f=0,st=0,best=null,tm=0,np=Math.min(4,cs.length),tot=cs.length+np;
 function fin(){if(f)return;f=1;clearTimeout(tm);ok(best)}
-function got(im){if(f)return;d++;if(im&&(!best||im.naturalWidth>best.naturalWidth))best=im;if(best&&best.naturalWidth>=min){fin();return}if(best&&!tm)tm=setTimeout(fin,1500);if(d>=tot)fin()}
+function got(im){if(f)return;d++;if(im&&(!best||im.naturalWidth>best.naturalWidth))best=im;if(best&&best.naturalWidth>=min){fin();return}if(best&&!tm)tm=setTimeout(fin,min>=800?7000:1500);if(d>=tot)fin()}
 function px(){if(st||f||best)return;st=1;cs.slice(0,np).forEach(function(u){loadImg(pxu(u),9000).then(got)})}
 var dd=0;cs.forEach(function(u){loadImg(u,6000).then(function(im){if(im){got(im);return}dd++;got(null);if(dd>=cs.length)px()})});
 setTimeout(px,1800)})}
@@ -2007,11 +2008,13 @@ function stCap(){return AS.f=='hist'?5:3}
 function stPool(k){var a=S.a[k]||{},m=M[k]||{};if(!m.t)return [];var tf=a.tf||{},tr=a.tr||{},o=Object.keys(tf).map(Number).filter(function(i){return m.t[i]}).sort(function(p,q){return (tr[q]||0)-(tr[p]||0)||p-q}).map(function(i){return {i:i,f:1,r:tr[i]||0}});
 Object.keys(tr).map(Number).filter(function(i){return m.t[i]&&!tf[i]}).sort(function(p,q){return tr[q]-tr[p]||p-q}).forEach(function(i){o.push({i:i,f:0,r:tr[i]})});return o}
 function stEff(k,max){var pl=stPool(k),sel=stSel[k];if(sel)pl=pl.filter(function(p){return sel.indexOf(p.i)>-1});return pl.slice(0,max)}
+var stRt={};
 async function stdraw(k){var my=++stTok,a=S.a[k];if(!a||!$('spv'))return;stFile=null;
-function paint(im){var c=stCanvas(k,im||null),p=$('spv');stchips();p.src=shPrev(c);p.style.display='block';
-c.toBlob(function(b){if(my==stTok&&b)stFile=new File([b],'digz-'+kof(a.ar,a.al).replace(/[^a-z0-9]+/gi,'-').slice(0,40)+'.jpg',{type:'image/jpeg'})},'image/jpeg',.95)}
+function paint(im,pre){var c=stCanvas(k,im||null),p=$('spv');stchips();p.src=shPrev(c);p.style.display='block';if(pre)return;
+c.toBlob(function(b){if(my==stTok&&b)stFile=new File([b],'digz-'+kof(a.ar,a.al).replace(/[^a-z0-9]+/gi,'-').slice(0,40)+'.jpg',{type:'image/jpeg'})},'image/jpeg',.97)}
 var im=stIm[k],sig=covCands(k).join('|');
-if(im===undefined||(im===false&&stSg[k]!==sig)){paint(im||null);stSg[k]=sig;var pr=stLd[k]||(stLd[k]=loadCover(k).then(function(i){stIm[k]=i||false;delete stLd[k];return i}));im=await pr;if(my!=stTok||!$('spv'))return}
+if(im&&im.naturalWidth<900&&!stRt[k]){stRt[k]=1;im=undefined}
+if(im===undefined||(im===false&&stSg[k]!==sig)){paint(im||null,1);stSg[k]=sig;var pr=stLd[k]||(stLd[k]=loadCover(k).then(function(i){stIm[k]=i||false;delete stLd[k];return i}));im=await pr;if(my!=stTok||!$('spv'))return}
 paint(im||null)}
 function studio(k){ui.st=true;cur=k;var a=S.a[k];if(stIm[k]===false)delete stIm[k];loadW(k);need(k,1);needG(k,1);
 function o(key,l,cu){return l.map(function(e){return '<button data-s="'+key+'" data-v="'+e[0]+'" class="'+(String(cu)==String(e[0])?'on':'')+'">'+e[1]+'</button>'}).join('')}
@@ -2043,7 +2046,7 @@ $('stsh').onclick=function(){if(!stFile){toast('Preparando imagen…');return}
 var d={files:[stFile],title:a.al};
 if(navigator.canShare&&navigator.canShare(d))navigator.share(d).catch(function(e){if(e&&e.name!='AbortError')toast('No se pudo compartir')});
 else toast('Este navegador no permite compartir imágenes. Usa «Guardar imagen».')};
-$('stdl').onclick=function(){if(!stFile){toast('Preparando imagen…');return}var u=URL.createObjectURL(stFile),l=document.createElement('a');l.href=u;l.download=stFile.name;l.click();toast('Imagen guardada')};
+$('stdl').onclick=function(){if(!stFile){toast('Preparando imagen…');return}saveFile(stFile)};
 $('stlk').onclick=function(){shareAlbum(k,false)};
 stdraw(k)}
 
