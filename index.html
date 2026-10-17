@@ -188,7 +188,7 @@ details>summary+*{margin-top:10px}
 #ov.full{background:var(--bg)}
 #ov.full #sh{height:100%;max-width:900px;border-radius:0;padding-top:calc(16px + var(--sat))}
 .stp{display:flex;justify-content:center;min-height:120px}
-.stp img{display:none;max-height:50vh;max-width:100%;border-radius:12px;border:1px solid var(--bd)}
+.stp img{display:none;max-height:50vh;max-width:100%;border-radius:12px;border:0;outline:0}
 .agr{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:16px 12px}
 .hero{position:relative;overflow:hidden;margin-left:-16px;margin-right:-16px;margin-top:calc(-16px - var(--sat));padding:calc(16px + var(--sat)) 16px 4px}
 .hbg{position:absolute;inset:0;z-index:0;overflow:hidden}
@@ -697,11 +697,11 @@ html:before{height:calc(var(--sat) + 60px)!important;background:linear-gradient(
 .hero.colpg.cs-mini .ab h2{grid-column:2;align-self:end;text-align:left;font-size:24px;margin:0;padding:0}
 .hero.colpg.cs-mini .cdsc{grid-column:2;align-self:start;flex-direction:column;gap:2px;margin-top:4px}
 /* v136: franja de datos de la ficha (sin fondo; las divisiones nunca tocan las palabras) */
-.mst{display:flex;justify-content:center;margin:14px auto 6px;max-width:100%}
-.mst>div{padding:2px 17px;text-align:center;position:relative;min-width:0}
+.mst{display:grid;grid-template-columns:repeat(var(--n,3),minmax(0,1fr));margin:14px auto 6px;max-width:440px;width:100%}
+.mst>div{padding:2px 8px;text-align:center;position:relative;min-width:0}
 .mst>div+div:before{content:"";position:absolute;left:0;top:16%;bottom:16%;width:1px;background:currentColor;opacity:.18}
 .mst small{display:block;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
-.mst b{display:block;font-size:16px;font-weight:600;margin-top:2px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mst b{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;font-size:14px;line-height:1.2;font-weight:400;margin-top:3px;overflow:hidden;overflow-wrap:anywhere;word-break:break-word}
 /* v131: sin «tirar para recargar» de Chrome (el círculo azul y la barra de carga) ni rebote al llegar arriba */
 html,body{overscroll-behavior:none}
 #sh,#list,#opt,.lpc{overscroll-behavior:contain}
@@ -1859,9 +1859,9 @@ if(window.DZTC0&&!$('sh').querySelector('.colpg')){window.DZTC=window.DZTC0;wind
 if(cur&&S.a[cur]&&$('sh').querySelector('.hbg'))albumBar(cur);else dzHc(null)}
 function cleanTmp(){var ch=0;Object.keys(S.a).forEach(function(k){var t=S.a[k];if(!t||!t.tmp)return;if(t.rate||t.done||t.fav||colList(t).length||t.note)delete t.tmp;else delete S.a[k];ch=1});if(ch){save();render()}}
 function hide(){var cmx=document.getElementById('cmenu');if(cmx)cmx.remove();if(!ui.keep&&typeof MS!='undefined'&&MS)msEnd();if(!ui.keep)cleanTmp();
-if(!ui.keep){ui.tabRet=null;$('ov').style.display='none';$('ov').className='';OVS=[];APT={};ui.ovk=null;ui.sy=null;ui.ls=false}
+if(!ui.keep){ui.tabRet=null;$('ov').style.display='none';$('ov').className='';OVS=[];APT={};ui.ovk=null;ui.sy=null;ui.ls=false;ui.lh=null}
 if(window.DZTC0){window.DZTC=window.DZTC0;window.DZTC0=null}dzHc(null);ui.st=false;ui.back=null;cur=null;mbPause=false;pump()}
-function rs2(k){if(cur!=k||SD)return;if(ui.st){if($('spv'))stdraw(k);return}var f=document.activeElement;if(f&&(f.id=='nt'||f.id=='sc'))return;sheet(k)}
+var _rs2t=0;function rs2(k){if(cur!=k||SD)return;if(ui.st){if($('spv'))stdraw(k);return}clearTimeout(_rs2t);_rs2t=setTimeout(function(){if(cur!=k||SD||ui.st)return;var f=document.activeElement;if(f&&(f.id=='nt'||f.id=='sc'))return;ui.sk=1;sheet(k)},140)}
 var AD={};
 /* ---------- MOTOR DE BÚSQUEDA: Deezer (principal) + iTunes en paralelo ----------
    Responde en cuanto contesta el primero; el otro se suma 300 ms después si llega a tiempo. */
@@ -1981,9 +1981,9 @@ function sumOf(k){var a=S.a[k]||{},w=W[k]||{};return ((a.note||'').trim())||((w.
 /* Portada: recorte cuadrado centrado y, si la imagen es mucho mayor que el destino, reducción en un paso intermedio para que no se vea dentada */
 function drawCov(x,im,X,Y,Z){var T=Z*SHQ,w=im.naturalWidth||im.width,h=im.naturalHeight||im.height,s=Math.min(w,h),sx=(w-s)/2,sy=(h-s)/2;
 if(s>T*2){var st=document.createElement('canvas'),n=Math.ceil(T*1.5);st.width=st.height=n;var sc=st.getContext('2d');try{sc.imageSmoothingQuality='high'}catch(e){}sc.drawImage(im,sx,sy,s,s,0,0,n,n);x.drawImage(st,X,Y,Z,Z)}else x.drawImage(im,sx,sy,s,s,X,Y,Z,Z)}
-function stCanvas(k,im){var a=S.a[k],m=M[k]||{},w=W[k]||{},f=FM[AS.f],W2=f[1],H=f[2],c=shCanvas(W2,H);var x=c.getContext('2d'),th=dsgn(Object.assign({},stTheme(k,im))),F='sans-serif',hist=AS.f=='hist',sq=AS.f=='cuad';
+function stCanvas(k,im,dy){dy=dy||0;var a=S.a[k],m=M[k]||{},w=W[k]||{},f=FM[AS.f],W2=f[1],H=f[2],c=shCanvas(W2,H);var x=c.getContext('2d'),th=dsgn(Object.assign({},stTheme(k,im))),F='sans-serif',hist=AS.f=='hist',sq=AS.f=='cuad';
 meBg(x,W2,H,th);
-var Z=sq?390:(hist?760:480),X=sq?72:(W2-Z)/2,Y=sq?72:(hist?200:80),R=sq?24:32;
+var Z=sq?390:(hist?760:480),X=sq?72:(W2-Z)/2,Y=sq?72+dy:(hist?200:80),R=sq?24:32;
 x.save();x.shadowColor=(th.p&&!th.light)?'rgba('+dzRgbs(th.p[0])+',.55)':'rgba(0,0,0,.45)';x.shadowBlur=70;x.shadowOffsetY=26;rr(x,X,Y,Z,Z,R);x.fillStyle='#222';x.fill();x.restore();
 x.save();rr(x,X,Y,Z,Z,R);x.clip();
 if(im)drawCov(x,im,X,Y,Z);else{var hh=hue(a.al+a.ar),g2=x.createLinearGradient(X,Y,X+Z,Y+Z);g2.addColorStop(0,'hsl('+hh+',50%,42%)');g2.addColorStop(1,'hsl('+((hh+50)%360)+',55%,20%)');x.fillStyle=g2;x.fillRect(X,Y,Z,Z);x.fillStyle='rgba(255,255,255,.9)';x.font='bold '+Math.round(Z*.28)+'px '+F;x.textAlign='center';x.fillText(ini(a.al),X+Z/2,Y+Z/2+Z*.1)}
@@ -2010,7 +2010,7 @@ if(fl.length){hair(y2);y2+=64;x.textAlign='center';x.fillStyle=th.a;x.font='bold
 fl.forEach(function(p){y2+=50;x.fillStyle=th.x;x.font='34px '+F;x.fillText((wrapT(x,m.t[p.i][0],W2-2*X-(p.r&&p.f?220:120),1)[0]||'')+(p.r&&p.f?'  ★'+fr(p.r):''),cx2,y2)})}
 if(st){st=st.length>400?st.slice(0,400):st;if(!fl.length){hair(y2);y2+=22}else y2+=30;var sn=Math.min(4,Math.floor((foot2-60-y2)/42));
 if(sn>=2){x.textAlign='center';x.fillStyle=th.m;x.font='30px '+F;wrapT(x,st,W2-2*X-40,sn).forEach(function(l){y2+=42;x.fillText(l,cx2,y2)})}}
-x.textAlign='center';x.fillStyle=th.m;x.font='bold 30px '+F;x.fillText('Digz',cx2,foot2);return c}
+x.textAlign='center';x.fillStyle=th.m;x.font='bold 30px '+F;x.fillText('Digz',cx2,foot2);stCanvas.bt=Math.max(hb,y2);return c}
 var cx=W2/2,lh=hist?80:72;y=Y+Z+(hist?125:100);x.textAlign='center';x.fillStyle=th.x;x.font='bold '+(hist?70:62)+'px '+F;
 wrapT(x,a.al,W2-140,2).forEach(function(l){x.fillText(l,cx,y);y+=lh});y=y-lh+68;
 x.fillStyle=th.a;x.font='bold 44px '+F;x.fillText(wrapT(x,a.ar,W2-140,1)[0],cx,y);
@@ -2028,7 +2028,8 @@ function stPool(k){var a=S.a[k]||{},m=M[k]||{};if(!m.t)return [];var tf=a.tf||{}
 Object.keys(tr).map(Number).filter(function(i){return m.t[i]&&!tf[i]}).sort(function(p,q){return tr[q]-tr[p]||p-q}).forEach(function(i){o.push({i:i,f:0,r:tr[i]})});return o}
 function stEff(k,max){var pl=stPool(k),sel=stSel[k];if(sel)pl=pl.filter(function(p){return sel.indexOf(p.i)>-1});return pl.slice(0,max)}
 async function stdraw(k){var my=++stTok,a=S.a[k];if(!a||!$('spv'))return;stFile=null;
-function paint(im){var c=stCanvas(k,im||null),p=$('spv');stchips();p.src=shPrev(c);p.style.display='block';
+function stC(k,im){stCanvas.bt=0;if(AS.f!='cuad')return stCanvas(k,im,0);stCanvas(k,null,0);var bt=stCanvas.bt;if(!bt)return stCanvas(k,im,0);var H=1080,bot=bt+14,dy=Math.round(H*.53-(72+bot)/2);dy=Math.min(dy,H-105-bot);return stCanvas(k,im,dy>8?dy:0)}
+function paint(im){var c=stC(k,im||null),p=$('spv');stchips();var _u=shPrev(c);if(p.__u!==_u){p.src=_u;p.__u=_u}p.style.display='block';
 c.toBlob(function(b){if(my==stTok&&b)stFile=new File([b],'digz-'+kof(a.ar,a.al).replace(/[^a-z0-9]+/gi,'-').slice(0,40)+'.jpg',{type:'image/jpeg'})},'image/jpeg',.95)}
 var im=stIm[k],sig=covCands(k).join('|');
 if(im===undefined||(im===false&&stSg[k]!==sig)){paint(im||null);stSg[k]=sig;var pr=stLd[k]||(stLd[k]=loadCover(k).then(function(i){stIm[k]=i||false;delete stLd[k];return i}));im=await pr;if(my!=stTok||!$('spv'))return}
@@ -2068,13 +2069,13 @@ $('stlk').onclick=function(){shareAlbum(k,false)};
 stdraw(k)}
 
 /* ---------- Ficha del álbum ---------- */
-function sheet(k){var o=$('nt');if(o&&cur==k)S.a[k].note=o.value;var same2=cur==k,sc=same2?$('sh').scrollTop:0;
+function sheet(k){var _sk=ui.sk;ui.sk=0;var o=$('nt');if(o&&cur==k)S.a[k].note=o.value;var same2=cur==k,sc=same2?$('sh').scrollTop:0;
 if(!same2){ui.tk=null;ui.op={};ui.wx={};ui.sm=false;ui.tab=(ui.tabRet&&ui.tabRet.k==k)?ui.tabRet.t:'tk';ui.ls=false;ui.rv=false}
 mbPause=false;cur=k;var a=S.a[k],m=M[k];needCover(k,1);if(stIm[k]===undefined&&!stPre[k]){stPre[k]=1;loadCover(k).then(function(im){if(im)stIm[k]=im;else delete stPre[k]})}needG(k,1);fbCheck(k);need(k,1);loadT(k);loadR(k);loadL(k);loadW(k);recoLoad(k);if(m&&m.ai)loadA(m.ai);
 var u=(m&&m.u)||{},ai=m&&m.ai,au=(ai&&AR[ai]&&AR[ai].u)||{},lc=LC[k],w=W[k],tv=Object.keys(a.tr||{}).map(function(i){return a.tr[i]});
 var u2={};for(var z in u)u2[z]=u[z];if(a.mb)u2.mb='https://musicbrainz.org/release-group/'+a.mb;
 var AL=albumLinks(k);AL.splice(AL.length-1,0,['MusicBrainz','mb','']);if(!a.mb)AL=AL.filter(function(x){return x[1]!='mb'});
-var meta=!m?'<div class="h">'+(tries[k]>=4?'No pude conectar con MusicBrainz.':'Cargando datos del álbum…')+'</div>':m.x?'<div class="h">No encontré este álbum en MusicBrainz.</div>':(function(){var it=[],yy=(m.d||'').slice(0,4);if(yy)it.push(['Año',yy]);if(m.t&&m.t.length)it.push(['Canciones',m.t.length]);if(m.l)it.push(['Sello',m.l]);return it.length?'<div class="mst">'+it.map(function(e){return '<div><small>'+e[0]+'</small><b>'+esc(String(e[1]))+'</b></div>'}).join('')+'</div>':''})(),
+var meta=!m?'<div class="h">'+(tries[k]>=4?'No pude conectar con MusicBrainz.':'Cargando datos del álbum…')+'</div>':m.x?'<div class="h">No encontré este álbum en MusicBrainz.</div>':(function(){var it=[],yy=(m.d||'').slice(0,4);if(yy)it.push(['Año',yy]);if(m.t&&m.t.length)it.push(['Canciones',m.t.length]);if(m.l)it.push(['Sello',m.l]);return it.length?'<div class="mst" style="--n:'+it.length+'">'+it.map(function(e){return '<div><small>'+e[0]+'</small><b>'+esc(String(e[1]))+'</b></div>'}).join('')+'</div>':''})(),
 mg=gmx(k),gtl=mg.length?'<div class="h">'+esc(mg.slice(0,2).map(cap).join(' • '))+'</div>':'',gen=mg.length?'<div class="gn">'+mg.map(function(x){return '<span role="button" tabindex="0" data-a="ge" data-ge="'+esc(x)+'" aria-label="Ver álbumes del género '+esc(x)+'">'+esc(cap(x))+'</span>'}).join('')+'</div>':'',
 lfx=lc?((lc.pc||lc.ls||(lc.g&&lc.g.length))?'<div class="h">Last.fm'+(lc.pc?' · '+lc.pc+' reproducciones tuyas':'')+(lc.ls?' · '+lc.ls.toLocaleString()+' oyentes':'')+'</div>':'')+((lc.gv==2&&lc.g&&lc.g.length)?'<div class="gn" style="margin-top:10px">'+lc.g.slice(0,10).map(function(x){var gc=gman(x),nm=gc?gc.n:cap(x),has=!!gc&&gm(k).some(function(y){return nrm(y)==nrm(gc.n)});return '<div class="lfc'+(has?' on':'')+'"><b role="button" tabindex="0" data-a="ge" data-ge="'+esc(nm)+'" aria-label="Ver álbumes de '+esc(nm)+'">'+esc(cap(x))+'</b><i role="button" tabindex="0" data-a="lfg" data-lg="'+esc(x)+'" aria-label="'+(has?'Ya está en los géneros del álbum':'Añadir '+esc(cap(x))+' a los géneros del álbum')+'">'+(has?'✓':'+')+'</i></div>'}).join('')+'</div><div class="h" style="margin-top:8px">Etiquetas de este álbum puestas por los usuarios de Last.fm: muchas son opiniones personales y pueden no ser exactas. Toca el nombre para ver álbumes de ese género; toca + para añadirlo a este álbum si sabes que es correcto.</div>':''):'',
 tl='';var hast=!!(m&&m.t&&m.t.length),mbp=(!m&&!(tries[k]>=4))||(m&&a.mb&&!m.x&&!m.t&&tq[k]!=2),ldg=FBq[k]==1||mbp;
@@ -2112,6 +2113,7 @@ var h='<div class="hero"><div class="hbg">'+(cvu?'<img alt="" decoding="sync" sr
 
 +'<div class="tabs">'+TB.map(function(q){return '<button data-a="tab" data-v="'+q[0]+'" class="'+(tb==q[0]?'on':'')+'">'+q[1]+'</button>'}).join('')+'</div>'
 +body+rcs+lst+lsh;
+if(_sk&&same2&&ui.lh===h&&$('sh').firstChild)return;ui.lh=h;
 var _hi=h.indexOf('<div class="rate">'),_hh=_hi>0?h.slice(0,_hi):'',_ho=(same2&&_hh&&ui.hh===_hh)?$('sh').querySelector('.hero'):null;ui.hh=_hh;
 if(_ho){_ho.remove();show(h.slice(_hi),_ho)}else show(h);
 $('x').onclick=closeSheet;$('sh').scrollTop=(ui.sy&&ui.sy.k===ui.ovk?ui.sy.v:sc)}
