@@ -480,6 +480,8 @@ html{overflow-x:hidden}
 .cedd input{text-align:center;font-weight:700;font-size:16px}
 .cdbt{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;width:100%}
 .cdbt button{font-size:13px;padding:8px 12px;border-radius:99px}
+.cdsl{width:100%;text-align:left;font-size:12.5px;font-weight:700;color:var(--mut);margin:6px 2px -2px}
+.cdst button.on{background:rgba(var(--acr),.28)!important;border-color:rgba(var(--acr),.7)!important}
 .cadd{max-height:88vh}
 .calst{width:100%;overflow:auto;max-height:50vh;min-height:120px;-webkit-overflow-scrolling:touch}
 .cal{padding:8px 4px}
@@ -670,11 +672,11 @@ img{pointer-events:auto}
 
 .vmb{margin:10px auto 8px!important}
 
-/* ===== Barra de estado: el color de la barra del teléfono continúa hacia abajo y se desvanece (sin escalón); no mueve el diseño ===== */
-html:before{height:calc(var(--bar) + 48px)!important;background:linear-gradient(to bottom,color-mix(in srgb,var(--tc,var(--bg)) 100%,transparent) 0,color-mix(in srgb,var(--tc,var(--bg)) 100%,transparent) var(--bar),color-mix(in srgb,var(--tc,var(--bg)) 80%,transparent) calc(var(--bar) + 6px),color-mix(in srgb,var(--tc,var(--bg)) 57%,transparent) calc(var(--bar) + 13px),color-mix(in srgb,var(--tc,var(--bg)) 35%,transparent) calc(var(--bar) + 23px),color-mix(in srgb,var(--tc,var(--bg)) 19%,transparent) calc(var(--bar) + 32px),color-mix(in srgb,var(--tc,var(--bg)) 8%,transparent) calc(var(--bar) + 40px),color-mix(in srgb,var(--tc,var(--bg)) 0%,transparent) calc(var(--bar) + 48px))!important}
-#ov.full:before,#ov:has(.colpg):before{height:calc(var(--bar) + 64px)!important;background:linear-gradient(to bottom,rgba(var(--hcr,13,13,15),1) 0,rgba(var(--hcr,13,13,15),1) var(--bar),rgba(var(--hcr,13,13,15),0.8) calc(var(--bar) + 8px),rgba(var(--hcr,13,13,15),0.57) calc(var(--bar) + 18px),rgba(var(--hcr,13,13,15),0.35) calc(var(--bar) + 30px),rgba(var(--hcr,13,13,15),0.19) calc(var(--bar) + 42px),rgba(var(--hcr,13,13,15),0.075) calc(var(--bar) + 54px),rgba(var(--hcr,13,13,15),0) calc(var(--bar) + 64px))!important}
+/* ===== Barra de estado: desvanecido suave desde el color de la barra, sin tramo sólido ni escalón ===== */
+html:before{height:calc(var(--bar) + 10px)!important;background:linear-gradient(to bottom,color-mix(in srgb,var(--tc,var(--bg)) 100%,transparent) 0%,color-mix(in srgb,var(--tc,var(--bg)) 73.8%,transparent) 19%,color-mix(in srgb,var(--tc,var(--bg)) 54.1%,transparent) 34%,color-mix(in srgb,var(--tc,var(--bg)) 38.2%,transparent) 47%,color-mix(in srgb,var(--tc,var(--bg)) 27.8%,transparent) 56.5%,color-mix(in srgb,var(--tc,var(--bg)) 19.4%,transparent) 65%,color-mix(in srgb,var(--tc,var(--bg)) 12.6%,transparent) 73%,color-mix(in srgb,var(--tc,var(--bg)) 7.5%,transparent) 80.2%,color-mix(in srgb,var(--tc,var(--bg)) 4.2%,transparent) 86.1%,color-mix(in srgb,var(--tc,var(--bg)) 2.1%,transparent) 91%,color-mix(in srgb,var(--tc,var(--bg)) 0.8%,transparent) 95.2%,color-mix(in srgb,var(--tc,var(--bg)) 0.2%,transparent) 98.2%,color-mix(in srgb,var(--tc,var(--bg)) 0%,transparent) 100%)!important}
+#ov.full:before,#ov:has(.colpg):before{height:calc(var(--bar) + 10px)!important;background:linear-gradient(to bottom,rgba(var(--hcr,13,13,15),1.0) 0%,rgba(var(--hcr,13,13,15),0.738) 19%,rgba(var(--hcr,13,13,15),0.541) 34%,rgba(var(--hcr,13,13,15),0.382) 47%,rgba(var(--hcr,13,13,15),0.278) 56.5%,rgba(var(--hcr,13,13,15),0.194) 65%,rgba(var(--hcr,13,13,15),0.126) 73%,rgba(var(--hcr,13,13,15),0.075) 80.2%,rgba(var(--hcr,13,13,15),0.042) 86.1%,rgba(var(--hcr,13,13,15),0.021) 91%,rgba(var(--hcr,13,13,15),0.008) 95.2%,rgba(var(--hcr,13,13,15),0.002) 98.2%,rgba(var(--hcr,13,13,15),0.0) 100%)!important}
 #ov:has(.colpg):before{opacity:1!important}
-.hbg:before{height:calc(var(--bar) + 64px)!important;background:linear-gradient(to bottom,color-mix(in srgb,var(--tc,var(--bg)) 100%,transparent) 0,color-mix(in srgb,var(--tc,var(--bg)) 100%,transparent) var(--bar),color-mix(in srgb,var(--tc,var(--bg)) 80%,transparent) calc(var(--bar) + 8px),color-mix(in srgb,var(--tc,var(--bg)) 57%,transparent) calc(var(--bar) + 18px),color-mix(in srgb,var(--tc,var(--bg)) 35%,transparent) calc(var(--bar) + 30px),color-mix(in srgb,var(--tc,var(--bg)) 19%,transparent) calc(var(--bar) + 42px),color-mix(in srgb,var(--tc,var(--bg)) 8%,transparent) calc(var(--bar) + 54px),color-mix(in srgb,var(--tc,var(--bg)) 0%,transparent) calc(var(--bar) + 64px))!important}
+.hbg:before{height:calc(var(--bar) + 10px)!important;background:linear-gradient(to bottom,color-mix(in srgb,var(--tc,var(--bg)) 100%,transparent) 0%,color-mix(in srgb,var(--tc,var(--bg)) 73.8%,transparent) 19%,color-mix(in srgb,var(--tc,var(--bg)) 54.1%,transparent) 34%,color-mix(in srgb,var(--tc,var(--bg)) 38.2%,transparent) 47%,color-mix(in srgb,var(--tc,var(--bg)) 27.8%,transparent) 56.5%,color-mix(in srgb,var(--tc,var(--bg)) 19.4%,transparent) 65%,color-mix(in srgb,var(--tc,var(--bg)) 12.6%,transparent) 73%,color-mix(in srgb,var(--tc,var(--bg)) 7.5%,transparent) 80.2%,color-mix(in srgb,var(--tc,var(--bg)) 4.2%,transparent) 86.1%,color-mix(in srgb,var(--tc,var(--bg)) 2.1%,transparent) 91%,color-mix(in srgb,var(--tc,var(--bg)) 0.8%,transparent) 95.2%,color-mix(in srgb,var(--tc,var(--bg)) 0.2%,transparent) 98.2%,color-mix(in srgb,var(--tc,var(--bg)) 0%,transparent) 100%)!important}
 .hero.colpg:before{display:none!important}
 /* ===== Estilos de portada de colección ===== */
 .hero.colpg:not(.cs-full)+#cpl{margin-top:22px!important}
@@ -2355,9 +2357,11 @@ CCR[bg]=rows;if(ui.vk!=='col:'+n)return;CC.rows=rows;colBarUpd()}catch(e){}};im.
 function colRename(o,nn){var i=S.cols.indexOf(o);if(i>-1)S.cols[i]=nn;Object.keys(S.a).forEach(function(k){var l=colList(S.a[k]),i=l.indexOf(o);if(i>-1)l[i]=nn});['ci','cs','cp','cd','cf'].forEach(function(f){if(S[f]&&S[f][o]!==undefined){S[f][nn]=S[f][o];delete S[f][o]}});if(ui.c==o)ui.c=nn}
 function colEditDlg(n){var P={ci:(S.ci&&S.ci[n])||null,cs:(S.cs&&S.cs[n])||null,cp:(S.cp&&S.cp[n])||null},w=document.createElement('div');
 w.className='cedw dzmod';w.style.zIndex=55;
-w.innerHTML='<div class="cedb cedd"><div class="cedt">Editar colección</div><div class="ccv cdprev"></div><input id="cdn" maxlength="40" placeholder="Nombre de la colección" autocomplete="off"><div class="cdbt"></div><div class="row"><button id="cdc" style="flex:1">Cancelar</button><button class="p" id="cds" style="flex:1">Guardar</button></div></div>';
+w.innerHTML='<div class="cedb cedd"><div class="cedt">Editar colección</div><div class="ccv cdprev"></div><input id="cdn" maxlength="40" placeholder="Nombre de la colección" autocomplete="off"><div class="cdbt"></div><div class="cdsl">Estilo de portada</div><div class="cdbt cdst"></div><div class="row"><button id="cdc" style="flex:1">Cancelar</button><button class="p" id="cds" style="flex:1">Guardar</button></div></div>';
 document.body.appendChild(w);
-var nm=w.querySelector('#cdn'),pv=w.querySelector('.cdprev'),bt=w.querySelector('.cdbt');nm.value=n;
+var nm=w.querySelector('#cdn'),pv=w.querySelector('.cdprev'),bt=w.querySelector('.cdbt'),stb=w.querySelector('.cdst'),SV=CVS();nm.value=n;
+function paintSt(){stb.innerHTML=Object.keys(CVN).map(function(k){return '<button type="button" data-st="'+k+'"'+(k==SV?' class="on"':'')+'>'+(k==SV?'✓ ':'')+CVN[k]+'</button>'}).join('')}
+paintSt();stb.onclick=function(e){var b=e.target.closest('button');if(!b)return;SV=b.dataset.st;paintSt()};
 function paint(){pv.innerHTML=P.ci?'<div class="mos"><img class="cp" alt="" src="'+P.ci+'"></div>':colMos(n,true);
 bt.innerHTML='<button data-e="ph">'+(P.ci?'Cambiar foto':'Añadir foto')+'</button>'+(P.ci?'<button data-e="adj">Ajustar foto</button><button data-e="rmp">Quitar foto</button>':'')}
 paint();
@@ -2368,7 +2372,7 @@ else if(a=='rmp'){P.ci=P.cs=P.cp=null;paint()}};
 w.querySelector('#cdc').onclick=function(){w.remove()};
 w.querySelector('#cds').onclick=function(){var nn=nm.value.trim();if(!nn){toast('Ponle un nombre a la colección');return}
 if(nn!=n&&S.cols.indexOf(nn)>-1){toast('Ya existe una colección con ese nombre');return}
-var y=$('sh').scrollTop;if(nn!=n)colRename(n,nn);
+var y=$('sh').scrollTop;try{localStorage.setItem('digz-cvs',SV)}catch(x){}if(nn!=n)colRename(n,nn);
 ['ci','cs','cp'].forEach(function(f){S[f]=S[f]||{};if(P[f])S[f][nn]=P[f];else delete S[f][nn]});
 save();w.remove();render();colPage(nn,y)}}
 function colAddDlg(n){var sel={},AV=null,GA=[],G={},gl=[],gst=0,qid=0,gt=0,w=document.createElement('div');w.className='cedw dzmod';w.style.zIndex=55;
@@ -2410,7 +2414,7 @@ if(S.a[k]){delete S.a[k].tmp;if(!hasCol(S.a[k],n)){addCol(S.a[k],n);cnt++}}});
 save();var y=$('sh').scrollTop;w.remove();render();colPage(n,y);toast(cnt?cnt+(cnt==1?' álbum añadido':' álbumes añadidos'):'No encontré álbumes nuevos para añadir')}}
 function colMenu(n){var old=document.getElementById('cmenu');if(old){old.remove();return}
 var L=vm('cd')=='l',m=document.createElement('div');m.id='cmenu';m.className='cmenu';
-m.innerHTML='<button data-m="ed">Editar</button><button data-m="ad">Añadir álbumes</button><button data-m="fv">'+(S.cf&&S.cf[n]?'Quitar de favoritas':'Marcar como favorita')+'</button><button data-m="vw">'+(L?'Ver en cuadrícula':'Ver en lista')+'</button><button data-m="st">Estilo de portada</button><button data-m="sl">Seleccionar varios</button><button class="dg" data-m="del">Eliminar colección</button>';
+m.innerHTML='<button data-m="ed">Editar</button><button data-m="vw">'+(L?'Ver en cuadrícula':'Ver en lista')+'</button><button data-m="ad">Añadir álbumes</button><button data-m="fv">'+(S.cf&&S.cf[n]?'Quitar de favoritas':'Marcar como favorita')+'</button><button data-m="sl">Seleccionar varios</button><button class="dg" data-m="del">Eliminar colección</button>';
 document.body.appendChild(m);
 function close(){var e=document.getElementById('cmenu');if(e)e.remove();document.removeEventListener('click',away,true);document.removeEventListener('pointerdown',pd,true);document.removeEventListener('scroll',sc,true);document.removeEventListener('touchmove',sc,true);document.removeEventListener('wheel',sc,true)}
 function away(e){if(!e.target.closest('#cmenu,#cmb')){close();e.preventDefault();e.stopPropagation()}}
@@ -2418,8 +2422,6 @@ function pd(e){if(!e.target.closest('#cmenu,#cmb')){close();swallowClick()}}
 function sc(e){if(e.target&&e.target.closest&&e.target.closest('#cmenu'))return;close()}
 setTimeout(function(){if(!document.getElementById('cmenu'))return;document.addEventListener('click',away,true);document.addEventListener('pointerdown',pd,true);document.addEventListener('scroll',sc,true);document.addEventListener('touchmove',sc,{capture:true,passive:true});document.addEventListener('wheel',sc,{capture:true,passive:true})},0);
 m.onclick=function(e){var b=e.target.closest('button');if(!b)return;var a=b.dataset.m;
-if(a=='st'){var cs=CVS();m.innerHTML=Object.keys(CVN).map(function(k){return '<button data-m="s:'+k+'">'+(k==cs?'✓ ':'')+CVN[k]+'</button>'}).join('');return}
-if(a&&a.indexOf('s:')==0){close();var y0=$('sh').scrollTop;try{localStorage.setItem('digz-cvs',a.slice(2))}catch(x){}colPage(n,y0);return}
 close();var y=$('sh').scrollTop;
 if(a=='fv')colFav(n);
 else if(a=='ed')colEditDlg(n);
