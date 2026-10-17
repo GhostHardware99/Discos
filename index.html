@@ -735,7 +735,7 @@ function dzBar(c){var m=document.querySelector('meta[name=theme-color]');if(!m||
 if(a>0&&/^#[0-9a-f]{6}$/i.test(c)){var r=[1,3,5].map(function(i){return parseInt(c.substr(i,2),16)});c=dzHex(dzMix(r,[0,0,0],a))}if(/^#[0-9a-f]{6}$/i.test(c))c=dzHex([1,3,5].map(function(i){return Math.min(255,Math.round(parseInt(c.substr(i,2),16)/4)*4)}));dzBarApply(m,c)}
 /* El color de la barra de estado cambiaba muchas veces por segundo al hacer scroll (parpadeo arriba): ahora se agrupa en pasos y como mucho 1 cambio cada 120 ms */
 function dzBarApply(m,c){m.__want=c;if(m.getAttribute('content')===c){clearTimeout(dzBarApply.t);return}var n=Date.now(),w=120-(n-(dzBarApply.l||0));if(w<=0){clearTimeout(dzBarApply.t);dzBarApply.l=n;m.setAttribute('content',c)}else{clearTimeout(dzBarApply.t);dzBarApply.t=setTimeout(function(){dzBarApply.l=Date.now();m.setAttribute('content',m.__want)},w)}}
-function dzHc(av){var d=document.documentElement;if(!av){window.DZBC=null;d.style.removeProperty('--bc');window.DZHK=null;window.DZHC=null;d.style.removeProperty('--hc');d.style.setProperty('--hcr',dzRgbs(window.DZTC));dzBar();return}
+function dzHc(av){var d=document.documentElement;if(!av){var had=!!window.DZBC;window.DZBC=null;d.style.removeProperty('--bc');window.DZHK=null;window.DZHC=null;d.style.removeProperty('--hc');d.style.setProperty('--hcr',dzRgbs(window.DZTC));if(had)requestAnimationFrame(function(){requestAnimationFrame(function(){if(!window.DZBC)dzBar()})});else dzBar();return}
 var rgb=[1,3,5].map(function(i){return parseInt(av.substr(i,2),16)}),bg=window.DZDK?[13,13,15]:[244,243,239],c=dzHex(dzMix(dzMix(bg,rgb,.55),[0,0,0],.12));window.DZHC=c;d.style.setProperty('--hc',c);if(typeof albBarUpd=='function'&&albBarUpd())return;window.DZBC=null;d.style.removeProperty('--bc');d.style.setProperty('--hcr',dzRgbs(window.DZTC));dzBar()}
 dzApply(dzLoad());
 try{var vv=window.visualViewport;if(vv){var vf=function(){document.documentElement.style.setProperty('--vvt',(vv.offsetTop||0)+'px')};vv.addEventListener('resize',vf);vv.addEventListener('scroll',vf);window.addEventListener('scroll',vf,{passive:true});var vk=function(){vf();[80,200,400,700,1100].forEach(function(t){setTimeout(vf,t)})};document.addEventListener('focusin',vk);document.addEventListener('focusout',vk);vf()}}catch(e){}
@@ -2048,7 +2048,7 @@ if(navigator.canShare&&navigator.canShare(d))navigator.share(d).catch(function(e
 else toast('Este navegador no permite compartir imágenes. Usa «Guardar imagen».')};
 $('stdl').onclick=function(){if(!stFile){toast('Preparando imagen…');return}saveFile(stFile)};
 $('stlk').onclick=function(){shareAlbum(k,false)};
-stdraw(k)}
+requestAnimationFrame(function(){setTimeout(function(){if(ui.st&&cur==k)stdraw(k)},40)})}
 
 /* ---------- Ficha del álbum ---------- */
 function sheet(k){var o=$('nt');if(o&&cur==k)S.a[k].note=o.value;var same2=cur==k,sc=same2?$('sh').scrollTop:0;
