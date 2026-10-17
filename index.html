@@ -737,7 +737,7 @@ if(o&&o.style.display=='flex'&&!o.classList.contains('full'))k*=.45;return 1-k}
 function dzBar(c,imm){var m=document.querySelector('meta[name=theme-color]');if(!m||!window.DZTC)return;c=window.DZBC||window.DZTC;window.DZB=c;var a=dzDimA();
 if(a>0&&/^#[0-9a-f]{6}$/i.test(c)){var r=[1,3,5].map(function(i){return parseInt(c.substr(i,2),16)});c=dzHex(dzMix(r,[0,0,0],a))}if(/^#[0-9a-f]{6}$/i.test(c))c=dzHex([1,3,5].map(function(i){return Math.min(255,Math.round(parseInt(c.substr(i,2),16)/4)*4)}));dzBarApply(m,c,imm)}
 /* El color de la barra de estado cambiaba muchas veces por segundo al hacer scroll (parpadeo arriba): ahora se agrupa en pasos y como mucho 1 cambio cada 120 ms */
-function dzBarApply(m,c,imm){m.__want=c;if(m.getAttribute('content')===c){clearTimeout(dzBarApply.t);return}if(imm){clearTimeout(dzBarApply.t);dzBarApply.l=Date.now();m.setAttribute('content',c);return}var n=Date.now(),w=120-(n-(dzBarApply.l||0));if(w<=0){clearTimeout(dzBarApply.t);dzBarApply.l=n;m.setAttribute('content',c)}else{clearTimeout(dzBarApply.t);dzBarApply.t=setTimeout(function(){dzBarApply.l=Date.now();m.setAttribute('content',m.__want)},w)}}
+function dzBarApply(m,c,imm){m.__want=c;if(window.DZDEF){clearTimeout(dzBarApply.t);if(!dzBarApply.d){dzBarApply.d=1;requestAnimationFrame(function(){requestAnimationFrame(function(){dzBarApply.d=0;var w=m.__want;if(w&&m.getAttribute('content')!==w){dzBarApply.l=Date.now();m.setAttribute('content',w)}})})}return}if(m.getAttribute('content')===c){clearTimeout(dzBarApply.t);return}if(imm){clearTimeout(dzBarApply.t);dzBarApply.l=Date.now();m.setAttribute('content',c);return}var n=Date.now(),w=120-(n-(dzBarApply.l||0));if(w<=0){clearTimeout(dzBarApply.t);dzBarApply.l=n;m.setAttribute('content',c)}else{clearTimeout(dzBarApply.t);dzBarApply.t=setTimeout(function(){dzBarApply.l=Date.now();m.setAttribute('content',m.__want)},w)}}
 function dzTwStop(){if(dzTw.r){cancelAnimationFrame(dzTw.r);dzTw.r=0}}
 function dzTw(to){dzTwStop();document.documentElement.style.setProperty('--hcr',String(to))}
 function dzHc(av){var d=document.documentElement;window.DZBC=null;d.style.removeProperty('--bc');if(!av){window.DZHC=null;window.DZTWN=0;d.style.removeProperty('--hc');dzTw(dzRgbs(window.DZTC));dzBar(0,1);return}
@@ -1857,11 +1857,12 @@ try{[].forEach.call($('sh').querySelectorAll('img'),function(i){var u=i.getAttri
 [].forEach.call($('sh').querySelectorAll('.cv img'),function(i){if(i.complete&&i.naturalWidth>0)i.classList.add('ld')});$('ov').className='full';$('ov').style.display='flex';
 if(ui.sy&&ui.sy.k===key)$('sh').scrollTop=ui.sy.v;
 if(window.DZTC0&&!$('sh').querySelector('.colpg')){window.DZTC=window.DZTC0;window.DZTC0=null;document.documentElement.style.setProperty('--hcr',dzRgbs(window.DZTC))}
-if(cur&&S.a[cur]&&$('sh').querySelector('.hbg'))albumBar(cur);else dzHc(null)}
+/* El color de la barra del teléfono cambia DESPUÉS de pintar la nueva pantalla (antes se adelantaba cientos de ms en pantallas pesadas como Compartir álbum y la barra y la pantalla quedaban descoordinadas) */
+window.DZDEF=1;try{if(cur&&S.a[cur]&&$('sh').querySelector('.hbg'))albumBar(cur);else dzHc(null)}finally{window.DZDEF=0}}
 function cleanTmp(){var ch=0;Object.keys(S.a).forEach(function(k){var t=S.a[k];if(!t||!t.tmp)return;if(t.rate||t.done||t.fav||colList(t).length||t.note)delete t.tmp;else delete S.a[k];ch=1});if(ch){save();render()}}
 function hide(){var cmx=document.getElementById('cmenu');if(cmx)cmx.remove();if(!ui.keep&&typeof MS!='undefined'&&MS)msEnd();if(!ui.keep)cleanTmp();
 if(!ui.keep){ui.tabRet=null;$('ov').style.display='none';$('ov').className='';OVS=[];APT={};ui.ovk=null;ui.sy=null;ui.ls=false;ui.lh=null}
-if(window.DZTC0){window.DZTC=window.DZTC0;window.DZTC0=null}dzHc(null);ui.st=false;ui.back=null;cur=null;mbPause=false;pump()}
+if(window.DZTC0){window.DZTC=window.DZTC0;window.DZTC0=null}window.DZDEF=1;try{dzHc(null)}finally{window.DZDEF=0}ui.st=false;ui.back=null;cur=null;mbPause=false;pump()}
 var _rs2t=0;function rs2(k){if(cur!=k||SD)return;if(ui.st){if($('spv'))stdraw(k);return}clearTimeout(_rs2t);_rs2t=setTimeout(function(){if(cur!=k||SD||ui.st)return;var f=document.activeElement;if(f&&(f.id=='nt'||f.id=='sc'))return;ui.sk=1;sheet(k)},140)}
 var AD={};
 /* ---------- MOTOR DE BÚSQUEDA: Deezer (principal) + iTunes en paralelo ----------
