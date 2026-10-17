@@ -16,14 +16,14 @@ export default {
     const t = new URL(req.url).searchParams.get('url');
     let u; try { u = new URL(t); } catch (e) { return new Response('bad url', {status: 400, headers: cors}); }
     if (u.protocol !== 'https:' || !OK.includes(u.hostname)) return new Response('host not allowed', {status: 403, headers: cors});
-    // Discogs: el token vive aquí como secreto (DISCOGS_TOKEN), nunca en la apk. Respuestas en caché 7 días.
+    // Discogs: el token vive aquí como secreto (DISCOGS_TOKEN), nunca en la apk. Respuestas en caché 30 días.
     let ttl = 300;
     if (u.hostname === 'api.discogs.com') {
       if (!u.searchParams.get('token')) {
         if (!env || !env.DISCOGS_TOKEN) return new Response('no discogs token', {status: 401, headers: cors});
         u.searchParams.set('token', env.DISCOGS_TOKEN);
       }
-      ttl = 604800;
+      ttl = 2592000;
     }
     const opts = {
       headers: {'User-Agent': UA, 'Accept': req.headers.get('Accept') || '*/*'},
