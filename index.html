@@ -120,6 +120,7 @@ html:before{content:"";position:fixed;left:0;right:0;top:0;height:calc(10px + en
 .h{color:var(--mut);font-size:13px}
 .gn{display:flex;gap:6px;flex-wrap:wrap}
 .gn span{background:var(--ac2);border:1px solid var(--ac);border-radius:99px;padding:3px 11px;font-size:12px;cursor:pointer}.gn span:focus-visible{outline:2px solid var(--ac);outline-offset:2px}.gn span:hover{filter:brightness(1.12)}
+.gn.lft span{cursor:default;background:transparent}.gn.lft span:hover{filter:none}
 .lk{display:flex;gap:6px;flex-wrap:wrap}
 .lk a{border:1px solid var(--bd);border-radius:99px;padding:6px 12px;font-size:13px;color:var(--tx);text-decoration:none;background:var(--card)}
 .lk a.d{border-color:var(--ac)}
@@ -702,6 +703,10 @@ try{matchMedia('(prefers-color-scheme:dark)').addListener(function(){var t=dzLoa
 <script>
 /* Pega aquí tu API key de Last.fm una sola vez y quien use la app solo tendrá que escribir su usuario */
 var DEF_LFKEY='';
+/* Pega aquí tu token de Discogs una sola vez: será el predeterminado para todos los que usen la app (cada uno puede poner el suyo en Ajustes) */
+var DEF_DCTOKEN='';
+/* URL de TU Cloudflare Worker (el que guarda el token de Discogs como secreto). Con esto, todos los usuarios tienen Discogs sin configurar nada y el token no aparece en la apk. Ejemplo: 'https://digz-proxy.tuusuario.workers.dev/' */
+var DEF_PROXY='https://digz-proxy.blancocory35.workers.dev/';
 
 var KEY='discos2',S={a:{},cols:[]},ui={cv:false,cn:0,ot:'lib',f:'all',v:'g',s:'ar',q:'',c:'',lim:120,g:'',ge:'',o:null,tk:null,wk:false,op:{},wx:{},back:null,st:false},cur=null;
 try{var r=localStorage.getItem(KEY);if(r)S=JSON.parse(r)}catch(e){}
@@ -880,9 +885,13 @@ return l.map(function(x,i){return [sc(x),i,x]}).sort(function(x,y){return x[0]-y
 function seAdbArt(v){return adbGet('search.php?s='+qe(v)).then(function(d){return (d.artists||[]).map(function(x){return x.strArtist}).filter(Boolean)})}
 function seMbArt(v){var w=v.toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').split(' ').filter(Boolean).slice(0,6);if(!w.length)return Promise.resolve([]);
 return netGet('https://musicbrainz.org/ws/2/artist?limit=8&query='+encodeURIComponent('artist:('+w.map(function(x,i){return esq(x)+(i==w.length-1&&x.length>=2?'*':'')}).join(' AND ')+')')+'&fmt=json',12000).then(function(d){return (d.artists||[]).map(function(x){return x.name}).filter(Boolean)})}
-async function mbGen(a,noArt){var s1=await mbq('release-group?limit=8&query='+encodeURIComponent('releasegroup:"'+esq(a.al)+'" AND artist:"'+esq(a.ar)+'"')),m=rg(a,s1['release-groups']||[]),g=m?gs(m):[];
-if(!g.length&&!noArt){var s2=await mbq('artist?limit=5&query='+encodeURIComponent('artist:"'+esq(a.ar)+'"')),ar=(s2.artists||[]).filter(function(x){return nrm(x.name)===nrm(a.ar)})[0];if(ar)g=gs(ar)}
-return g}
+async function mbGen(a){var d=null;
+/* Solo géneros del propio álbum (release-group) de MusicBrainz: votados por la comunidad, sin etiquetas libres y nunca los del artista */
+if(a.mb){d=await mbq('release-group/'+a.mb+'?inc=genres');if(d&&d.error)d=null}
+if(!d){var s1=await mbq('release-group?limit=8&query='+encodeURIComponent('releasegroup:"'+esq(a.al)+'" AND artist:"'+esq(a.ar)+'"')),l=s1['release-groups']||[],c=cln(a.al),
+m=l.filter(function(x){return cln(x.title)==c&&acs(x).some(function(n){return same(n,a.ar)})})[0];
+if(!m)return [];d=await mbq('release-group/'+m.id+'?inc=genres');if(d&&d.error)d=null}
+return d?gsg(d):[]}
 function dOK(h){var p=NH[h];return !!(p&&p.r=='jp'&&Date.now()-p.t<600000)}
 function cgc(g){var s={};g.forEach(function(x){var c=gcan(x);if(c)s[c.n]=1});return Object.keys(s).length}
 function cgn(g){return g.some(function(x){return gcan(x)})}
@@ -894,6 +903,7 @@ function aMatch(lib,n){var k=akey(n);if(!k)return false;var t=String(lib||'');if
 function same(x,y){x=nrm(x);y=nrm(y);return !!x&&!!y&&(x.indexOf(y)>-1||y.indexOf(x)>-1)}
 function cap(s){return String(s).replace(/(^|[\s\-\/])(\p{L})/gu,function(m,p,c){return p+c.toUpperCase()})}
 var JUNK=/seen live|favou?rite|albums? i own|owned|spotify|under \d+ listeners|^\d{4}s?$|^\d0s$|my |love|check out|male|female|artist on cover|\bstems\b|^_/i;
+function gsg(d){var l=(d.genres||[]).filter(function(x){return x&&x.name&&(x.count==null||x.count>0)}).sort(function(x,y){return (y.count||0)-(x.count||0)}),seen={};return l.map(function(x){return x.name}).filter(function(x){var k=nrm(x);if(seen[k])return false;seen[k]=1;return true}).slice(0,4).map(cap)}
 function gs(d){var l=[].concat(d.genres||[],d.tags||[]),seen={};return l.slice().sort(function(x,y){return (y.count||0)-(x.count||0)}).map(function(x){return x.name}).filter(function(x){var k=nrm(x);if(!x||JUNK.test(x)||seen[k])return false;seen[k]=1;return true}).slice(0,20).map(cap)}
 function aid(d){var c=(d['artist-credit']||[])[0];return c&&c.artist?c.artist.id:''}
 function pickM(d){return {g:gs(d),d:d['first-release-date']||'',l:'',id:d.id,ai:aid(d)}}
@@ -1060,8 +1070,8 @@ delete wq[k];if(W[k])rs2(k)}
 
 /* ---------- Géneros rápidos (iTunes + Deezer), sin depender de MusicBrainz ---------- */
 var AGC={},GX={},gq=[],gqd={},gbz=0,gt={},gRT=0;
-try{GX=JSON.parse(localStorage.getItem('digz-gx2')||'{}');Object.keys(GX).forEach(function(k){if(GX[k]&&GX[k].v>=3&&!(GX[k].g||[]).length)delete GX[k]})}catch(e){}
-function saveGX(){clearTimeout(saveGX.t);saveGX.t=setTimeout(function(){try{localStorage.setItem('digz-gx2',JSON.stringify(GX))}catch(e){}},1500)}
+try{GX=JSON.parse(localStorage.getItem('digz-gx3')||'{}');Object.keys(GX).forEach(function(k){if(GX[k]&&GX[k].v>=3&&!(GX[k].g||[]).length)delete GX[k]})}catch(e){}
+function saveGX(){clearTimeout(saveGX.t);saveGX.t=setTimeout(function(){try{localStorage.setItem('digz-gx3',JSON.stringify(GX))}catch(e){}},1500)}
 function needG(k,front){if(!S.a[k]||(GX[k]&&(GX[k].v>=4||gAuto(k).length>=2||(GX[k].v==2&&Date.now()-GX[k].t<86400000))))return;if(gqd[k]){if(front){var i=gq.indexOf(k);if(i>0){gq.splice(i,1);gq.unshift(k)}}return}
 gqd[k]=1;front?gq.unshift(k):gq.push(k);gPump()}
 var gDirty=0;
@@ -1071,37 +1081,37 @@ if(ok){gDirty=1;if(cur==k)rs2(k)}
 else if(S.a[k]&&(gt[k]=(gt[k]||0)+1)<3)setTimeout(function(){needG(k)},5000*gt[k]);
 if(ui.ge||ui.g=='ge'){if(!gq.length){if(gDirty){gDirty=0;render()}}else{var gnn=document.querySelector('.gnote');if(gnn)gnn.innerHTML=gnn.innerHTML.replace(/Buscando géneros de \d+ álbum(?:es)?…/,'Buscando géneros de '+gq.length+(gq.length==1?' álbum…':' álbumes…'))}}else if(!gq.length)gDirty=0;
 setTimeout(gPump,250)})}
-var DC={t:''},DCT=0,DCBAD=0;try{DC.t=localStorage.getItem('digz-dc')||''}catch(e){}
+var DC={t:''},DCT=0,DCBAD=0;try{DC.t=localStorage.getItem('digz-dc')||''}catch(e){}if(!DC.t)DC.t=DEF_DCTOKEN;
 function dcWait(){var w=Math.max(0,DCT+1150-Date.now());DCT=Date.now()+w;return sleep(w)}
-function dcGet(p){var ck='dcg:'+p.toLowerCase();return idbGet(ck).then(function(c){if(c&&c.d&&Date.now()-c.t<6048e5)return c.d;var u='https://api.discogs.com/'+p+'&token='+encodeURIComponent(DC.t);return dcWait().then(function(){return fj(u,12000).catch(function(e){if(PXC&&!(e&&e.nf)&&String(e&&e.message)!='h401')return fj(PXC+(PXC.indexOf('?')>-1?'&':'?')+'url='+encodeURIComponent(u),12000);throw e})}).then(function(d){idbPut(ck,{d:d,t:Date.now()});return d})})}
+function dcGet(p){var ck='dcg:'+p.toLowerCase();return idbGet(ck).then(function(c){if(c&&c.d&&Date.now()-c.t<6048e5)return c.d;var u='https://api.discogs.com/'+p+(DC.t?'&token='+encodeURIComponent(DC.t):'');return dcWait().then(function(){return (DC.t?fj(u,12000):Promise.reject({})).catch(function(e){var PX=DC.t?PXC:DEF_PROXY;if(PX&&!(e&&e.nf)&&String(e&&e.message)!='h401')return fj(PX+(PX.indexOf('?')>-1?'&':'?')+'url='+encodeURIComponent(u),12000);throw e})}).then(function(d){idbPut(ck,{d:d,t:Date.now()});return d})})}
 /* Discogs: géneros y estilos del álbum (master primero, luego release). Solo cuenta si el título y el artista coinciden. */
-async function dcGenres(a){if(!DC.t||DCBAD||!a.ar||a.ar=='Desconocido')return [];var ty=['master','release'],c=cln(a.al);
+function dcOn(){return !!(DC.t||DEF_PROXY)}
+async function dcGenres(a){if(!dcOn()||DCBAD||!a.ar||a.ar=='Desconocido')return [];var ty=['master','release'],c=cln(a.al);
 for(var i=0;i<ty.length;i++){var d;try{d=await dcGet('database/search?type='+ty[i]+'&release_title='+qe(a.al)+'&artist='+qe(a.ar)+'&per_page=10')}catch(e){if(e&&e.message=='h401'){DCBAD=1;toast('Token de Discogs no válido');return []}if(e&&e.nf)continue;throw e}
 var l=(d.results||[]).map(function(x){var s=String(x.title||''),j=s.indexOf(' - ');return j<0?null:{ar:s.slice(0,j),al:s.slice(j+3),x:x}}).filter(function(x){return x&&same(x.ar,a.ar)});
 var h=l.filter(function(x){return cln(x.al)==c})[0]||l.filter(function(x){return same(x.al,a.al)})[0];
 if(h){var g=[].concat(h.x.style||[],h.x.genre||[]);if(g.length)return g}}return []}
-async function loadG(k){var a=S.a[k];if(!a)return true;var g=[],ok=0,h,r,id,dcg=[];
-if(DC.t&&!DCBAD){try{dcg=await dcGenres(a)}catch(e){if((gt[k]||0)<2)return false}}
-if(dcg.length){g=dcg.slice();ok=1}
-/* Deezer: lista de géneros del álbum (primero: rápido y fiable) */
-if(!dcg.length)try{id=a.id;if(!id){r=await jsonp('https://api.deezer.com/search/album?limit=10&q='+qe('artist:"'+a.ar+'" album:"'+a.al+'"'));
+async function loadG(k){var a=S.a[k];if(!a)return true;var g=[],ok=0,src='',h,r,id,dcg=[];
+/* Orden de fiabilidad (todas son del ÁLBUM, nunca del artista, y no se rellena hasta tener 2):
+   1) Discogs (si hay token)  2) MusicBrainz  3) Deezer + iTunes, solo si las anteriores no tienen nada */
+if(dcOn()&&!DCBAD){try{dcg=await dcGenres(a)}catch(e){if((gt[k]||0)<2)return false}}
+if(dcg.length){g=dcg.slice(0,4);ok=1;src='Discogs'}
+if(!g.length){try{var mg=await mbGen(a);ok=1;if(mg.length){g=mg;src='MusicBrainz'}}catch(e){}}
+if(!g.length){
+var dzg=[];try{id=a.id;if(!id){r=await jsonp('https://api.deezer.com/search/album?limit=10&q='+qe('artist:"'+a.ar+'" album:"'+a.al+'"'));
 var dh=pickAlb(r.data||[],function(x){return x.title},function(x){return (x.artist||{}).name},a);
 if(!dh){r=await jsonp('https://api.deezer.com/search/album?limit=10&q='+qe(a.ar+' '+a.al));dh=pickAlb(r.data||[],function(x){return x.title},function(x){return (x.artist||{}).name},a)}
 if(dh)id=String(dh.id)}
 if(id){var dz=await jsonp('https://api.deezer.com/album/'+id);ok=1;if(S.a[k]&&!S.a[k].id){S.a[k].id=id;saveSoon()}
-g=g.concat(((dz.genres||{}).data||[]).map(function(x){return x.name}))}else ok=1}catch(e){}
-/* iTunes: género principal, solo si Deezer dio menos de 2 géneros */
-if(!dcg.length&&g.length<2)try{if(a.iid){var d=await tmo(jsonp('https://itunes.apple.com/lookup?id='+a.iid),6000);h=(d.results||[])[0]}else h=await tmo(itAlbum(k),6000);
-ok=1;if(h&&h.primaryGenreName)g.push(h.primaryGenreName)}catch(e){}
+dzg=((dz.genres||{}).data||[]).map(function(x){return x.name})}else ok=1}catch(e){}
+var itg='';try{if(a.iid){var d=await tmo(jsonp('https://itunes.apple.com/lookup?id='+a.iid),6000);h=(d.results||[])[0]}else h=await tmo(itAlbum(k),6000);
+ok=1;if(h&&h.primaryGenreName)itg=h.primaryGenreName}catch(e){}
+/* Si Deezer e iTunes coinciden en algo, se queda solo con lo que coincide (más fiable); si no, el de iTunes y, si no hay, el de Deezer */
+var both=dzg.filter(function(x){var c=gcan(x);return c&&itg&&gcan(itg)&&gcan(itg).n==c.n});
+g=both.length?both.slice(0,1):(itg?[itg]:dzg.slice(0,2));if(g.length)src=both.length?'Deezer + iTunes':(itg?'iTunes':'Deezer')}
 g=g.filter(function(x){return x&&!/^(music|m[uú]sica)$/i.test(x)});
-/* Si hay menos de 2 géneros distintos, se completa con los del propio ÁLBUM (nunca con los del artista):
-   1) MusicBrainz (ya cargado o buscándolo)  2) TheAudioDB (Last.fm no se usa para los géneros) */
-if(cgc(g)<2&&M[k]&&M[k].g&&M[k].g.length)g=g.concat(M[k].g.slice(0,6));
-if(cgc(g)<2)try{var mg=await mbGen(a,1);ok=1;g=g.concat(mg.slice(0,6))}catch(e){}
-if(cgc(g)<2)try{var ax=await adbGet('searchalbum.php?s='+qe(a.ar)+'&a='+qe(a.al));ok=1;var al0=((ax&&ax.album)||[])[0];if(al0)[al0.strGenre,al0.strStyle].forEach(function(x){if(x)g.push(x)})}catch(e){}
 if(!S.a[k])return true;if(!ok)return false;
-var cg={};g.forEach(function(x){var c=gcan(x);if(c)cg[c.n]=1});
-var fg=gcl(g).slice(0,12);GX[k]={g:fg,t:Date.now(),v:cgn(fg)?4:2};saveGX();return true}
+var fg=gcl(g).slice(0,12);GX[k]={g:fg,s:src,t:Date.now(),v:cgn(fg)?4:2};saveGX();return true}
 function bulkG(){Object.keys(S.a).forEach(function(k){if(!S.a[k].tmp)needG(k)})}
 
 /* ---------- Last.fm ---------- */
@@ -1112,13 +1122,13 @@ function saveLF(){try{localStorage.setItem('digz-lfm',JSON.stringify(LF))}catch(
 function lf(m,p){var u='https://ws.audioscrobbler.com/2.0/?format=json&api_key='+encodeURIComponent(lfKey())+'&method='+m+'&'+Object.keys(p).map(function(x){return x+'='+encodeURIComponent(p[x])}).join('&');
 return cfetch(u,216e5).then(function(r){return r.json()}).catch(function(){return jsonp(u)})}
 function tg(l){return [].concat(l||[]).map(function(x){return x.name}).filter(function(x){return x&&!JUNK.test(x)}).slice(0,15)}
-async function loadL(k){if(!lfKey()||!LF.u||LC[k]||!S.a[k]||lq[k])return;lq[k]=1;var a=S.a[k];
+async function loadL(k){if(!lfKey()||!LF.u||(LC[k]&&LC[k].gv==2)||!S.a[k]||lq[k])return;lq[k]=1;var a=S.a[k];
 try{var d=await lf('album.getinfo',{artist:a.ar,album:a.al,autocorrect:1,username:LF.u}),i=d.album,g=i?tg((i.tags||{}).tag):[];
-if(!g.length){var t=await lf('artist.gettoptags',{artist:a.ar,autocorrect:1});g=tg((t.toptags||{}).tag)}
+g=g.filter(function(x){return nrm(x)!=nrm(a.ar)&&nrm(x)!=nrm(a.al)});
 if(d.error==10||d.error==26){lq[k]=0;return}
-LC[k]={g:g,pc:i?+i.userplaycount||0:0,ls:i?+i.listeners||0:0};try{localStorage.setItem('digz-lc',JSON.stringify(LC))}catch(e){}}catch(e){}
+LC[k]={gv:2,g:g,pc:i?+i.userplaycount||0:0,ls:i?+i.listeners||0:0};try{localStorage.setItem('digz-lc',JSON.stringify(LC))}catch(e){}}catch(e){}
 delete lq[k];if(LC[k])rs2(k)}
-async function bulkL(){var ks=Object.keys(S.a);for(var i=0;i<ks.length;i++){if(!LC[ks[i]]){await loadL(ks[i]);await sleep(260)}}render()}
+async function bulkL(){var ks=Object.keys(S.a);for(var i=0;i<ks.length;i++){if(!LC[ks[i]]||LC[ks[i]].gv!=2){await loadL(ks[i]);await sleep(260)}}render()}
 async function syncL(){var by={},n=0,tot=0;Object.keys(S.a).forEach(function(k){(by[nrm(S.a[k].ar)]=by[nrm(S.a[k].ar)]||[]).push(k)});
 for(var p=1;p<=8;p++){var d=await lf('user.gettopalbums',{user:LF.u,period:'overall',limit:500,page:p});
 if(d.error)return 'Error de Last.fm: '+(d.message||d.error);var l=(d.topalbums||{}).album;if(!l||!l.length)break;
@@ -1953,7 +1963,7 @@ var u2={};for(var z in u)u2[z]=u[z];if(a.mb)u2.mb='https://musicbrainz.org/relea
 var AL=albumLinks(k);AL.splice(AL.length-1,0,['MusicBrainz','mb','']);if(!a.mb)AL=AL.filter(function(x){return x[1]!='mb'});
 var meta=!m?'<div class="h">'+(tries[k]>=4?'No pude conectar con MusicBrainz.':'Cargando datos del álbum…')+'</div>':m.x?'<div class="h">No encontré este álbum en MusicBrainz.</div>':(function(){var p=[(m.d||'').slice(0,4),m.t&&m.t.length?m.t.length+' canciones':'',m.l].filter(Boolean);return (p.length?'<div class="h">'+esc(p.join(' • '))+'</div>':'')})(),
 mg=gmx(k),gtl=mg.length?'<div class="h">'+esc(mg.slice(0,2).map(cap).join(' • '))+'</div>':'',gen=mg.length?'<div class="gn">'+mg.map(function(x){return '<span role="button" tabindex="0" data-a="ge" data-ge="'+esc(x)+'" aria-label="Ver álbumes del género '+esc(x)+'">'+esc(cap(x))+'</span>'}).join('')+'</div>':'',
-lfx=lc?((lc.pc||lc.ls)?'<div class="h">Last.fm'+(lc.pc?' · '+lc.pc+' reproducciones tuyas':'')+(lc.ls?' · '+lc.ls.toLocaleString()+' oyentes':'')+'</div>':''):'',
+lfx=lc?((lc.pc||lc.ls||(lc.g&&lc.g.length))?'<div class="h">Last.fm'+(lc.pc?' · '+lc.pc+' reproducciones tuyas':'')+(lc.ls?' · '+lc.ls.toLocaleString()+' oyentes':'')+'</div>':'')+((lc.gv==2&&lc.g&&lc.g.length)?'<div class="gn lft" style="margin-top:10px">'+lc.g.slice(0,10).map(function(x){return '<span>'+esc(cap(x))+'</span>'}).join('')+'</div><div class="h" style="margin-top:8px">Etiquetas de este álbum puestas por los usuarios de Last.fm: muchas son opiniones personales y pueden no ser exactas. No se usan para clasificar tus álbumes.</div>':''):'',
 tl='';var hast=!!(m&&m.t&&m.t.length),mbp=(!m&&!(tries[k]>=4))||(m&&a.mb&&!m.x&&!m.t&&tq[k]!=2),ldg=FBq[k]==1||mbp;
 if(hast){tl='<div class="tk">'+m.t.map(function(t,i){var s=t[1]||0,r=(a.tr||{})[i],f=(a.tf||{})[i],row='<div class="tr1" data-a="trk" data-i="'+i+'"><span class="n">'+(i+1)+'</span><span class="nm">'+esc(t[0])+(s?'<span class="tdu">'+Math.floor(s/60)+':'+('0'+s%60).slice(-2)+'</span>':'')+'</span>'+(r?'<span class="rv3" aria-label="Puntuación '+fr(r)+' de 5">★ '+fr(r)+'</span>':'')+'<span class="tfh'+(f?' on':'')+'" data-a="tfv" data-i="'+i+'" aria-label="Canción favorita">'+(f?ICHT:ICHT0)+'</span></div>';
 if(ui.tk===i)row+='<div class="tp">'+stars(r||0,'trr','data-i="'+i+'"',1)+'</div>';
@@ -1968,7 +1978,7 @@ var hasN=!!(a.note&&a.note.trim()),edN=!hasN||ui.rv;
 body='<div class="sec rvh"><span>Mi reseña</span>'+(!edN?'<button type="button" class="rve" data-a="rved">Editar reseña</button>':'')+'</div>'+(edN?'<div class="rvc '+rvCls()+'"><textarea id="nt" rows="3" maxlength="600" placeholder="Escribe tu reseña de este álbum…">'+esc(a.note)+'</textarea><div class="rvf"><span class="rvn" id="ntc">'+String(a.note||'').length+' / 600</span><div class="btns rvb">'+(hasN?'<button class="dgb" data-a="rvdel">Eliminar</button><button data-a="rvcx">Cancelar</button>':'')+'<button class="p" data-a="rvsv">Guardar</button></div></div></div>':'<div class="rvc '+rvCls()+'"><div class="rvt">'+esc(a.note)+'</div></div>')
 +'<div class="sec">Críticas y reseñas de webs</div>'+lkRow(CRL,u2)
 +'<div class="sec">Más información</div>'+lkRow(INF,u2)}
-else if(tb=='ge')body=('<div class="sec">Géneros</div>'+genTab(k)+(gen?'<div class="h" style="margin-top:8px">Toca un género para ver tus álbumes de ese estilo.</div>':(GX[k]?'<div class="h" style="padding:10px 0">Sin género</div>':'<div class="h" style="padding:10px 0">Buscando géneros…</div>')))+(lfx?'<div class="sec">Last.fm</div>'+lfx:'')||'<div class="h" style="padding:18px 0">Sin datos de género todavía.</div>';
+else if(tb=='ge')body=('<div class="sec">Géneros</div>'+genTab(k)+(gen?'<div class="h" style="margin-top:8px">Toca un género para ver tus álbumes de ese estilo.'+(GX[k]&&GX[k].s?' Fuente: '+esc(GX[k].s)+'.':'')+'</div>':(GX[k]?'<div class="h" style="padding:10px 0">Sin género</div>':'<div class="h" style="padding:10px 0">Buscando géneros…</div>')))+(lfx?'<div class="sec">Last.fm</div>'+lfx:'')||'<div class="h" style="padding:18px 0">Sin datos de género todavía.</div>';
 else{var avg=tv.length?tv.reduce(function(p,c){return p+c},0)/tv.length:0,cls=colList(a),nfv=Object.keys(a.tf||{}).length,dtx=(a.done&&a.t)?new Date(a.t).toLocaleDateString('es',{day:'numeric',month:'short'}).replace('.',''):'—';
 body='<div class="mn-card"><div class="mn-big">'+(a.rate?fr(a.rate):'—')+'</div><div class="mn-in">'+stars(a.rate||0,'mnr')+'<div class="mn-sub">'+(tv.length?'Media de canciones '+avg.toFixed(1)+' · '+tv.length+' de '+(hast?m.t.length:tv.length)+' puntuadas':'Aún no has puntuado canciones')+'</div></div></div>'
 +'<div class="mn-3"><div><b>'+nfv+'</b><span>Favoritas</span></div><div><b>'+dtx+'</b><span>'+(a.done?'Escuchado':'Por escuchar')+'</span></div><div><b>'+cls.length+'</b><span>Colecciones</span></div></div>'
@@ -2113,7 +2123,7 @@ $('im').onclick=function(){var v=$('pt').value,n=0;
 if(/^\ufeff?"?(track name|album|artist)/i.test(v.trim())){n=Math.max(0,importCSV(v))}
 else v.split('\n').forEach(function(l){var p=l.split(/\s[-–—]\s/);if(p.length>1)n+=add(p[0].trim(),p.slice(1).join(' - ').trim())});
 $('pt').value='';save();render();msg(n+' álbumes nuevos')}}
-else if(sub=='cx'){$('pxu').value=PXC;$('dct').value=DC.t||'';$('dcs').onclick=function(){var v=$('dct').value.trim();DC.t=v;DCBAD=0;try{localStorage.setItem('digz-dc',v)}catch(e){}GX={};try{localStorage.removeItem('digz-gx2')}catch(e){}if(v){bulkG();toast('Token guardado · actualizando géneros')}else toast('Token borrado')};
+else if(sub=='cx'){$('pxu').value=PXC;$('dct').value=DC.t||'';$('dcs').onclick=function(){var v=$('dct').value.trim();DC.t=v||DEF_DCTOKEN;DCBAD=0;try{localStorage.setItem('digz-dc',v)}catch(e){}GX={};try{localStorage.removeItem('digz-gx3')}catch(e){}if(v){bulkG();toast('Token guardado · actualizando géneros')}else toast('Token borrado')};
 $('pxs').onclick=function(){var v=$('pxu').value.trim();if(v&&!/^https:\/\//i.test(v)){toast('Debe empezar por https://');return}PXC=v;try{localStorage.setItem('digz-px',v)}catch(e){}NH={};NCH={};toast(v?'Proxy guardado':'Proxy borrado')};
 cstat().then(function(t){var e=$('cxs');if(e)e.textContent=t});
 $('cxc').onclick=function(){NCH={};SEC={};SEA={};idbClear().then(function(){toast('Caché borrada');return cstat()}).then(function(t){var e=$('cxs');if(e)e.textContent=t})};
