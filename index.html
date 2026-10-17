@@ -714,8 +714,16 @@ html.boot #seg,html.boot #chips,html.boot #list{opacity:0}
 html.bootf #seg,html.bootf #chips,html.bootf #list{animation:bootf .18s ease-out}
 @keyframes bootf{from{opacity:0}to{opacity:1}}
 
+/* ===== Fuentes ===== */
+.srx{display:flex;align-items:center;gap:10px;padding:12px 14px}.srx+.srx{border-top:1px solid var(--bd)}
+.srt{flex:1;min-width:0}.srt b{display:block;font-size:15px}.srt small{display:block;color:var(--mut);font-size:12.5px;margin-top:2px}
+.sra2{display:flex;align-items:center;gap:8px;flex:none}
+.sra2 a{font-size:12.5px;color:var(--mut);text-decoration:underline;padding:6px 2px}
+.sra2 a.go{color:var(--ac);font-weight:700;text-decoration:none;border:1px solid var(--ac);border-radius:999px;padding:6px 12px}
+.sra2 button{padding:4px 8px;font-size:12px}
 /* ===== Pestaña Info ===== */
-.tabs5 button{font-size:13px;padding:13px 0}
+.tabs5{justify-content:space-between;gap:0;padding:0 2px}
+.tabs5 button{flex:0 0 auto;font-size:13px;padding:13px 6px;white-space:nowrap}
 .infc{border:1px solid var(--bd);background:var(--card);border-radius:16px;padding:13px 14px;margin:0 0 10px}
 .infc h4{font-size:14.5px;margin:0 0 5px}
 .infc .ds{color:var(--tx);opacity:.85;line-height:1.5;margin-top:2px}
@@ -985,7 +993,7 @@ function covurl(mb,sz){return 'https://coverartarchive.org/release-group/'+mb+'/
 function apx(im){var p=im.parentNode;im.remove();if(p&&p.classList){p.classList.remove('kn');if(p.dataset&&p.dataset.bg)p.style.background=p.dataset.bg}}
 function ncv(im){var m=im.dataset.m,p=im.parentNode;im.remove();if(p&&p.classList){p.classList.remove('kn');if(p.dataset&&p.dataset.bg)p.style.background=p.dataset.bg}if(m){NC[m]=Date.now();try{localStorage.setItem('digz-nc',JSON.stringify(NC))}catch(e){}}}
 function sleep(t){return new Promise(function(r){setTimeout(r,t)})}
-function mbq(p){var run=mbC.then(function(){return sleep(Math.max(0,mbT+1100-Date.now()))}).then(function(){mbT=Date.now();return netGet('https://musicbrainz.org/ws/2/'+p+(p.indexOf('?')>-1?'&':'?')+'fmt=json',15000,DCB?{nc:1}:undefined)});mbC=run.catch(function(){});return run}
+function mbq(p){var run=mbC.then(function(){return sleep(Math.max(0,mbT+1100-Date.now()))}).then(function(){mbT=Date.now();return netGet('https://musicbrainz.org/ws/2/'+p+(p.indexOf('?')>-1?'&':'?')+'fmt=json',15000,(DCB||inForce())?{nc:1}:undefined)});mbC=run.catch(function(){});return run}
 function mbs(p,sig){return fetch('https://musicbrainz.org/ws/2/'+p+'&fmt=json',{signal:sig}).then(function(r){if(r.status==503||r.status==429)throw 'q';if(!r.ok)throw 'e';return r.json()})}
 function rg(a,l){var c=l.filter(function(x){return same(x.title,a.al)&&(a.ar=='Desconocido'||acs(x).some(function(n){return same(n,a.ar)}))});c.sort(function(x,y){return (x['primary-type']=='Album'?0:1)-(y['primary-type']=='Album'?0:1)});return c[0]}
 async function load(k){var a=S.a[k],d=null;
@@ -1154,7 +1162,7 @@ if(ui.ge||ui.g=='ge'){if(!gq.length){if(gDirty){gDirty=0;render()}}else{var gnn=
 setTimeout(gPump,250)})}
 var DC={t:''},DCT=0,DCBAD=0,DCP=0,DCB='',gF={};try{DC.t=localStorage.getItem('digz-dc')||''}catch(e){}if(!DC.t)DC.t=DEF_DCTOKEN;
 function dcWait(){var n=Date.now(),w=Math.max(0,DCT+1600-n,DCB?0:DCP-n);DCT=n+w;return sleep(w)}
-function dcGet(p){var ck='dcg:'+p.toLowerCase();return (DCB?Promise.resolve(null):idbGet(ck)).then(function(c){if(c&&c.d&&Date.now()-c.t<7776e6)return c.d;var u='https://api.discogs.com/'+p+(DC.t?'&token='+encodeURIComponent(DC.t):'')+DCB;
+function dcGet(p){var ck='dcg:'+p.toLowerCase();return ((DCB||inForce())?Promise.resolve(null):idbGet(ck)).then(function(c){if(c&&c.d&&Date.now()-c.t<7776e6)return c.d;var u='https://api.discogs.com/'+p+(DC.t?'&token='+encodeURIComponent(DC.t):'')+DCB;
 /* Si Discogs responde 429 (demasiadas peticiones) se pausa todo ~1 min y se reintenta solo, sin perder el álbum */
 function go(n){return dcWait().then(function(){return (DC.t?fj(u,12000):Promise.reject({})).catch(function(e){var PX=DC.t?PXC:DEF_PROXY;if(PX&&!(e&&e.nf)&&String(e&&e.message)!='h401')return fj(PX+(PX.indexOf('?')>-1?'&':'?')+'url='+encodeURIComponent(u),12000);throw e})}).catch(function(e){if(String(e&&e.message)=='h429'&&n<3&&!DCB){DCP=Date.now()+65000;return go(n+1)}throw e})}
 return go(0).then(function(d){idbPut(ck,{d:d,t:Date.now()});return d})})}
@@ -2085,7 +2093,8 @@ stdraw(k)}
 /* ---------- Ficha del álbum ---------- */
 /* ---------- Pestaña «Info» del álbum: Wikipedia (solo el artículo del ÁLBUM), MusicBrainz y Discogs ----------
    Todo se pide solo al tocar un chip, en paralelo y con tope de tiempo; cada resultado se guarda 30 días (IndexedDB). */
-var IN={},INC='info1:',INT=2592e6;
+var IN={},INC='info2:',INT=2592e6,INFORCE=0;
+function inForce(){return INFORCE>Date.now()}
 var INR={'producer':'Productor','co producer':'Coproductor','co-producer':'Coproductor','executive producer':'Productor ejecutivo','additional producer':'Productor adicional','assistant producer':'Productor asistente','engineer':'Ingeniería','recording':'Grabación','recorded by':'Grabación','recording engineer':'Grabación','mix':'Mezcla','mixed by':'Mezcla','mixing':'Mezcla','mix engineer':'Mezcla','mastering':'Masterización','mastered by':'Masterización','mastering engineer':'Masterización','vocal':'Voz','vocals':'Voz','lead vocals':'Voz principal','background vocals':'Coros','backing vocals':'Coros','guitar':'Guitarra','electric guitar':'Guitarra eléctrica','acoustic guitar':'Guitarra acústica','bass':'Bajo','bass guitar':'Bajo','drums':'Batería','piano':'Piano','keyboard':'Teclados','keyboards':'Teclados','synthesizer':'Sintetizador','programming':'Programación','arranger':'Arreglos','arranged by':'Arreglos','composer':'Composición','writer':'Autor','lyricist':'Letra','written-by':'Autor','written by':'Autor','songwriter':'Autor','instrument':'Instrumento','performer':'Intérprete','featuring':'Invitado','sampler':'Sampler','percussion':'Percusión','strings':'Cuerdas','violin':'Violín','cello':'Chelo','saxophone':'Saxofón','trumpet':'Trompeta','flute':'Flauta','organ':'Órgano','turntables':'Tornamesas','choir':'Coro','design':'Diseño','artwork by':'Arte','photography by':'Fotografía','executive-producer':'Productor ejecutivo','a&r':'A&R'};
 function inEs(r){var l=String(r).toLowerCase().trim(),b=l.replace(/\s*\[.*?\]/g,'').trim();return INR[l]||INR[b]||cap(String(r).trim())}
 function inGrp(r){var l=String(r).toLowerCase();
@@ -2100,14 +2109,14 @@ function inRows(M){return Object.keys(M).map(function(q){var o=M[q];return {n:o.
 /* --- Wikipedia: solo si el artículo es de ESTE álbum (título igual, categoría de álbum/EP y menciona al artista). Nunca el del artista. --- */
 async function inWiki(a){var base='https://en.wikipedia.org/w/api.php?format=json&origin=*&action=query&redirects=1';
 var parts=String(a.ar).split(/\s*(?:,|&|\band\b|\bfeat\.?|\bx\b)\s*/i).filter(Boolean),want=cln(a.al);
-var d=await netGet(base+'&generator=search&gsrlimit=8&gsrsearch='+qe('"'+a.al+'" '+a.ar+' album')+'&prop=extracts|categories&exintro=1&explaintext=1&exlimit=8&cllimit=60',12000);
+var NC1=inForce()?{nc:1}:undefined,d=await netGet(base+'&generator=search&gsrlimit=8&gsrsearch='+qe('"'+a.al+'" '+a.ar+' album')+'&prop=extracts|categories&exintro=1&explaintext=1&exlimit=8&cllimit=60',12000,NC1);
 var ps=Object.keys((d.query&&d.query.pages)||{}).map(function(i){return d.query.pages[i]}).sort(function(x,y){return (x.index||0)-(y.index||0)});
 var hit=ps.filter(function(p){var tt=String(p.title||'').replace(/\s*\(.*?\)\s*$/,'');if(cln(tt)!=want)return false;
 var ex=String(p.extract||''),cat=(p.categories||[]).some(function(c){return /albums|extended plays|mixtapes|soundtracks|compilation|EPs\b/i.test(c.title)}),
 alb=/\b(album|extended play|\bEP\b|mixtape|soundtrack|compilation|record)\b/i.test(ex.slice(0,350))&&!/\b(is|was) an? [^.]{0,60}\b(singer|rapper|musician|band|duo|producer|songwriter|actor|actress|film|novel)\b/i.test(ex.slice(0,200));
 var art=parts.some(function(x){return nrm(ex).indexOf(nrm(x))>-1});return (cat||alb)&&art})[0];
 if(!hit)return null;
-var f=await netGet(base+'&prop=extracts&explaintext=1&exsectionformat=wiki&titles='+qe(hit.title),15000),fp=f.query&&f.query.pages,txt='';
+var f=await netGet(base+'&prop=extracts&explaintext=1&exsectionformat=wiki&titles='+qe(hit.title),15000,NC1),fp=f.query&&f.query.pages,txt='';
 if(fp)Object.keys(fp).forEach(function(i){txt=fp[i].extract||txt});
 var sp=txt.split(/\n+(={2,})\s*([^=\n]+?)\s*\1\s*\n/),secs=[{n:'',t:sp[0]}];for(var i=1;i+2<sp.length+1;i+=3)secs.push({n:sp[i+1],t:sp[i+2]||''});
 function pick(re){var o=secs.filter(function(x){return x.n&&re.test(x.n.toLowerCase())&&x.t.trim().length>80});return o.slice(0,2).map(function(x){return x.t.trim()}).join('\n\n')}
@@ -2115,7 +2124,12 @@ function tidy(s){return cutT(String(s).replace(/\n{3,}/g,'\n\n').trim(),1400)}
 var cards=[],intro=(secs[0].t||hit.extract||'').trim();
 if(intro)cards.push({h:'Contexto',t:tidy(intro)});
 [['Grabación',/^(background|recording|production|development|writing|conception|writing and recording|recording and production)/],['Composición',/^(music|composition|lyrics|style|music and lyrics|musical style|themes|lyrical themes|content)/],['Lanzamiento',/^(release|promotion|marketing|artwork|title|packaging|release and promotion)/],['Recepción',/^(critical reception|reception|critical response|accolades|legacy)/]].forEach(function(x){var t=pick(x[1]);if(t)cards.push({h:x[0],t:tidy(t)})});
-return {title:hit.title,url:'https://en.wikipedia.org/wiki/'+encodeURIComponent(String(hit.title).replace(/ /g,'_')),cards:cards}}
+var PM={},pm=txt.match(/\n==\s*(?:Personnel|Credits(?: and personnel)?|Credits adapted[^=\n]*|Album personnel)\s*==\s*\n([\s\S]*?)(?=\n==\s*[^=\n]+?\s*==\s*\n|$)/i);
+if(pm){var cur2='';pm[1].split('\n').forEach(function(ln){ln=ln.trim();if(!ln)return;var h3=ln.match(/^=+\s*([^=]+?)\s*=+$/);if(h3){cur2=h3[1];return}
+var m2=ln.match(/^[•*\-]?\s*([^–—:]{2,60}?)\s*(?:[–—]|\s-\s|:)\s*(.{2,200})$/);if(!m2)return;var nm=m2[1].trim(),rl=m2[2].replace(/\(.*?\)/g,'').replace(/\.$/,'');
+if(/^(track|tracks|all tracks)\b/i.test(nm))return;
+rl.split(/\s*,\s*|\s+and\s+|\s*;\s*/).forEach(function(r){r=r.trim();if(r&&r.length<40)inAdd(PM,nm,r,null,'Wikipedia')})})}
+return {title:hit.title,url:'https://en.wikipedia.org/wiki/'+encodeURIComponent(String(hit.title).replace(/ /g,'_')),cards:cards,rows:inRows(PM)}}
 /* --- MusicBrainz: créditos del lanzamiento (nivel álbum y de cada pista) --- */
 function inMbRoles(r){var t=r.type,at=r.attributes||[];return (t=='instrument'||t=='vocal'||t=='performer')?(at.length?at:[t]):[at.concat([t]).join(' ')]}
 async function inMB(a){var id=a.mb;
@@ -2124,9 +2138,11 @@ if(!id)return null;
 var g=await mbq('release-group/'+id+'?inc=releases');if(!g||g.error)return null;
 var rl=(g.releases||[]).filter(function(r){return !r.status||r.status=='Official'});if(!rl.length)rl=g.releases||[];
 rl.sort(function(x,y){return String(x.date||'9999').localeCompare(String(y.date||'9999'))});if(!rl.length)return null;
-var r=await mbq('release/'+rl[0].id+'?inc=artist-rels+recordings+recording-level-rels');if(!r||r.error)return null;
-var M={},n=0;(r.relations||[]).forEach(function(x){if(x['target-type']!='artist'||!x.artist)return;inMbRoles(x).forEach(function(ro){inAdd(M,x.artist.name,ro,null,'MusicBrainz')})});
-(r.media||[]).forEach(function(md){(md.tracks||[]).forEach(function(t){n++;var rc=t.recording;if(!rc)return;(rc.relations||[]).forEach(function(x){if(x['target-type']!='artist'||!x.artist)return;inMbRoles(x).forEach(function(ro){inAdd(M,x.artist.name,ro,n,'MusicBrainz')})})})});
+var M={};
+for(var ri=0;ri<Math.min(rl.length,3)&&!Object.keys(M).length;ri++){
+var r=await mbq('release/'+rl[ri].id+'?inc=artist-rels+recordings+recording-level-rels');if(!r||r.error)continue;
+var n=0;(r.relations||[]).forEach(function(x){if(x['target-type']!='artist'||!x.artist)return;inMbRoles(x).forEach(function(ro){inAdd(M,x.artist.name,ro,null,'MusicBrainz')})});
+(r.media||[]).forEach(function(md){(md.tracks||[]).forEach(function(t){n++;var rc=t.recording;if(!rc)return;(rc.relations||[]).forEach(function(x){if(x['target-type']!='artist'||!x.artist)return;inMbRoles(x).forEach(function(ro){inAdd(M,x.artist.name,ro,n,'MusicBrainz')})})})})}
 return {rows:inRows(M)}}
 /* --- Discogs: créditos y datos de la edición (master → edición principal) --- */
 async function inDc(a){if(!dcOn()||DCBAD||!a.ar||a.ar=='Desconocido')return null;var ty=['master','release'],c=cln(a.al),rel=null;
@@ -2149,9 +2165,9 @@ function inSave(k){var s=IN[k],o={};['wp','mb','dc'].forEach(function(q){if(s[q]
 function inRun(k,key,fn){var s=IN[k];if(s[key])return;s[key]={s:'load'};
 tmo(fn(S.a[k]),28000).then(function(d){s[key]={s:d?'ok':'none',d:d||null};inSave(k)},function(){s[key]={s:'err'}}).then(function(){if(cur==k&&ui.tab=='in')rs2(k)})}
 function inLoad(k,ch){var a=S.a[k];if(!a||a.ar=='Desconocido')return;var s=IN[k]=IN[k]||{};
-var go=function(){if(ch=='rs'){inRun(k,'wp',inWiki);inRun(k,'dc',inDc)}else{inRun(k,'mb',inMB);inRun(k,'dc',inDc)}};
+var go=function(){inRun(k,'wp',inWiki);inRun(k,'dc',inDc);inRun(k,'mb',inMB)};
 if(s.rest){go();return}s.rest=1;
-idbGet(INC+k).then(function(c){if(c&&c.d&&Date.now()-c.t<INT)['wp','mb','dc'].forEach(function(q){if(c.d[q]&&!s[q])s[q]=c.d[q]})}).catch(function(){}).then(function(){go();if(cur==k&&ui.tab=='in')rs2(k)})}
+idbGet(INC+k).then(function(c){if(c&&c.d&&Date.now()-c.t<INT)['wp','mb','dc'].forEach(function(q){var x=c.d[q];if(x&&!s[q]&&!(x.s=='none'&&Date.now()-c.t>2*864e5))s[q]=x})}).catch(function(){}).then(function(){go();if(cur==k&&ui.tab=='in')rs2(k)})}
 function inBadge(l){return '<span class="srcb">'+esc(l)+'</span>'}
 function inCard(i,k,c,src,u){var op=ui.wx['i'+i],big=c.t.length>300;return '<div class="infc"'+(big?' data-a="wx" data-w="i'+i+'"':'')+'><h4>'+esc(c.h)+'</h4><div class="ds'+(op?' open':'')+'">'+esc(c.t)+'</div>'+(big?'<div class="h" style="margin-top:4px">'+(op?'Ver menos':'Ver más')+'</div>':'')+(u?'<a class="srcb" href="'+esc(u)+'" target="_blank" rel="noopener">'+esc(src)+'</a>':inBadge(src))+'</div>'}
 function inPeople(rows,groups,lim){var by={};rows.forEach(function(r){if(groups.indexOf(r.g)<0)return;var k=nrm(r.n)+'|'+r.g,o=by[k]=by[k]||{n:r.n,g:r.g,r:{},t:0,s:{}};r.r.forEach(function(x){o.r[x]=1});o.t=Math.max(o.t,r.t||0);r.s.forEach(function(x){o.s[x]=1})});
@@ -2169,10 +2185,10 @@ if(dc&&dc.info.length)h+=(wp?'':'<div class="sec">Datos documentados</div>')+'<d
 if(st('wp')=='load')h+=ld('Buscando en Wikipedia…');if(st('dc')=='load')h+=ld('Buscando en Discogs…');
 if(!wp&&!(dc&&dc.info.length)&&st('wp')!='load'&&st('dc')!='load')h+=ld(st('wp')=='err'&&st('dc')=='err'?'No pude conectar con las fuentes. Revisa tu conexión y toca «Actualizar».':'No encontré información de este álbum.');
 if(wp)h+='<div class="h" style="margin-top:6px;font-size:11.5px;opacity:.75">Texto de Wikipedia en inglés, licencia CC BY-SA.</div>'}
-else{var rows=[].concat(st('mb')=='ok'?s.mb.d.rows:[],st('dc')=='ok'?s.dc.d.rows:[]),
+else{var rows=[].concat(st('mb')=='ok'?s.mb.d.rows:[],st('dc')=='ok'?s.dc.d.rows:[],st('wp')=='ok'&&s.wp.d.rows?s.wp.d.rows:[]),
 body=ch=='cr'?inPeople(rows,['Producción','Ingeniería','Composición','Otros']):inPeople(rows,['Músicos'],60);
-h+=body;if(st('mb')=='load')h+=ld('Buscando en MusicBrainz…');if(st('dc')=='load')h+=ld('Buscando en Discogs…');
-if(!body&&st('mb')!='load'&&st('dc')!='load')h+=ld(st('mb')=='err'&&st('dc')=='err'?'No pude conectar con las fuentes. Revisa tu conexión y toca «Actualizar».':(ch=='cr'?'No encontré créditos de este álbum.':'No encontré músicos acreditados en este álbum.'))}
+h+=body;if(st('mb')=='load')h+=ld('Buscando en MusicBrainz…');if(st('dc')=='load')h+=ld('Buscando en Discogs…');if(st('wp')=='load')h+=ld('Buscando en Wikipedia…');
+if(!body&&st('mb')!='load'&&st('dc')!='load'&&st('wp')!='load')h+=ld(st('mb')=='err'&&st('dc')=='err'?'No pude conectar con las fuentes. Revisa tu conexión y toca «Actualizar».':(ch=='cr'?'No encontré créditos de este álbum.':'No encontré músicos acreditados en este álbum.'))}
 var ok=['wp','mb','dc'].every(function(q){return st(q)!='load'});
 return h+'<div style="text-align:center;margin-top:16px"><span role="button" tabindex="0" data-a="inr" style="font-size:12px;color:var(--mut);opacity:.7;text-decoration:underline;cursor:pointer;padding:6px'+(ok?'':';pointer-events:none')+'">↻ Actualizar info</span></div>'}
 function sheet(k){var _sk=ui.sk;ui.sk=0;var o=$('nt');if(o&&cur==k)S.a[k].note=o.value;var same2=cur==k,sc=same2?$('sh').scrollTop:0;
@@ -2191,7 +2207,7 @@ return row}).join('')+'</div>'}
 else tl=ldg?'<div class="h" style="padding:18px 0">Buscando canciones…</div>':'<div class="h" style="padding:18px 0 10px">No encontré la lista de canciones de este álbum.</div><button data-a="rt">Reintentar</button>';
 var al=w&&w.al,dt=al?al.t:'',ex=!!ui.wx.al,bf=dt?cutT(dt.split('\n')[0],300):'',more=dt.length>bf.length+30,
 desc=dt?'<div class="ds open">'+esc(ex?dt:bf)+'</div>'+(more?'<button class="vm" data-a="wx" data-w="al">'+(ex?'Ver menos':'Ver más')+'</button>':'')+(ex&&al.u?' <a class="src2" href="'+esc(al.u)+'" target="_blank" rel="noopener">· Fuente</a>':''):(w?'':'<div class="h" style="margin-top:6px">Buscando descripción…</div>');
-var TB=[['tk','Canciones'],['cr','Críticas'],['ge','Géneros'],['in','Info'],['bi','Mi nota']],tb=ui.tab||'tk',body='';
+var TB=[['tk','Canciones'],['cr','Críticas'],['ge','Géneros'],['bi','Mi nota'],['in','Info']],tb=ui.tab||'tk',body='';
 if(tb=='tk')body=tl;
 else if(tb=='cr'){var CRK=['metacritic','aoty','rym','pitchfork','allmusic'],CRL=AL.filter(function(x){return CRK.indexOf(x[1])>-1}),INF=AL.filter(function(x){return CRK.indexOf(x[1])<0});
 var hasN=!!(a.note&&a.note.trim()),edN=!hasN||ui.rv;
@@ -2263,7 +2279,7 @@ else if(ac=='grm'){var gn=t.dataset.g,gz=nrm(gn);if((a.mg||[]).some(function(x){
 else if(ac=='shi'){ui.sm=false;studio(k)}
 else if(ac=='tab'){ui.tab=t.dataset.v;sheet(k)}
 else if(ac=='ic'){ui.ic=t.dataset.v;sheet(k)}
-else if(ac=='inr'){delete IN[k];idbPut(INC+k,{t:0,d:{}});sheet(k)}
+else if(ac=='inr'){INFORCE=Date.now()+90000;for(var nk in NCH)delete NCH[nk];delete IN[k];idbPut(INC+k,{t:0,d:{}});sheet(k)}
 else if(ac=='lst'){ui.ls=true;ui.lsn=1;sheet(k)}
 else if(ac=='lsx'){ui.ls=false;sheet(k)}
 else if(ac=='rt'){delete FBq[k];delete tq[k];delete tqn[k];delete tries[k];if(M[k]&&(M[k].x||(M[k].fb&&!hasT(k))))delete M[k];need(k,1);loadT(k);fbLoad(k,true);sheet(k)}
@@ -2296,9 +2312,33 @@ var GN=['Sólido','Neutro','Cristal','Suave','Brillo','Dúo'],tg=$("tgd");functi
 tg.onclick=function(e){var b=e.target.closest('button');if(!b)return;try{localStorage.setItem('dzgd2',b.dataset.gd)}catch(x){}document.documentElement.dataset.gd=b.dataset.gd;gdr()};gdr();
 $('trs').onclick=function(){try{localStorage.removeItem('dzgd2')}catch(x){}document.documentElement.dataset.gd='1';gdr();t={m:DZD.m,c:DZD.c};dzSave(t);dzApply(t);draw()};
 draw()}
+
+/* ---------- Fuentes (páginas de reseñas e info) ---------- */
+var SRC0=[['Rate Your Music','Reseñas y listas de la comunidad','https://rateyourmusic.com/new-music/','https://rateyourmusic.com/account/signup'],
+['Album of the Year','Notas de críticos y usuarios','https://www.albumoftheyear.org','https://www.albumoftheyear.org/user/register/'],
+['AllMusic','Créditos, estilos y reseñas','https://www.allmusic.com',''],
+['NME · Reseñas de álbumes','Críticas de discos','https://www.nme.com/reviews/album',''],
+['Paste Music','Reseñas y noticias','https://www.pastemagazine.com/music',''],
+['The Needle Drop','Reseñas en vídeo de Anthony Fantano','https://theneedledrop.com',''],
+['Last.fm','Historial de escucha y etiquetas','https://www.last.fm','https://www.last.fm/join'],
+['Musicboard','Registra y puntúa tus álbumes','https://musicboard.app',''],
+['Music-Map','Mapa de artistas parecidos','https://www.music-map.com',''],
+['Every Noise at Once','Mapa de géneros','https://everynoise.com',''],
+["Ishkur's Guide to Electronic Music",'Guía de música electrónica','https://music.ishkur.com',''],
+['NTS Radio','Radio y descubrimiento','https://www.nts.live',''],
+['LyricFind','Letras','https://www.lyricfind.com','']];
+var SRX=[];try{SRX=JSON.parse(localStorage.getItem('digz-srcx')||'[]')}catch(e){}
+function srcSave(){try{localStorage.setItem('digz-srcx',JSON.stringify(SRX))}catch(e){}}
+function srcUI(){var e=$('srl');if(!e)return;
+function row(x,i){return '<div class="srx"><div class="srt"><b>'+esc(x[0])+'</b>'+(x[1]?'<small>'+esc(x[1])+'</small>':'')+'</div><div class="sra2">'+(x[3]?'<a href="'+esc(x[3])+'" target="_blank" rel="noopener">Crear cuenta</a>':'')+'<a class="go" href="'+esc(x[2])+'" target="_blank" rel="noopener">Abrir</a>'+(i>=0?'<button data-sx="'+i+'" aria-label="Quitar">✕</button>':'')+'</div></div>'}
+e.innerHTML='<div class="cfg-g">'+SRC0.map(function(x){return row(x,-1)}).join('')+SRX.map(function(x,i){return row([x.n,'Añadida por ti',x.u,''],i)}).join('')+'</div>';
+[].forEach.call(e.querySelectorAll('[data-sx]'),function(b){b.onclick=function(){SRX.splice(+b.dataset.sx,1);srcSave();srcUI()}});
+$('sra').onclick=function(){var n=$('srn').value.trim(),u=$('sru').value.trim();if(u&&!/^https?:\/\//i.test(u))u='https://'+u;
+if(!n||!/^https?:\/\/[^\s.]+\.[^\s]+$/i.test(u)){toast('Escribe un nombre y un enlace válido');return}
+SRX.push({n:n,u:u});srcSave();$('srn').value='';$('sru').value='';srcUI();toast(n+' añadida')}}
 var CHV='<svg class="cfg-ch" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>';
-var CFI={fm:'<path d="M3 12h3l3-7 4 14 3-7h5"/>',pl:'<circle cx="12" cy="12" r="9"/><path d="M10 8.5l5 3.5-5 3.5z"/>',lk:'<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4"/>',im:'<path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19h14"/>',co:'<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',rs:'<path d="M5 20V11M12 20V4M19 20v-6"/>',bk:'<path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/>',ld:'<path d="M20 11a8 8 0 0 0-14.5-4M4 4v4h4M4 13a8 8 0 0 0 14.5 4M20 20v-4h-4"/>',cl:'<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/>'};
-var CFT={lastfm:'Last.fm',plat:'Plataformas de escucha',look:'Apariencia',imp:'Importar música',bk:'Respaldo y restauración',cx:'Conexión y fuentes'};
+var CFI={fm:'<path d="M3 12h3l3-7 4 14 3-7h5"/>',pl:'<circle cx="12" cy="12" r="9"/><path d="M10 8.5l5 3.5-5 3.5z"/>',lk:'<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4"/>',im:'<path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19h14"/>',co:'<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',rs:'<path d="M5 20V11M12 20V4M19 20v-6"/>',bk:'<path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/>',sr:'<path d="M4 5h16v14H4zM4 9h16M8 13h5"/>',ld:'<path d="M20 11a8 8 0 0 0-14.5-4M4 4v4h4M4 13a8 8 0 0 0 14.5 4M20 20v-4h-4"/>',cl:'<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/>'};
+var CFT={lastfm:'Last.fm',plat:'Plataformas de escucha',look:'Apariencia',imp:'Importar música',bk:'Respaldo y restauración',cx:'Conexión y APIs',src:'Fuentes'};
 function cfRow(a,ic,t,v,o){return '<button class="cfg-i'+(o&&o.indexOf('d')>-1?' dn':'')+'" '+a+'><span class="cfg-ic"><svg viewBox="0 0 24 24">'+CFI[ic]+'</svg></span><span class="cfg-t">'+t+'</span>'+(v?'<span class="cfg-v">'+v+'</span>':'')+(o&&o.indexOf('c')>-1?CHV:'')+'</button>'}
 function settings(sub){cur=null;if(!CFT[sub])sub='';ui.vk='settings'+(sub?':'+sub:'');var conn=LF.u&&lfKey(),h;
 if(!sub){var th=dzLoad(),ml={sys:'Sistema',light:'Claro',dark:'Oscuro'}[th.m]||'Sistema',on=SV.filter(function(s){return s.on}).length;
@@ -2308,12 +2348,13 @@ h=bhd('Ajustes')
 +cfRow('data-go="plat"','pl','Plataformas',on+(on==1?' activa':' activas'),'c')+'</div>'
 +'<div class="cfg-h">Personalización</div><div class="cfg-g">'
 +cfRow('data-go="look"','lk','Apariencia',ml+'<i class="cdot" style="background:'+esc(th.c)+'"></i>','c')+'</div>'
++'<div class="cfg-h">Descubrir</div><div class="cfg-g">'+cfRow('data-go="src"','sr','Fuentes','Reseñas y música','c')+'</div>'
 +'<div class="cfg-h">Biblioteca</div><div class="cfg-g">'
 
 +cfRow('data-go="imp"','im','Importar música','','c')+'</div>'
 +'<div class="cfg-h">Datos</div><div class="cfg-g">'
 +cfRow('data-go="bk"','bk','Respaldo y restauración','','c')
-+cfRow('data-go="cx"','ld','Conexión y fuentes','','c')
++cfRow('data-go="cx"','ld','Conexión y APIs','','c')
 +cfRow('data-do="ld"','ld','Descargar portadas y datos','','')+'</div>'
 +'<div class="cfg-g" style="margin-top:22px">'+cfRow('data-do="cl"','cl','Borrar toda mi biblioteca','','d')+'</div>'
 +'<div class="cfg-n" style="text-align:center;margin:22px 0 8px">Versión '+APPV+' · Digz'+(LF&&LF.u?' · '+esc(LF.u):'')+'</div>'}
@@ -2326,6 +2367,7 @@ plat:'<div class="card"><b>Tus plataformas</b><div class="h">Toca las que uses. 
 look:'<div class="card"><b>Modo</b><div class="seg" id="tm"></div><b>Color</b><div class="dots" id="tc"></div><b>Estilo de tarjetas</b><div class="seg" id="tgd"></div><button id="trs">Restablecer</button></div>',
 imp:'<div class="card"><div class="h">CSV de Deezer, Spotify (Exportify)…</div><input type="file" id="f" multiple><div class="h">O pega un CSV, o líneas «Artista - Álbum»</div><textarea id="pt"></textarea><button class="p" id="im">Importar texto</button><div class="h" id="ms"></div></div>',
 cx:'<div class="card"><b>Discogs</b><div class="h">Token personal de discogs.com/settings/developers. Fuente principal de géneros.</div><input id="dct" placeholder="Token de Discogs" autocapitalize="off" autocomplete="off"><button id="dcs">Guardar</button></div><div class="card" style="margin-top:12px"><b>Proxy propio (opcional)</b><div class="h">Si tu red bloquea o limita alguna fuente, pon aquí la URL de tu proxy (Cloudflare Worker gratis). Vacío = proxies públicos.</div><input id="pxu" placeholder="https://tu-proxy.workers.dev/" autocapitalize="off" autocomplete="off"><button id="pxs">Guardar</button></div><div class="card" style="margin-top:12px"><b>Probar conexiones</b><div class="h">Comprueba qué fuentes responden en esta red, directo o con proxy.</div><button class="p" id="cxt">Probar ahora</button><div id="cxr"></div></div><div class="card" style="margin-top:12px"><b>Caché de búsquedas</b><div class="h" id="cxs"></div><div class="h">Guarda lo que ya buscaste (7 días; las respuestas de Discogs, hasta 90) para no repetirlo: va más rápido y sirve incluso sin conexión.</div><button id="cxc">Borrar caché</button></div><div class="card" style="margin-top:12px"><b>Barra de estado</b><div class="h">Espacio extra en px arriba de cada pantalla, por si quieres que los botones queden por debajo de la barra del teléfono. Vacío = como siempre, sin espacio extra.</div><input id="sbi" type="number" inputmode="numeric" placeholder="Sin espacio extra"><button id="sbs">Guardar</button></div>',
+src:'<div class="h" style="margin:0 4px 10px">Páginas que uso para ver reseñas e información de álbumes, artistas y música. Toca «Abrir» para entrar; «Crear cuenta» te lleva al registro.</div><div id="srl"></div><div class="card" style="margin-top:12px"><b>Añadir otra fuente</b><div class="h">Nombre y enlace de cualquier página.</div><div class="row"><input id="srn" placeholder="Nombre"><input id="sru" placeholder="https://sitio.com" autocapitalize="off"></div><button id="sra">Añadir fuente</button></div>',
 bk:'<div class="card"><div class="h">Genera el texto, guárdalo y pégalo aquí para restaurar.</div><textarea id="bk"></textarea><div class="row"><button id="ex">Generar respaldo</button><button id="rs">Restaurar</button></div></div>'};
 h='<div class="hd"><div class="hl"><button id="x" class="cfg-bk" aria-label="Atrás">'+ICBK+'</button><div class="t">'+CFT[sub]+'</div></div></div>'+B[sub]}
 show(h);$('x').onclick=ovBack;$('sh').scrollTop=ovsy();
@@ -2345,6 +2387,7 @@ else if(sub=='plat'){svList();
 $('sva').onclick=function(){var n=$('svn').value.trim(),u=$('svu').value.trim();
 if(!n||!/^https?:\/\/.+\{(q|ar|al)\}/i.test(u)){toast('Escribe un nombre y una URL https que incluya {q}');return}
 SV.push({n:n,u:u,on:true,c:1});saveSV();$('svn').value='';$('svu').value='';svList();toast(n+' añadida')}}
+else if(sub=='src'){srcUI()}
 else if(sub=='look'){themeUI()}
 else if(sub=='imp'){
 $('f').onchange=function(e){var fs=[].slice.call(e.target.files),tot=0,bad=0,p=fs.length;
