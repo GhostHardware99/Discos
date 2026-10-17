@@ -36,7 +36,7 @@ button.p{background:var(--ac);border-color:var(--ac);color:var(--onac);font-weig
 .ttl{align-items:flex-end}.ttl .sub{color:var(--mut);font-size:14px;font-weight:600;margin-top:2px}
 .ttl span{color:var(--mut);font-size:13px;text-align:right}
 html{background:var(--bg)}
-body::before{content:"";position:fixed;left:0;right:0;top:var(--vvt,0px);height:560px;background:linear-gradient(180deg,rgba(var(--acr),var(--g1)) 0,rgba(var(--acr),var(--g2)) 42%,transparent 100%);pointer-events:none;z-index:0}
+body::before{content:"";position:fixed;left:0;right:0;top:var(--vvt,0px);height:560px;background:linear-gradient(180deg,rgb(var(--hcr,var(--acr))) 0,rgb(var(--hcr,var(--acr))) calc(var(--sat) + 28px),rgba(var(--acr),var(--g2)) 42%,transparent 100%);pointer-events:none;z-index:0}
 body.srch #seg,body.srch #chips,body.srch #opt{display:none!important}
 body.srch.sblank #list,body.srch.sblank #gauto{display:none}
 #gauto{position:relative;z-index:1;padding:0 16px 20px}
@@ -343,7 +343,7 @@ body{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
 html{min-height:100%;min-height:100dvh}body{min-height:100vh;min-height:100dvh}
 
 .hbg:before{content:"";position:absolute;left:0;right:0;top:0;height:170px;background:linear-gradient(to bottom,color-mix(in srgb,var(--tc,var(--bg)) 100%,transparent) 0%,color-mix(in srgb,var(--tc,var(--bg)) 73.8%,transparent) 19%,color-mix(in srgb,var(--tc,var(--bg)) 54.1%,transparent) 34%,color-mix(in srgb,var(--tc,var(--bg)) 38.2%,transparent) 47%,color-mix(in srgb,var(--tc,var(--bg)) 27.8%,transparent) 56.5%,color-mix(in srgb,var(--tc,var(--bg)) 19.4%,transparent) 65%,color-mix(in srgb,var(--tc,var(--bg)) 12.6%,transparent) 73%,color-mix(in srgb,var(--tc,var(--bg)) 7.5%,transparent) 80.2%,color-mix(in srgb,var(--tc,var(--bg)) 4.2%,transparent) 86.1%,color-mix(in srgb,var(--tc,var(--bg)) 2.1%,transparent) 91%,color-mix(in srgb,var(--tc,var(--bg)) 0.8%,transparent) 95.2%,color-mix(in srgb,var(--tc,var(--bg)) 0.2%,transparent) 98.2%,color-mix(in srgb,var(--tc,var(--bg)) 0%,transparent) 100%);z-index:2}
-#ov.full #sh{background:linear-gradient(180deg,rgba(var(--acr),var(--g1)) 0,rgba(var(--acr),var(--g2)) 42%,transparent 100%) top/100% 560px no-repeat,var(--bg)}
+#ov.full #sh{background:linear-gradient(180deg,rgb(var(--hcr,var(--acr))) 0,rgb(var(--hcr,var(--acr))) calc(var(--sat) + 28px),rgba(var(--acr),var(--g2)) 42%,transparent 100%) top/100% 560px no-repeat,var(--bg)}
 .hbg{-webkit-mask-image:linear-gradient(to bottom,rgba(0,0,0,1) 0%,rgba(0,0,0,1) 30%,rgba(0,0,0,0.945) 40%,rgba(0,0,0,0.802) 50%,rgba(0,0,0,0.606) 60%,rgba(0,0,0,0.394) 70%,rgba(0,0,0,0.198) 80%,rgba(0,0,0,0.055) 90%,rgba(0,0,0,0) 100%);mask-image:linear-gradient(to bottom,rgba(0,0,0,1) 0%,rgba(0,0,0,1) 30%,rgba(0,0,0,0.945) 40%,rgba(0,0,0,0.802) 50%,rgba(0,0,0,0.606) 60%,rgba(0,0,0,0.394) 70%,rgba(0,0,0,0.198) 80%,rgba(0,0,0,0.055) 90%,rgba(0,0,0,0) 100%)}
 .hbg:after{background:linear-gradient(to bottom,rgba(0,0,0,.12),transparent 60%)}
 .hrt{display:inline-flex;vertical-align:middle;color:#ff4d6d;filter:drop-shadow(0 2px 7px rgba(255,77,109,.5))}.hrt svg{width:22px;height:22px;display:block}
@@ -659,7 +659,7 @@ html[data-gd="3"] .lpc,html[data-gd="3"] .lsh,html[data-gd="3"] .cmenu,html[data
 /* ===== Colección: botones suben con la página; degradado sin franja de color sólido ===== */
 .hero.colpg>.htop{position:absolute;left:16px;right:16px;top:calc(12px + var(--sat));transform:none;width:auto;padding:0;pointer-events:auto;z-index:6}
 .hero.colpg>.htop .rb{pointer-events:auto}
-#ov:has(.colpg) #sh{background:linear-gradient(180deg,rgba(var(--acr),var(--g1)) 0,rgba(var(--acr),var(--g2)) 42%,transparent 100%) top/100% 560px no-repeat local,var(--bg)}
+#ov:has(.colpg) #sh{background:linear-gradient(180deg,rgb(var(--hcr,var(--acr))) 0,rgb(var(--hcr,var(--acr))) calc(var(--sat) + 28px),rgba(var(--acr),var(--g2)) 42%,transparent 100%) top/100% 560px no-repeat local,var(--bg)}
 
 #ov:has(.colpg):before{height:calc(56px + var(--sat))!important;background:linear-gradient(to bottom,rgba(var(--hcr,13,13,15),1) 0,rgba(var(--hcr,13,13,15),.82) 34%,rgba(var(--hcr,13,13,15),.42) 64%,rgba(var(--hcr,13,13,15),.12) 86%,rgba(var(--hcr,13,13,15),0) 100%)!important}
 .hbg img,.cv img,.ap img{will-change:auto}
@@ -728,7 +728,9 @@ function dzRgbs(h){return [1,3,5].map(function(i){return parseInt(h.substr(i,2),
 function dzDimA(){var l=[['.cedw',.72],['.lpm',.5],['.lsb',.6]],k=1,i,o=document.getElementById('ov');for(i=0;i<l.length;i++)if(document.querySelector(l[i][0]))k*=1-l[i][1];
 if(o&&o.style.display=='flex'&&!o.classList.contains('full'))k*=.45;return 1-k}
 function dzBar(c){var m=document.querySelector('meta[name=theme-color]');if(!m||!window.DZTC)return;c=window.DZBC||window.DZTC;window.DZB=c;var a=dzDimA();
-if(a>0&&/^#[0-9a-f]{6}$/i.test(c)){var r=[1,3,5].map(function(i){return parseInt(c.substr(i,2),16)});c=dzHex(dzMix(r,[0,0,0],a))}if(m.getAttribute('content')!==c)m.setAttribute('content',c)}
+if(a>0&&/^#[0-9a-f]{6}$/i.test(c)){var r=[1,3,5].map(function(i){return parseInt(c.substr(i,2),16)});c=dzHex(dzMix(r,[0,0,0],a))}if(/^#[0-9a-f]{6}$/i.test(c))c=dzHex([1,3,5].map(function(i){return Math.min(255,Math.round(parseInt(c.substr(i,2),16)/4)*4)}));dzBarApply(m,c)}
+/* El color de la barra de estado cambiaba muchas veces por segundo al hacer scroll (parpadeo arriba): ahora se agrupa en pasos y como mucho 1 cambio cada 120 ms */
+function dzBarApply(m,c){m.__want=c;if(m.getAttribute('content')===c){clearTimeout(dzBarApply.t);return}var n=Date.now(),w=120-(n-(dzBarApply.l||0));if(w<=0){clearTimeout(dzBarApply.t);dzBarApply.l=n;m.setAttribute('content',c)}else{clearTimeout(dzBarApply.t);dzBarApply.t=setTimeout(function(){dzBarApply.l=Date.now();m.setAttribute('content',m.__want)},w)}}
 function dzHc(av){var d=document.documentElement;window.DZBC=null;d.style.removeProperty('--bc');if(!av){window.DZHC=null;d.style.removeProperty('--hc');d.style.setProperty('--hcr',dzRgbs(window.DZTC));dzBar();return}
 var rgb=[1,3,5].map(function(i){return parseInt(av.substr(i,2),16)}),bg=window.DZDK?[13,13,15]:[244,243,239],c=dzHex(dzMix(dzMix(bg,rgb,.55),[0,0,0],.12));window.DZHC=c;d.style.setProperty('--hc',c);d.style.setProperty('--hcr',dzRgbs(window.DZTC));dzBar();if(typeof albBarUpd=='function')albBarUpd()}
 dzApply(dzLoad());
