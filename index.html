@@ -1826,7 +1826,7 @@ var io=window.IntersectionObserver?new IntersectionObserver(function(es){es.forE
 function keysOf(el){if(el.dataset.ks){try{return JSON.parse(el.dataset.ks)}catch(e){return []}}return [el.dataset.k]}
 function watch(){[].forEach.call($('list').querySelectorAll('[data-k],[data-ks]'),function(el){var miss=keysOf(el).some(function(k){var a=S.a[k];return !M[k]||!GX[k]||(a&&!dzImg(a)&&!(a.dzx&&(a.cu||a.cx||a.img)))});if(miss){if(io)io.observe(el);else keysOf(el).forEach(function(k){needCover(k);need(k);needG(k,1)})}})}
 var AC={};try{AC=JSON.parse(localStorage.getItem('digz-ac')||'{}')}catch(e){}
-function albBarUpd(){return;var sh=$('sh'),hc=window.DZHC,d=document.documentElement;if(!hc||!cur||ui.st||!sh||!sh.querySelector('.hero .hbg')||sh.querySelector('.colpg'))return;
+function albBarUpd(){var sh=$('sh'),hc=window.DZHC,d=document.documentElement;if(!hc||!cur||ui.st||!sh||!sh.querySelector('.hero .hbg')||sh.querySelector('.colpg'))return;
 /* La barra del teléfono lleva el color de la portada y se funde con el color de la página a medida que el degradado de la portada se va desvaneciendo al subir */
 var hero=sh.querySelector('.hero'),H=hero?hero.offsetHeight:600,y=Math.max(0,sh.scrollTop),p=y/H,al=p<=.3?1:Math.max(0,1-(p-.3)/.7),k=1-al;k=k*k*(3-2*k);
 var c=dzHex(dzMix(hx3(hc),hx3(window.DZTC),k));window.DZBC=c;d.style.setProperty('--bc',c);d.style.setProperty('--hcr',dzRgbs(c));dzBar()}
