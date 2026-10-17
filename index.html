@@ -707,10 +707,8 @@ html.boot #seg,html.boot #chips,html.boot #list{opacity:0}
 html.bootf #seg,html.bootf #chips,html.bootf #list{animation:bootf .18s ease-out}
 @keyframes bootf{from{opacity:0}to{opacity:1}}
 
-/* ===== Barra de estado integrada: en álbum y colección la imagen llega hasta arriba y solo se ve un velo suave y fijo (sin cambios de color) ===== */
-#ov:has(.hbg):before,#ov:has(.colpg):before{height:calc(var(--sat) + 56px)!important;background:linear-gradient(to bottom,rgba(var(--scr,0,0,0),.42) 0%,rgba(var(--scr,0,0,0),.22) 45%,rgba(var(--scr,0,0,0),0) 100%)!important;opacity:1!important}
-html:has(#ov .hbg):before,html:has(#ov .colpg):before{background:none!important}
-.hbg:before{background:none!important}
+/* ===== Barra de estado: el contenido se funde con el color de la barra con un degradado largo y fijo (sin cambios de color al hacer scroll) ===== */
+#ov.full:before,#ov:has(.colpg):before{height:calc(var(--sat) + 96px)!important}
 </style>
 <script>
 /* Tema: modo claro/oscuro y color. Se aplica antes de pintar para evitar parpadeos */
