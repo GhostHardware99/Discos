@@ -1,5 +1,5 @@
 /* Service worker — cambia VERSION cada vez que subas un index.html nuevo */
-var VERSION = 'v128-2026-10-17';
+var VERSION = 'v129-2026-10-17';
 var CACHE = 'app-' + VERSION;
 /* Portadas: caché propia que NO se borra al actualizar la app */
 var IMG = 'covers-v1', IMGMAX = 5000, BAD = {};
@@ -127,17 +127,27 @@ self.addEventListener('fetch', function (e) {
   var isPage = req.mode === 'navigate' ||
     (req.headers.get('accept') || '').indexOf('text/html') > -1;
   if (isPage) {
-    // Red primero: siempre carga la versión nueva si hay conexión
+    /* Caché primero: la app abre al instante (sin esperar a la red ni mostrar barra de carga).
+       En segundo plano se descarga la versión nueva; si cambió, se avisa a la app y se usa al reabrir. */
     e.respondWith(
-      caches.match(req).then(function (hit) {
+      caches.match(req, { ignoreSearch: true }).then(function (hit) {
         hit = hit || null;
         var net = fetch(req, { cache: 'no-cache' }).then(function (res) {
-          if (res && res.ok) { var copy = res.clone(); caches.open(CACHE).then(function (c) { c.put(req, copy); }); }
+          if (res && res.ok) {
+            var copy = res.clone();
+            var changed = hit && res.headers.get('etag') !== hit.headers.get('etag');
+            caches.open(CACHE).then(function (c) { c.put(req, copy); });
+            if (changed) {
+              self.clients.matchAll().then(function (cs) { cs.forEach(function (c) { c.postMessage({ t: 'NEW' }); }); });
+            }
+          }
           return res;
         });
-        /* Red primero (máx. 4 s): así se ve la versión nueva al abrir. Sin conexión o muy lenta: la guardada. */
-        var slow = new Promise(function (ok, no) { setTimeout(function () { hit ? ok(hit) : no(); }, 4000); });
-        return Promise.race([net, slow]).catch(function () { return hit || caches.match('index.html') || caches.match('./'); });
+        if (hit) {
+          e.waitUntil(net.catch(function () {}));
+          return hit;
+        }
+        return net.catch(function () { return caches.match('index.html') || caches.match('./'); });
       })
     );
     return;
