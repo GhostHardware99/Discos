@@ -2084,7 +2084,7 @@ var wa=w&&w.ar,asec=(tb=='tk'&&((al&&al.t)||(wa&&wa.t)))?'<div class="sa'+(ui.wx
 var en=SV.filter(function(q){return q.on}),lst='<div class="lo" data-a="lst"><div class="pf">'+en.slice(0,7).map(function(q){return '<span style="background:'+(BR[q.n]||['#666'])[0]+'">'+pic(q.n)+'</span>'}).join('')+'</div><span class="lt">Escuchar en…</span><span class="ch">›</span></div>',
 lsh=ui.ls?lsheet(a,k,m,en):'',
 cvu=(function(){var g=!a.mc&&GOODC[kof(a.ar,a.al)+'|b'];return (g&&g[0])||cvs(a,500)})();
-var h='<div class="hero"><div class="hbg">'+(cvu?'<img alt="" decoding="async" onload="dzHL(this)" src="'+esc(cvu)+'" onerror="this.remove()">':'')+'</div><div class="htop"><button id="x" class="rb" aria-label="Atrás">'+ICBK+'</button><span class="h" style="color:var(--tx);font-weight:600">Álbum</span><span style="width:46px"></span></div>'
+var h='<div class="hero"><div class="hbg">'+(cvu?'<img alt="" '+(isLd(cvu)?'class="ld" ':'')+'decoding="async" onload="dzHL(this)" src="'+esc(cvu)+'" onerror="this.remove()">':'')+'</div><div class="htop"><button id="x" class="rb" aria-label="Atrás">'+ICBK+'</button><span class="h" style="color:var(--tx);font-weight:600">Álbum</span><span style="width:46px"></span></div>'
 +'<div class="ab">'+cv(a,'big',k,500,1)+'<h2>'+esc(a.al)+'</h2><div class="by">de <span class="art" data-a="art">'+esc(a.ar)+'</span></div>'+gtl+meta+((noCover(k)&&!a.mc)?'<div class="h" style="opacity:.6;font-size:11.5px;margin-top:4px">Sin portada · mantén pulsada la imagen para añadir una</div>':'')+'</div></div>'
 +'<div class="rate">'+stars(a.rate||0,'rate')+'</div>'
 +(a.tmp?'<div class="btns"><button class="p" data-a="addl">＋ Añadir a mi biblioteca</button></div>':'')
