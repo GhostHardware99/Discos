@@ -2519,8 +2519,8 @@ h=bhd('Ajustes')
 +'<div class="cfg-g" style="margin-top:22px">'+cfRow('data-do="cl"','cl','Borrar toda mi biblioteca','','d')+'</div>'
 +'<div class="cfg-n" style="text-align:center;margin:22px 0 8px">Versión <span id="appv">'+APPV+'</span> · Digz'+(LF&&LF.u?' · '+esc(LF.u):'')+'</div>'}
 else{var B={
-lastfm:'<div class="card"><div class="h" id="lfs">'+(conn?'✓ Conectado como '+esc(LF.u):'Sin conectar. Solo necesitas tu usuario.')+'</div><input id="lu" placeholder="Tu usuario de Last.fm" autocapitalize="off" autocomplete="off">'
-+(lfKey()?'':'<div id="lkw"><div class="h">Falta la API key (solo la primera vez). Créala gratis en last.fm/api/account/create y pégala aquí:</div><input id="lk" placeholder="API key" autocapitalize="off" autocomplete="off"></div>')
+lastfm:'<div class="card"><div class="h" id="lfs">'+(conn?'✓ Conectado como '+esc(LF.u):(lfKey()?'Sin conectar. Solo necesitas tu usuario.':'Sin conectar. Necesitas tu usuario y tu propia API key de Last.fm (es gratis).'))+'</div><input id="lu" placeholder="Tu usuario de Last.fm" autocapitalize="off" autocomplete="off">'
++(lfKey()?'':'<div id="lkw"><div class="h">Falta la API key (solo la primera vez). Es gratis y se crea en un minuto:</div><a id="lkc" href="https://www.last.fm/api/account/create" target="_blank" rel="noopener" style="display:block;text-align:center;padding:12px;margin:8px 0;border-radius:12px;background:var(--ac);color:#fff;font-weight:700;text-decoration:none">Crear mi API key en Last.fm ↗</a><div class="h">En el formulario escribe <b>Application name: Digz</b> y una descripción cualquiera; lo demás puede quedar vacío. Al terminar, copia la <b>API key</b> (no el Shared secret) y pégala aquí:</div><input id="lk" placeholder="API key" autocapitalize="off" autocomplete="off" spellcheck="false"></div>')
 +'<button class="p" id="lcon">'+(conn?'Volver a sincronizar':'Conectar')+'</button></div>',
 plat:'<div class="card"><b>Tus plataformas</b><div class="h">Toca las que uses. Saldrán en cada álbum y canción.</div><div class="chips wrap" id="svl"></div></div>'
 +'<div class="card" style="margin-top:12px"><b>Añadir otra plataforma</b><div class="h">Busca algo en su web, copia la URL y pon {q} donde iba el texto buscado.</div><div id="svc"></div><div class="row"><input id="svn" placeholder="Nombre"><input id="svu" placeholder="https://sitio.com/search?q={q}"></div><button id="sva">Añadir plataforma</button></div>',
@@ -2537,10 +2537,13 @@ $('sh').querySelector('[data-do="ld"]').onclick=function(){Object.keys(S.a).forE
 $('sh').querySelector('[data-do="cl"]').onclick=function(){if(this.dataset.s){S={a:{},cols:[]};save();render();hide()}else{this.dataset.s=1;this.querySelector('.cfg-t').textContent='¿Seguro? Toca otra vez'}};
 return}
 if(sub=='lastfm'){$('lu').value=LF.u||'';
-$('lcon').onclick=function(){var u=$('lu').value.trim(),kk=$('lk')?$('lk').value.trim():'';if(!u){$('lfs').textContent='Escribe tu usuario de Last.fm';return}
-if(kk)LF.k=kk;if(!lfKey()){$('lfs').textContent='Falta la API key: pégala en el cuadro de arriba.';return}
+if($('lk'))$('lk').oninput=function(){var v=this.value.replace(/\s+/g,'');if(v!==this.value)this.value=v};
+$('lcon').onclick=function(){var u=$('lu').value.trim(),kk=$('lk')?$('lk').value.replace(/\s+/g,''):'',prev=LF.k;if(!u){$('lfs').textContent='Escribe tu usuario de Last.fm';return}
+if(kk&&!/^[0-9a-f]{32}$/i.test(kk)){$('lfs').textContent='Esa API key no parece válida: son 32 letras y números, sin espacios. Cópiala otra vez.';return}
+if(kk)LF.k=kk;if(!lfKey()){$('lfs').textContent='Falta la API key: créala con el botón y pégala en su cuadro.';return}
+function undo(){if(kk){if(prev)LF.k=prev;else delete LF.k;saveLF()}}
 LF.u=u;saveLF();$('lfs').textContent='Comprobando…';
-lf('user.getinfo',{user:u}).then(function(d){if(d.error||!d.user){$('lfs').textContent='Last.fm: '+(d.message||'no encontré ese usuario');return}
+lf('user.getinfo',{user:u}).then(function(d){if(d.error||!d.user){if(d.error==10)undo();$('lfs').textContent=d.error==10?'Last.fm no aceptó esa API key. Revisa que sea la API key y no el Shared secret.':'Last.fm: '+(d.message||'no encontré ese usuario');return}
 $('lfs').textContent='✓ Conectado como '+d.user.name+'. Sincronizando tus álbumes…';
 return syncL().then(function(t){$('lfs').textContent='✓ Conectado como '+d.user.name+'. '+t})}).catch(function(){$('lfs').textContent='No pude conectar con Last.fm. Revisa tu conexión.'})}}
 else if(sub=='plat'){svList();
