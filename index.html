@@ -2109,15 +2109,18 @@ function inRows(M){return Object.keys(M).map(function(q){var o=M[q];return {n:o.
 /* --- Wikipedia: solo si el artículo es de ESTE álbum (título igual, categoría de álbum/EP y menciona al artista). Nunca el del artista. --- */
 async function inWiki(a){var base='https://en.wikipedia.org/w/api.php?format=json&origin=*&action=query&redirects=1';
 var parts=String(a.ar).split(/\s*(?:,|&|\band\b|\bfeat\.?|\bx\b)\s*/i).filter(Boolean),want=cln(a.al);
-var NC1=inForce()?{nc:1}:undefined,d=await netGet(base+'&generator=search&gsrlimit=8&gsrsearch='+qe('"'+a.al+'" '+a.ar+' album')+'&prop=extracts|categories&exintro=1&explaintext=1&exlimit=8&cllimit=60',12000,NC1);
-var ps=Object.keys((d.query&&d.query.pages)||{}).map(function(i){return d.query.pages[i]}).sort(function(x,y){return (x.index||0)-(y.index||0)});
-var hit=ps.filter(function(p){var tt=String(p.title||'').replace(/\s*\(.*?\)\s*$/,'');if(cln(tt)!=want)return false;
-var ex=String(p.extract||''),cat=(p.categories||[]).some(function(c){return /albums|extended plays|mixtapes|soundtracks|compilation|EPs\b/i.test(c.title)}),
-alb=/\b(album|extended play|\bEP\b|mixtape|soundtrack|compilation|record)\b/i.test(ex.slice(0,350))&&!/\b(is|was) an? [^.]{0,60}\b(singer|rapper|musician|band|duo|producer|songwriter|actor|actress|film|novel)\b/i.test(ex.slice(0,200));
-var art=parts.some(function(x){return nrm(ex).indexOf(nrm(x))>-1});return (cat||alb)&&art})[0];
+var NC1=inForce()?{nc:1}:undefined,
+d=await netGet(base+'&list=search&srlimit=6&srprop=&srsearch='+qe('\"'+a.al+'\" '+a.ar+' album'),9000,NC1);
+var cand=((d.query&&d.query.search)||[]).map(function(x){return x.title}).filter(function(t){return cln(String(t).replace(/\s*\(.*?\)\s*$/,''))==want}).slice(0,2),hit=null,txt='';
+for(var ci=0;ci<cand.length&&!hit;ci++){
+var f=await netGet(base+'&prop=extracts|categories&explaintext=1&exsectionformat=wiki&cllimit=60&titles='+qe(cand[ci]),12000,NC1),fp=f.query&&f.query.pages,pg=null;
+if(fp)Object.keys(fp).forEach(function(i){pg=fp[i]});
+if(!pg||pg.missing!==undefined)continue;
+var t2=String(pg.extract||''),ex=t2.split(/\n+==/)[0],cat=(pg.categories||[]).some(function(c){return /albums|extended plays|mixtapes|soundtracks|compilation|EPs\b/i.test(c.title)}),
+alb=/\b(album|extended play|\bEP\b|mixtape|soundtrack|compilation|record)\b/i.test(ex.slice(0,350))&&!/\b(is|was) an? [^.]{0,60}\b(singer|rapper|musician|band|duo|producer|songwriter|actor|actress|film|novel)\b/i.test(ex.slice(0,200)),
+art=parts.some(function(x){return nrm(ex).indexOf(nrm(x))>-1});
+if((cat||alb)&&art){hit={title:pg.title,extract:ex};txt=t2}}
 if(!hit)return null;
-var f=await netGet(base+'&prop=extracts&explaintext=1&exsectionformat=wiki&titles='+qe(hit.title),15000,NC1),fp=f.query&&f.query.pages,txt='';
-if(fp)Object.keys(fp).forEach(function(i){txt=fp[i].extract||txt});
 var sp=txt.split(/\n+(={2,})\s*([^=\n]+?)\s*\1\s*\n/),secs=[{n:'',t:sp[0]}];for(var i=1;i+2<sp.length+1;i+=3)secs.push({n:sp[i+1],t:sp[i+2]||''});
 function pick(re){var o=secs.filter(function(x){return x.n&&re.test(x.n.toLowerCase())&&x.t.trim().length>80});return o.slice(0,2).map(function(x){return x.t.trim()}).join('\n\n')}
 function tidy(s){return cutT(String(s).replace(/\n{3,}/g,'\n\n').trim(),1400)}
@@ -2165,7 +2168,7 @@ function inSave(k){var s=IN[k],o={};['wp','mb','dc'].forEach(function(q){if(s[q]
 function inRun(k,key,fn){var s=IN[k];if(s[key])return;s[key]={s:'load'};
 tmo(fn(S.a[k]),28000).then(function(d){s[key]={s:d?'ok':'none',d:d||null};inSave(k)},function(){s[key]={s:'err'}}).then(function(){if(cur==k&&ui.tab=='in')rs2(k)})}
 function inLoad(k,ch){var a=S.a[k];if(!a||a.ar=='Desconocido')return;var s=IN[k]=IN[k]||{};
-var go=function(){inRun(k,'wp',inWiki);inRun(k,'dc',inDc);inRun(k,'mb',inMB)};
+var go=function(){inRun(k,'wp',inWiki);if(ch!='rs'){inRun(k,'dc',inDc);inRun(k,'mb',inMB)}};
 if(s.rest){go();return}s.rest=1;
 idbGet(INC+k).then(function(c){if(c&&c.d&&Date.now()-c.t<INT)['wp','mb','dc'].forEach(function(q){var x=c.d[q];if(x&&!s[q]&&!(x.s=='none'&&Date.now()-c.t>2*864e5))s[q]=x})}).catch(function(){}).then(function(){go();if(cur==k&&ui.tab=='in')rs2(k)})}
 function inBadge(l){return '<span class="srcb">'+esc(l)+'</span>'}
@@ -2179,17 +2182,15 @@ if(a.ar=='Desconocido')return '<div class="h" style="padding:14px 0">Esta pesta�
 inLoad(k,ch);s=IN[k]||{};
 var h='<div class="chips" style="margin-top:12px">'+CH.map(function(q){return '<button data-a="ic" data-v="'+q[0]+'" class="'+(ch==q[0]?'on':'')+'">'+q[1]+'</button>'}).join('')+'</div>',
 st=function(q){return s[q]?s[q].s:'load'},ld=function(l){return '<div class="h" style="padding:10px 0">'+l+'</div>'};
-if(ch=='rs'){var wp=st('wp')=='ok'?s.wp.d:null,dc=st('dc')=='ok'?s.dc.d:null,i=0;
-if(wp)h+='<div class="sec">Datos documentados</div>'+wp.cards.map(function(c){return inCard(i++,k,c,'Wikipedia',wp.url)}).join('');
-if(dc&&dc.info.length)h+=(wp?'':'<div class="sec">Datos documentados</div>')+'<div class="infc"><h4>Edición</h4>'+dc.info.map(function(x){return '<div class="infk"><span>'+esc(x[0])+'</span><b>'+esc(x[1])+'</b></div>'}).join('')+(dc.url?'<a class="srcb" href="'+esc(dc.url)+'" target="_blank" rel="noopener">Discogs</a>':inBadge('Discogs'))+'</div>';
-if(st('wp')=='load')h+=ld('Buscando en Wikipedia…');if(st('dc')=='load')h+=ld('Buscando en Discogs…');
-if(!wp&&!(dc&&dc.info.length)&&st('wp')!='load'&&st('dc')!='load')h+=ld(st('wp')=='err'&&st('dc')=='err'?'No pude conectar con las fuentes. Revisa tu conexión y toca «Actualizar».':'No encontré información de este álbum.');
-if(wp)h+='<div class="h" style="margin-top:6px;font-size:11.5px;opacity:.75">Texto de Wikipedia en inglés, licencia CC BY-SA.</div>'}
+if(ch=='rs'){var wp=st('wp')=='ok'?s.wp.d:null,i=0;
+if(wp)h+='<div class="sec">Datos documentados</div>'+wp.cards.map(function(c){return inCard(i++,k,c,'Wikipedia',wp.url)}).join('')+'<div class="h" style="margin-top:6px;font-size:11.5px;opacity:.75">Texto de Wikipedia en inglés, licencia CC BY-SA.</div>';
+else if(st('wp')=='load')h+=ld('Buscando en Wikipedia…');
+else h+=ld(st('wp')=='err'?'No pude conectar con Wikipedia. Toca «Actualizar info».':'No hay información de este álbum en Wikipedia.')}
 else{var rows=[].concat(st('mb')=='ok'?s.mb.d.rows:[],st('dc')=='ok'?s.dc.d.rows:[],st('wp')=='ok'&&s.wp.d.rows?s.wp.d.rows:[]),
 body=ch=='cr'?inPeople(rows,['Producción','Ingeniería','Composición','Otros']):inPeople(rows,['Músicos'],60);
 h+=body;if(st('mb')=='load')h+=ld('Buscando en MusicBrainz…');if(st('dc')=='load')h+=ld('Buscando en Discogs…');if(st('wp')=='load')h+=ld('Buscando en Wikipedia…');
 if(!body&&st('mb')!='load'&&st('dc')!='load'&&st('wp')!='load')h+=ld(st('mb')=='err'&&st('dc')=='err'?'No pude conectar con las fuentes. Revisa tu conexión y toca «Actualizar».':(ch=='cr'?'No encontré créditos de este álbum.':'No encontré músicos acreditados en este álbum.'))}
-var ok=['wp','mb','dc'].every(function(q){return st(q)!='load'});
+var ok=(ch=='rs'?['wp']:['wp','mb','dc']).every(function(q){return st(q)!='load'});
 return h+'<div style="text-align:center;margin-top:16px"><span role="button" tabindex="0" data-a="inr" style="font-size:12px;color:var(--mut);opacity:.7;text-decoration:underline;cursor:pointer;padding:6px'+(ok?'':';pointer-events:none')+'">↻ Actualizar info</span></div>'}
 function sheet(k){var _sk=ui.sk;ui.sk=0;var o=$('nt');if(o&&cur==k)S.a[k].note=o.value;var same2=cur==k,sc=same2?$('sh').scrollTop:0;
 if(!same2){ui.tk=null;ui.op={};ui.wx={};ui.sm=false;ui.tab=(ui.tabRet&&ui.tabRet.k==k)?ui.tabRet.t:'tk';ui.ls=false;ui.rv=false}
@@ -2321,6 +2322,8 @@ var SRC0=[['Rate Your Music','Reseñas y listas de la comunidad','https://rateyo
 ['Paste Music','Reseñas y noticias','https://www.pastemagazine.com/music',''],
 ['The Needle Drop','Reseñas en vídeo de Anthony Fantano','https://theneedledrop.com',''],
 ['Last.fm','Historial de escucha y etiquetas','https://www.last.fm','https://www.last.fm/join'],
+['Discogs','Base de datos de discos y ediciones','https://www.discogs.com',''],
+['Genius','Letras, créditos y anotaciones','https://genius.com',''],
 ['Musicboard','Registra y puntúa tus álbumes','https://musicboard.app',''],
 ['Music-Map','Mapa de artistas parecidos','https://www.music-map.com',''],
 ['Every Noise at Once','Mapa de géneros','https://everynoise.com',''],
@@ -2330,7 +2333,7 @@ var SRC0=[['Rate Your Music','Reseñas y listas de la comunidad','https://rateyo
 var SRX=[];try{SRX=JSON.parse(localStorage.getItem('digz-srcx')||'[]')}catch(e){}
 function srcSave(){try{localStorage.setItem('digz-srcx',JSON.stringify(SRX))}catch(e){}}
 function srcUI(){var e=$('srl');if(!e)return;
-function row(x,i){return '<div class="srx"><div class="srt"><b>'+esc(x[0])+'</b>'+(x[1]?'<small>'+esc(x[1])+'</small>':'')+'</div><div class="sra2">'+(x[3]?'<a href="'+esc(x[3])+'" target="_blank" rel="noopener">Crear cuenta</a>':'')+'<a class="go" href="'+esc(x[2])+'" target="_blank" rel="noopener">Abrir</a>'+(i>=0?'<button data-sx="'+i+'" aria-label="Quitar">✕</button>':'')+'</div></div>'}
+function row(x,i){return '<div class="srx"><div class="srt"><b>'+esc(x[0])+'</b>'+(x[1]?'<small>'+esc(x[1])+'</small>':'')+'</div><div class="sra2">'+'<a class="go" href="'+esc(x[2])+'" target="_blank" rel="noopener">Abrir</a>'+(i>=0?'<button data-sx="'+i+'" aria-label="Quitar">✕</button>':'')+'</div></div>'}
 e.innerHTML='<div class="cfg-g">'+SRC0.map(function(x){return row(x,-1)}).join('')+SRX.map(function(x,i){return row([x.n,'Añadida por ti',x.u,''],i)}).join('')+'</div>';
 [].forEach.call(e.querySelectorAll('[data-sx]'),function(b){b.onclick=function(){SRX.splice(+b.dataset.sx,1);srcSave();srcUI()}});
 $('sra').onclick=function(){var n=$('srn').value.trim(),u=$('sru').value.trim();if(u&&!/^https?:\/\//i.test(u))u='https://'+u;
@@ -2367,7 +2370,7 @@ plat:'<div class="card"><b>Tus plataformas</b><div class="h">Toca las que uses. 
 look:'<div class="card"><b>Modo</b><div class="seg" id="tm"></div><b>Color</b><div class="dots" id="tc"></div><b>Estilo de tarjetas</b><div class="seg" id="tgd"></div><button id="trs">Restablecer</button></div>',
 imp:'<div class="card"><div class="h">CSV de Deezer, Spotify (Exportify)…</div><input type="file" id="f" multiple><div class="h">O pega un CSV, o líneas «Artista - Álbum»</div><textarea id="pt"></textarea><button class="p" id="im">Importar texto</button><div class="h" id="ms"></div></div>',
 cx:'<div class="card"><b>Discogs</b><div class="h">Token personal de discogs.com/settings/developers. Fuente principal de géneros.</div><input id="dct" placeholder="Token de Discogs" autocapitalize="off" autocomplete="off"><button id="dcs">Guardar</button></div><div class="card" style="margin-top:12px"><b>Proxy propio (opcional)</b><div class="h">Si tu red bloquea o limita alguna fuente, pon aquí la URL de tu proxy (Cloudflare Worker gratis). Vacío = proxies públicos.</div><input id="pxu" placeholder="https://tu-proxy.workers.dev/" autocapitalize="off" autocomplete="off"><button id="pxs">Guardar</button></div><div class="card" style="margin-top:12px"><b>Probar conexiones</b><div class="h">Comprueba qué fuentes responden en esta red, directo o con proxy.</div><button class="p" id="cxt">Probar ahora</button><div id="cxr"></div></div><div class="card" style="margin-top:12px"><b>Caché de búsquedas</b><div class="h" id="cxs"></div><div class="h">Guarda lo que ya buscaste (7 días; las respuestas de Discogs, hasta 90) para no repetirlo: va más rápido y sirve incluso sin conexión.</div><button id="cxc">Borrar caché</button></div><div class="card" style="margin-top:12px"><b>Barra de estado</b><div class="h">Espacio extra en px arriba de cada pantalla, por si quieres que los botones queden por debajo de la barra del teléfono. Vacío = como siempre, sin espacio extra.</div><input id="sbi" type="number" inputmode="numeric" placeholder="Sin espacio extra"><button id="sbs">Guardar</button></div>',
-src:'<div class="h" style="margin:0 4px 10px">Páginas que uso para ver reseñas e información de álbumes, artistas y música. Toca «Abrir» para entrar; «Crear cuenta» te lleva al registro.</div><div id="srl"></div><div class="card" style="margin-top:12px"><b>Añadir otra fuente</b><div class="h">Nombre y enlace de cualquier página.</div><div class="row"><input id="srn" placeholder="Nombre"><input id="sru" placeholder="https://sitio.com" autocapitalize="off"></div><button id="sra">Añadir fuente</button></div>',
+src:'<div class="h" style="margin:0 4px 10px">Páginas para ver reseñas e información de álbumes, artistas y música.</div><div id="srl"></div><div class="card" style="margin-top:12px"><b>Añadir otra fuente</b><div class="h">Nombre y enlace de cualquier página.</div><div class="row"><input id="srn" placeholder="Nombre"><input id="sru" placeholder="https://sitio.com" autocapitalize="off"></div><button id="sra">Añadir fuente</button></div>',
 bk:'<div class="card"><div class="h">Genera el texto, guárdalo y pégalo aquí para restaurar.</div><textarea id="bk"></textarea><div class="row"><button id="ex">Generar respaldo</button><button id="rs">Restaurar</button></div></div>'};
 h='<div class="hd"><div class="hl"><button id="x" class="cfg-bk" aria-label="Atrás">'+ICBK+'</button><div class="t">'+CFT[sub]+'</div></div></div>'+B[sub]}
 show(h);$('x').onclick=ovBack;$('sh').scrollTop=ovsy();
