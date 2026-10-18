@@ -738,16 +738,22 @@ html.bootf #seg,html.bootf #chips,html.bootf #list{animation:bootf .18s ease-out
 .infr b{display:block;font-size:14.5px}.infr small{color:var(--mut);font-size:12.5px}
 .infk{display:flex;justify-content:space-between;gap:14px;padding:5px 0;font-size:13.5px}.infk span{color:var(--mut)}.infk b{font-weight:600;text-align:right}
 
-/* === Controles integrados con el diseño: translúcidos y teñidos con el color de la app (en vez de negro sólido) === */
-:root{--ctl:rgba(var(--acr),.14);--ctlh:rgba(var(--acr),.22);--ctlb:var(--bdc,rgba(var(--acr),.28))}
-.card input:not([type=checkbox]):not([type=radio]),.card textarea,.card select,details input:not([type=checkbox]):not([type=radio]),details textarea,.cfg-g input:not([type=checkbox]):not([type=radio]),.cfg-g textarea,.cfg-g select{background:var(--ctl);border-color:var(--ctlb)}
-.card button:not(.p),details button:not(.p),.cfg-g button:not(.p):not(.cfg-i),.btns button:not(.p){background:var(--ctl);border-color:var(--ctlb)}
-.card button:not(.p):active,.btns button:not(.p):active{background:var(--ctlh)}
-.card input::placeholder,.card textarea::placeholder{color:var(--mut);opacity:.8}
-input[type=file]{padding:8px 10px;color:var(--mut)}
-input[type=file]::file-selector-button{background:var(--ctl);color:var(--tx);border:1px solid var(--ctlb);border-radius:10px;padding:8px 14px;margin-right:12px;font:inherit;font-weight:600;cursor:pointer}
-.btns .hb,.btns .shb{background:var(--ctl);border-color:var(--ctlb)}
-.btns .hb.on{background:rgba(255,77,109,.16);border-color:rgba(255,77,109,.45)}
+/* Cuadros de texto integrados (mismo estilo que los de colección/género), sin tirador de web */
+textarea.tin{display:block;width:100%;max-width:100%;min-width:0;min-height:120px;margin:10px 0 12px;resize:none;background:rgba(var(--acr),.08);border:1px solid rgba(var(--acr),.28);border-radius:14px;padding:12px 14px;font-size:16px;line-height:1.45;outline:none;-webkit-appearance:none;appearance:none}
+textarea.tin:focus{border-color:var(--ac);box-shadow:0 0 0 3px rgba(var(--acr),.2)}
+textarea.tin::placeholder{color:var(--mut)}
+/* Chip del corazón: el fondo no cambia nunca; solo se rellena el icono */
+.btns .hb,.btns .hb.on,.btns .hb:hover,.btns .hb:focus,.btns .hb:active,.btns .shb{background:var(--card);border:1px solid var(--bd);box-shadow:none}
+.btns .hb{color:var(--mut)}.btns .hb.on{color:#ff4d6d}
+
+/* Portada de colección (pantalla completa y banda): imagen hasta arriba, bajo la barra de estado, sin capa de color; botones sueltos en blanco */
+html:has(.colpg.cs-full):before,html:has(.colpg.cs-band):before,#ov:has(.colpg.cs-full):before,#ov:has(.colpg.cs-band):before{opacity:var(--fo2,0)!important}
+.hero.colpg.cs-full .ccv{width:100%;aspect-ratio:1;height:auto;max-height:min(100vw,560px);border-radius:0}
+.hero.colpg.cs-full .ccv>.mos{-webkit-mask-image:none!important;mask-image:none!important}
+.hero.colpg.cs-full .ab h2{margin:16px 0 0;padding:0 16px 2px}
+.hero.colpg.cs-full+#cpl{margin-top:22px!important}
+#ov .hero.colpg.cs-full>.htop .rb,#ov .hero.colpg.cs-band>.htop .rb{background:none!important;border:0!important;box-shadow:none!important;color:#fff!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+.hero.colpg.cs-full>.htop .rb svg,.hero.colpg.cs-band>.htop .rb svg{filter:drop-shadow(0 0 3px rgba(0,0,0,.5))}
 </style>
 <script>
 /* Tema: modo claro/oscuro y color. Se aplica antes de pintar para evitar parpadeos */
@@ -918,18 +924,18 @@ await Promise.all([w(),w(),w(),w()]);return {list:Object.keys(groups).map(functi
 
 /* ---------- Pantalla «Importar música»: guías por plataforma ---------- */
 var IMPG=[
-['Spotify',['Abre <a href="https://exportify.net" target="_blank" rel="noopener">exportify.net</a> e inicia sesión con Spotify (permiso de solo lectura).','Exporta una lista o tus canciones guardadas. Se descarga un CSV (con «Exportar todo» baja un ZIP: descomprímelo y elige los CSV).','Vuelve aquí y elige el archivo abajo.']],
-['Apple Music',['Abre <a href="https://www.tunemymusic.com" target="_blank" rel="noopener">tunemymusic.com</a> y elige Apple Music como origen.','Inicia sesión, elige qué exportar (listas, canciones o álbumes favoritos) y como destino «Exportar a archivo» (CSV).','Descarga el archivo, vuelve aquí y elige el archivo abajo.']],
-['Deezer',['Abre <a href="https://www.tunemymusic.com/transfer/deezer-to-file" target="_blank" rel="noopener">tunemymusic.com</a> e inicia sesión con Deezer.','Elige listas, canciones o álbumes favoritos y exporta a archivo (CSV).','Vuelve aquí y elige el archivo abajo.']],
-['YouTube Music',['Abre <a href="https://www.tunemymusic.com" target="_blank" rel="noopener">tunemymusic.com</a> y elige YouTube Music como origen.','Inicia sesión, elige qué exportar y como destino «Exportar a archivo» (CSV).','Vuelve aquí y elige el archivo abajo.']],
-['Tidal',['Abre <a href="https://www.tunemymusic.com" target="_blank" rel="noopener">tunemymusic.com</a> y elige Tidal como origen.','Inicia sesión, elige qué exportar y como destino «Exportar a archivo» (CSV).','Vuelve aquí y elige el archivo abajo.']],
-['Amazon Music',['Abre <a href="https://freeyourmusic.com/blog/csv" target="_blank" rel="noopener">freeyourmusic.com</a> y elige Amazon Music como origen para exportar a archivo (CSV).','Descarga el archivo, vuelve aquí y elige el archivo abajo.','Esta ruta está por probar: si el archivo no se reconoce, usa «Añadir a mano» o pega una lista abajo.']],
-['Otra plataforma o lista de texto',['Si tu plataforma exporta CSV, elígelo abajo. Debe tener columnas de artista y álbum.','Si no, pega líneas con el formato «Artista - Álbum» en el cuadro de texto.']]];
+['Spotify',['Abre <a href="https://exportify.net" target="_blank" rel="noopener">exportify.net</a> e inicia sesión con Spotify (permiso de solo lectura).','Exporta una lista o tus canciones guardadas. Se descarga un CSV (con «Exportar todo» baja un ZIP: descomprímelo y elige los CSV). También sirve un JSON, por ejemplo los datos de tu cuenta de Spotify.','Vuelve aquí y elige el archivo abajo.']],
+['Apple Music',['Abre <a href="https://www.tunemymusic.com" target="_blank" rel="noopener">tunemymusic.com</a> y elige Apple Music como origen.','Inicia sesión, elige qué exportar (listas, canciones o álbumes favoritos) y como destino «Exportar a archivo» (CSV o JSON, el que te ofrezca).','Descarga el archivo (CSV o JSON), vuelve aquí y elige el archivo abajo.']],
+['Deezer',['Abre <a href="https://www.tunemymusic.com/transfer/deezer-to-file" target="_blank" rel="noopener">tunemymusic.com</a> e inicia sesión con Deezer.','Elige listas, canciones o álbumes favoritos y exporta a archivo (CSV o JSON, el que te ofrezca).','Vuelve aquí y elige el archivo abajo.']],
+['YouTube Music',['Abre <a href="https://www.tunemymusic.com" target="_blank" rel="noopener">tunemymusic.com</a> y elige YouTube Music como origen.','Inicia sesión, elige qué exportar y como destino «Exportar a archivo» (CSV o JSON, el que te ofrezca).','Vuelve aquí y elige el archivo abajo.']],
+['Tidal',['Abre <a href="https://www.tunemymusic.com" target="_blank" rel="noopener">tunemymusic.com</a> y elige Tidal como origen.','Inicia sesión, elige qué exportar y como destino «Exportar a archivo» (CSV o JSON, el que te ofrezca).','Vuelve aquí y elige el archivo abajo.']],
+['Amazon Music',['Abre <a href="https://freeyourmusic.com/blog/csv" target="_blank" rel="noopener">freeyourmusic.com</a> y elige Amazon Music como origen para exportar a archivo (CSV o JSON, el que te ofrezca).','Descarga el archivo (CSV o JSON), vuelve aquí y elige el archivo abajo.','Esta ruta está por probar: si el archivo no se reconoce, usa «Añadir a mano» o pega una lista abajo.']],
+['Otra plataforma o lista de texto',['Si tu plataforma exporta CSV o JSON, elígelo abajo. Debe incluir artista y álbum. Si viene en ZIP, descomprímelo antes.','Si no, pega el contenido (CSV, JSON o líneas «Artista - Álbum») en el cuadro de texto.']]];
 function impHtml(){
 var g=IMPG.map(function(x){return '<details style="margin-bottom:8px"><summary>'+x[0]+'</summary><div class="h" style="margin-top:8px">'+x[1].map(function(t,i){return (i+1)+'. '+t}).join('<br>')+'</div></details>'}).join('');
 return '<div class="h" style="margin:0 4px 10px">Elige de dónde viene tu música. Cada una trae su guía (CSV o JSON). TuneMyMusic y Free Your Music son servicios de terceros.</div>'+g
-+'<div class="card" style="margin-top:12px"><b>Archivo CSV o JSON</b><div class="h">Si tu plataforma te da un JSON (por ejemplo, los datos de tu cuenta), elígelo aquí también. Si viene en ZIP, descomprímelo antes.</div><input type="file" id="f" multiple accept=".csv,.json,.txt,text/csv,text/plain,application/json"></div>'
-+'<div class="card" style="margin-top:12px"><b>Pegar una lista</b><div class="h">CSV o líneas «Artista - Álbum»</div><textarea id="pt"></textarea><button class="p" id="im">Importar texto</button></div>'
++'<div class="card" style="margin-top:12px"><b>Archivo CSV o JSON</b><div class="h">Si tu plataforma te da un JSON (por ejemplo, los datos de tu cuenta), elígelo aquí también. Si viene en ZIP, descomprímelo antes.</div><button id="fb" style="margin-top:10px;width:100%">Elegir archivos</button><input type="file" id="f" multiple accept=".csv,.json,.txt,text/csv,text/plain,application/json" hidden></div>'
++'<div class="card" style="margin-top:12px"><b>Pegar una lista</b><div class="h">CSV, JSON o líneas «Artista - Álbum»</div><textarea id="pt" class="tin" placeholder="Artista - Álbum" spellcheck="false"></textarea><button class="p" id="im">Importar texto</button></div>'
 +'<div class="card" style="margin-top:12px"><b>Música de este teléfono</b><div class="h">Elige archivos de audio o una carpeta. Se leen las etiquetas (artista y álbum) y se agrupa por álbum. Nada se sube a internet.</div><div class="row"><button id="lmf">Elegir archivos</button><button id="lmd">Elegir carpeta</button></div><input type="file" id="lmi" multiple accept="audio/*,.mp3,.m4a,.flac,.ogg,.opus" hidden><input type="file" id="lmj" webkitdirectory multiple hidden><div id="lmr"></div></div>'
 +'<div class="card" style="margin-top:12px"><b>Añadir a mano</b><div class="row"><input id="mna" placeholder="Artista" autocomplete="off"><input id="mnl" placeholder="Álbum" autocomplete="off"></div><button id="mnb">Añadir</button></div>'
 +'<div class="h" id="ms" style="margin-top:10px"></div>'}
@@ -2423,7 +2429,11 @@ e.innerHTML=SV.map(function(s,i){return '<button data-sv="'+i+'" class="'+(s.on?
 [].forEach.call(e.querySelectorAll('[data-sv]'),function(b){b.onclick=function(){var s=SV[b.dataset.sv];s.on=!s.on;saveSV();b.className=s.on?'on':''}});
 var c=$('svc');if(c){c.innerHTML=SV.map(function(s,i){return s.c?'<div class="sv"><span>'+esc(s.n)+'</span><button data-sd="'+i+'">✕</button></div>':''}).join('');
 [].forEach.call(c.querySelectorAll('[data-sd]'),function(b){b.onclick=function(){SV.splice(+b.dataset.sd,1);saveSV();svList()}})}}
-var APPV='2026-10-15';
+var APPV='2026-10-18';
+/* Versión automática: la fecha en que se subió este index.html (cabecera Last-Modified del servidor). Si no está disponible, se queda la de arriba. */
+(function(){function f(d){var m=d.getMonth()+1,n=d.getDate();return d.getFullYear()+'-'+(m<10?'0':'')+m+'-'+(n<10?'0':'')+n}
+try{fetch('index.html').then(function(r){var h=r&&r.headers&&r.headers.get('last-modified');try{if(r.body&&r.body.cancel)r.body.cancel()}catch(x){}
+if(!h)return;var d=new Date(h);if(isNaN(d.getTime()))return;APPV=f(d);var e=document.getElementById('appv');if(e)e.textContent=APPV}).catch(function(){})}catch(x){}})();
 var DZC=[['#8e8e93','Gris'],['#1db954','Verde'],['#2f80ff','Azul'],['#8b5cf6','Violeta'],['#ec4899','Rosa'],['#f97316','Naranja'],['#ef4444','Rojo'],['#14b8a6','Turquesa'],['#eab308','Amarillo']];
 function themeUI(){var t=dzLoad(),tm=$('tm'),tc=$('tc');if(!tm||!tc)return;
 function draw(){tm.innerHTML=[['sys','Sistema',DI.sys],['light','Claro',DI.sun],['dark','Oscuro',DI.moon]].map(function(m){return '<button data-m="'+m[0]+'" class="'+(t.m==m[0]?'on':'')+'">'+m[2]+m[1]+'</button>'}).join('');
@@ -2482,7 +2492,7 @@ h=bhd('Ajustes')
 +cfRow('data-go="cx"','ld','Conexión y APIs','','c')
 +cfRow('data-do="ld"','ld','Descargar portadas y datos','','')+'</div>'
 +'<div class="cfg-g" style="margin-top:22px">'+cfRow('data-do="cl"','cl','Borrar toda mi biblioteca','','d')+'</div>'
-+'<div class="cfg-n" style="text-align:center;margin:22px 0 8px">Versión '+APPV+' · Digz'+(LF&&LF.u?' · '+esc(LF.u):'')+'</div>'}
++'<div class="cfg-n" style="text-align:center;margin:22px 0 8px">Versión <span id="appv">'+APPV+'</span> · Digz'+(LF&&LF.u?' · '+esc(LF.u):'')+'</div>'}
 else{var B={
 lastfm:'<div class="card"><div class="h" id="lfs">'+(conn?'✓ Conectado como '+esc(LF.u):'Sin conectar. Solo necesitas tu usuario.')+'</div><input id="lu" placeholder="Tu usuario de Last.fm" autocapitalize="off" autocomplete="off">'
 +(lfKey()?'':'<div id="lkw"><div class="h">Falta la API key (solo la primera vez). Créala gratis en last.fm/api/account/create y pégala aquí:</div><input id="lk" placeholder="API key" autocapitalize="off" autocomplete="off"></div>')
@@ -2493,7 +2503,7 @@ look:'<div class="card"><b>Modo</b><div class="seg" id="tm"></div><b>Color</b><d
 imp:impHtml(),
 cx:'<div class="card"><b>Discogs</b><div class="h">Token personal de discogs.com/settings/developers. Fuente principal de géneros.</div><input id="dct" placeholder="Token de Discogs" autocapitalize="off" autocomplete="off"><button id="dcs">Guardar</button></div><div class="card" style="margin-top:12px"><b>Proxy propio (opcional)</b><div class="h">Si tu red bloquea o limita alguna fuente, pon aquí la URL de tu proxy (Cloudflare Worker gratis). Vacío = proxies públicos.</div><input id="pxu" placeholder="https://tu-proxy.workers.dev/" autocapitalize="off" autocomplete="off"><button id="pxs">Guardar</button></div><div class="card" style="margin-top:12px"><b>Probar conexiones</b><div class="h">Comprueba qué fuentes responden en esta red, directo o con proxy.</div><button class="p" id="cxt">Probar ahora</button><div id="cxr"></div></div><div class="card" style="margin-top:12px"><b>Caché de búsquedas</b><div class="h" id="cxs"></div><div class="h">Guarda lo que ya buscaste (7 días; las respuestas de Discogs, hasta 90) para no repetirlo: va más rápido y sirve incluso sin conexión.</div><button id="cxc">Borrar caché</button></div><div class="card" style="margin-top:12px"><b>Barra de estado</b><div class="h">Espacio extra en px arriba de cada pantalla, por si quieres que los botones queden por debajo de la barra del teléfono. Vacío = como siempre, sin espacio extra.</div><input id="sbi" type="number" inputmode="numeric" placeholder="Sin espacio extra"><button id="sbs">Guardar</button></div>',
 src:'<div class="h" style="margin:0 4px 10px">Páginas para ver reseñas e información de álbumes, artistas y música.</div><div id="srl"></div><div class="card" style="margin-top:12px"><b>Añadir otra fuente</b><div class="h">Nombre y enlace de cualquier página.</div><div class="row"><input id="srn" placeholder="Nombre"><input id="sru" placeholder="https://sitio.com" autocapitalize="off"></div><button id="sra">Añadir fuente</button></div>',
-bk:'<div class="card"><div class="h">Genera el texto, guárdalo y pégalo aquí para restaurar.</div><textarea id="bk"></textarea><div class="row"><button id="ex">Generar respaldo</button><button id="rs">Restaurar</button></div></div>'};
+bk:'<div class="card"><div class="h">Genera el texto, guárdalo y pégalo aquí para restaurar.</div><textarea id="bk" class="tin" spellcheck="false"></textarea><div class="row"><button id="ex">Generar respaldo</button><button id="rs">Restaurar</button></div></div>'};
 h='<div class="hd"><div class="hl"><button id="x" class="cfg-bk" aria-label="Atrás">'+ICBK+'</button><div class="t">'+CFT[sub]+'</div></div></div>'+B[sub]}
 show(h);$('x').onclick=ovBack;$('sh').scrollTop=ovsy();
 if(!sub){
@@ -2515,6 +2525,7 @@ SV.push({n:n,u:u,on:true,c:1});saveSV();$('svn').value='';$('svu').value='';svLi
 else if(sub=='src'){srcUI()}
 else if(sub=='look'){themeUI()}
 else if(sub=='imp'){lmUI();
+$('fb').onclick=function(){$('f').click()};
 $('f').onchange=function(e){var fs=[].slice.call(e.target.files),tot=0,bad=0,p=fs.length;
 fs.forEach(function(f){var rd=new FileReader();rd.onload=function(){var n;try{n=importAny(String(rd.result))}catch(er){n=-1}
 if(n<0)bad++;else tot+=n;if(--p==0){save();render();msg(tot+' álbumes nuevos'+(bad?' ('+bad+' archivo no reconocido)':''))}};rd.readAsText(f)})};
