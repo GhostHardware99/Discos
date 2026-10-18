@@ -2093,15 +2093,16 @@ stdraw(k)}
 /* ---------- Ficha del álbum ---------- */
 /* ---------- Pestaña «Info» del álbum: Wikipedia (solo el artículo del ÁLBUM), MusicBrainz y Discogs ----------
    Todo se pide solo al tocar un chip, en paralelo y con tope de tiempo; cada resultado se guarda 30 días (IndexedDB). */
-var IN={},INC='info2:',INT=2592e6,INFORCE=0;
+var IN={},INC='info3:',INT=2592e6,INFORCE=0;
 function inForce(){return INFORCE>Date.now()}
 var INR={'producer':'Productor','co producer':'Coproductor','co-producer':'Coproductor','executive producer':'Productor ejecutivo','additional producer':'Productor adicional','assistant producer':'Productor asistente','engineer':'Ingeniería','recording':'Grabación','recorded by':'Grabación','recording engineer':'Grabación','mix':'Mezcla','mixed by':'Mezcla','mixing':'Mezcla','mix engineer':'Mezcla','mastering':'Masterización','mastered by':'Masterización','mastering engineer':'Masterización','vocal':'Voz','vocals':'Voz','lead vocals':'Voz principal','background vocals':'Coros','backing vocals':'Coros','guitar':'Guitarra','electric guitar':'Guitarra eléctrica','acoustic guitar':'Guitarra acústica','bass':'Bajo','bass guitar':'Bajo','drums':'Batería','piano':'Piano','keyboard':'Teclados','keyboards':'Teclados','synthesizer':'Sintetizador','programming':'Programación','arranger':'Arreglos','arranged by':'Arreglos','composer':'Composición','writer':'Autor','lyricist':'Letra','written-by':'Autor','written by':'Autor','songwriter':'Autor','instrument':'Instrumento','performer':'Intérprete','featuring':'Invitado','sampler':'Sampler','percussion':'Percusión','strings':'Cuerdas','violin':'Violín','cello':'Chelo','saxophone':'Saxofón','trumpet':'Trompeta','flute':'Flauta','organ':'Órgano','turntables':'Tornamesas','choir':'Coro','design':'Diseño','artwork by':'Arte','photography by':'Fotografía','executive-producer':'Productor ejecutivo','a&r':'A&R'};
 function inEs(r){var l=String(r).toLowerCase().trim(),b=l.replace(/\s*\[.*?\]/g,'').trim();return INR[l]||INR[b]||cap(String(r).trim())}
 function inGrp(r){var l=String(r).toLowerCase();
 if(/produc/.test(l))return 'Producción';
+if(/photo|design|artwork|cover art|illustrat|layout|packaging|art direction|creative direction|typograph|paint|drawing|video|film|direction/.test(l))return 'Arte y diseño';
 if(/engineer|mix|master|record|sound|balance|editing|edited|audio|programm/.test(l))return 'Ingeniería';
 if(/writ|compos|lyric|arrang|orchestr|songwriter|words|music by|author/.test(l))return 'Composición';
-if(/vocal|voice|guitar|bass|drum|piano|key|synth|violin|cello|string|brass|horn|trumpet|sax|flute|percuss|organ|harp|sampl|turntable|\bdj\b|perform|instrument|choir|rap|featur|clarinet|oboe|trombone|banjo|ukulele|vibraphone|marimba|bongo|congas|tambourine|whistle|scratch/.test(l))return 'Músicos';
+if(/vocal|voice|guitar|bass|drum|piano|keys|keyboard|synth|violin|cello|string|brass|horn|trumpet|sax|flute|percuss|\borgan\b|harp|sampl|turntable|\bdj\b|perform|instrument|choir|\brap(per|ping)?\b|featur|clarinet|oboe|trombone|banjo|ukulele|vibraphone|marimba|bongo|congas|tambourine|whistle|scratch/.test(l))return 'Músicos';
 return 'Otros'}
 function inAdd(M,name,role,trk,src){name=String(name||'').replace(/\s\(\d+\)$/,'').trim();role=String(role||'').trim();if(!name||!role)return;
 var g=inGrp(role),key=nrm(name)+'|'+g,o=M[key]=M[key]||{n:name,g:g,r:{},tk:{},s:{}};o.r[inEs(role)]=1;if(trk!=null)o.tk[trk]=1;o.s[src]=1}
@@ -2187,10 +2188,11 @@ if(wp)h+='<div class="sec">Datos documentados</div>'+wp.cards.map(function(c){re
 else if(st('wp')=='load')h+=ld('Buscando en Wikipedia…');
 else h+=ld(st('wp')=='err'?'No pude conectar con Wikipedia. Toca «Actualizar info».':'No hay información de este álbum en Wikipedia.')}
 else{var rows=[].concat(st('mb')=='ok'?s.mb.d.rows:[],st('dc')=='ok'?s.dc.d.rows:[],st('wp')=='ok'&&s.wp.d.rows?s.wp.d.rows:[]),
-body=ch=='cr'?inPeople(rows,['Producción','Ingeniería','Composición','Otros']):inPeople(rows,['Músicos'],60);
+body=ch=='cr'?inPeople(rows,['Producción','Ingeniería','Composición','Arte y diseño','Otros']):inPeople(rows,['Músicos'],60);
 h+=body;if(st('mb')=='load')h+=ld('Buscando en MusicBrainz…');if(st('dc')=='load')h+=ld('Buscando en Discogs…');if(st('wp')=='load')h+=ld('Buscando en Wikipedia…');
 if(!body&&st('mb')!='load'&&st('dc')!='load'&&st('wp')!='load')h+=ld(st('mb')=='err'&&st('dc')=='err'?'No pude conectar con las fuentes. Revisa tu conexión y toca «Actualizar».':(ch=='cr'?'No encontré créditos de este álbum.':'No encontré músicos acreditados en este álbum.'))}
 var ok=(ch=='rs'?['wp']:['wp','mb','dc']).every(function(q){return st(q)!='load'});
+var ga=S.a[k];h+='<a href="https://genius.com/search?q='+qe(ga.ar+' '+ga.al)+'" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:18px;padding:13px 16px;border:1px solid var(--bd);border-radius:14px;color:var(--tx);font-weight:700;font-size:14px;text-decoration:none">Letras y notas en Genius <span style="opacity:.6">↗</span></a>';
 return h+'<div style="text-align:center;margin-top:16px"><span role="button" tabindex="0" data-a="inr" style="font-size:12px;color:var(--mut);opacity:.7;text-decoration:underline;cursor:pointer;padding:6px'+(ok?'':';pointer-events:none')+'">↻ Actualizar info</span></div>'}
 function sheet(k){var _sk=ui.sk;ui.sk=0;var o=$('nt');if(o&&cur==k)S.a[k].note=o.value;var same2=cur==k,sc=same2?$('sh').scrollTop:0;
 if(!same2){ui.tk=null;ui.op={};ui.wx={};ui.sm=false;ui.tab=(ui.tabRet&&ui.tabRet.k==k)?ui.tabRet.t:'tk';ui.ls=false;ui.rv=false}
