@@ -737,6 +737,17 @@ html.bootf #seg,html.bootf #chips,html.bootf #list{animation:bootf .18s ease-out
 .infa{width:42px;height:42px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#fff}
 .infr b{display:block;font-size:14.5px}.infr small{color:var(--mut);font-size:12.5px}
 .infk{display:flex;justify-content:space-between;gap:14px;padding:5px 0;font-size:13.5px}.infk span{color:var(--mut)}.infk b{font-weight:600;text-align:right}
+
+/* === Controles integrados con el diseño: translúcidos y teñidos con el color de la app (en vez de negro sólido) === */
+:root{--ctl:rgba(var(--acr),.14);--ctlh:rgba(var(--acr),.22);--ctlb:var(--bdc,rgba(var(--acr),.28))}
+.card input:not([type=checkbox]):not([type=radio]),.card textarea,.card select,details input:not([type=checkbox]):not([type=radio]),details textarea,.cfg-g input:not([type=checkbox]):not([type=radio]),.cfg-g textarea,.cfg-g select{background:var(--ctl);border-color:var(--ctlb)}
+.card button:not(.p),details button:not(.p),.cfg-g button:not(.p):not(.cfg-i),.btns button:not(.p){background:var(--ctl);border-color:var(--ctlb)}
+.card button:not(.p):active,.btns button:not(.p):active{background:var(--ctlh)}
+.card input::placeholder,.card textarea::placeholder{color:var(--mut);opacity:.8}
+input[type=file]{padding:8px 10px;color:var(--mut)}
+input[type=file]::file-selector-button{background:var(--ctl);color:var(--tx);border:1px solid var(--ctlb);border-radius:10px;padding:8px 14px;margin-right:12px;font:inherit;font-weight:600;cursor:pointer}
+.btns .hb,.btns .shb{background:var(--ctl);border-color:var(--ctlb)}
+.btns .hb.on{background:rgba(255,77,109,.16);border-color:rgba(255,77,109,.45)}
 </style>
 <script>
 /* Tema: modo claro/oscuro y color. Se aplica antes de pintar para evitar parpadeos */
