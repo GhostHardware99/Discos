@@ -350,6 +350,7 @@ html{min-height:100%;min-height:100dvh}body{min-height:100vh;min-height:100dvh}
 .hrt{display:inline-flex;vertical-align:middle;color:#ff4d6d;filter:drop-shadow(0 2px 7px rgba(255,77,109,.5))}.hrt svg{width:22px;height:22px;display:block}
 .dfh .dfi svg{width:18px;height:18px;display:block}.dfh .dfi svg path{stroke-width:2.2}
 .chips button.dis{opacity:.4}
+.chips a.gn{flex:none;display:inline-flex;align-items:center;white-space:nowrap;border-radius:99px;padding:7px 13px;font-size:13px;background:var(--gl);border:1px solid var(--glb);color:var(--tx);text-decoration:none}
 .dfo{background:var(--card);border:1px solid var(--bd);border-radius:18px;margin-top:12px;overflow:hidden}
 .dfh{display:flex;align-items:center;gap:12px;width:100%;border:0;border-radius:0;background:none;padding:14px 16px;text-align:left;font-weight:700;font-size:15px;color:var(--tx)}
 .dfh .dfi{width:34px;height:34px;border-radius:11px;background:var(--ac2);color:var(--act);display:inline-flex;align-items:center;justify-content:center;font-size:16px;flex:none}
@@ -729,6 +730,8 @@ html.bootf #seg,html.bootf #chips,html.bootf #list{animation:bootf .18s ease-out
 .infc .ds{color:var(--tx);opacity:.85;line-height:1.5;margin-top:2px}
 .srcb{display:inline-block;margin-top:8px;font-size:10.5px;font-weight:700;color:var(--act);border:1px solid rgba(var(--acr),.45);border-radius:99px;padding:2px 9px;text-decoration:none;white-space:nowrap}
 .infr{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--bd)}
+.srcw{margin-left:auto;display:flex;flex-wrap:wrap;gap:5px;justify-content:flex-end;flex:none;max-width:46%}
+.srcw .srcb{margin:0!important;max-width:none!important}
 .infr .srcb{margin:0 0 0 auto;flex:none;font-size:10px;max-width:42%;overflow:hidden;text-overflow:ellipsis}
 .infa{width:42px;height:42px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#fff}
 .infr b{display:block;font-size:14.5px}.infr small{color:var(--mut);font-size:12.5px}
@@ -2093,7 +2096,7 @@ stdraw(k)}
 /* ---------- Ficha del álbum ---------- */
 /* ---------- Pestaña «Info» del álbum: Wikipedia (solo el artículo del ÁLBUM), MusicBrainz y Discogs ----------
    Todo se pide solo al tocar un chip, en paralelo y con tope de tiempo; cada resultado se guarda 30 días (IndexedDB). */
-var IN={},INC='info3:',INT=2592e6,INFORCE=0;
+var IN={},INC='info4:',INT=2592e6,INFORCE=0;
 function inForce(){return INFORCE>Date.now()}
 var INR={'producer':'Productor','co producer':'Coproductor','co-producer':'Coproductor','executive producer':'Productor ejecutivo','additional producer':'Productor adicional','assistant producer':'Productor asistente','engineer':'Ingeniería','recording':'Grabación','recorded by':'Grabación','recording engineer':'Grabación','mix':'Mezcla','mixed by':'Mezcla','mixing':'Mezcla','mix engineer':'Mezcla','mastering':'Masterización','mastered by':'Masterización','mastering engineer':'Masterización','vocal':'Voz','vocals':'Voz','lead vocals':'Voz principal','background vocals':'Coros','backing vocals':'Coros','guitar':'Guitarra','electric guitar':'Guitarra eléctrica','acoustic guitar':'Guitarra acústica','bass':'Bajo','bass guitar':'Bajo','drums':'Batería','piano':'Piano','keyboard':'Teclados','keyboards':'Teclados','synthesizer':'Sintetizador','programming':'Programación','arranger':'Arreglos','arranged by':'Arreglos','composer':'Composición','writer':'Autor','lyricist':'Letra','written-by':'Autor','written by':'Autor','songwriter':'Autor','instrument':'Instrumento','performer':'Intérprete','featuring':'Invitado','sampler':'Sampler','percussion':'Percusión','strings':'Cuerdas','violin':'Violín','cello':'Chelo','saxophone':'Saxofón','trumpet':'Trompeta','flute':'Flauta','organ':'Órgano','turntables':'Tornamesas','choir':'Coro','design':'Diseño','artwork by':'Arte','photography by':'Fotografía','executive-producer':'Productor ejecutivo','a&r':'A&R'};
 function inEs(r){var l=String(r).toLowerCase().trim(),b=l.replace(/\s*\[.*?\]/g,'').trim();return INR[l]||INR[b]||cap(String(r).trim())}
@@ -2104,9 +2107,9 @@ if(/engineer|mix|master|record|sound|balance|editing|edited|audio|programm/.test
 if(/writ|compos|lyric|arrang|orchestr|songwriter|words|music by|author/.test(l))return 'Composición';
 if(/vocal|voice|guitar|bass|drum|piano|keys|keyboard|synth|violin|cello|string|brass|horn|trumpet|sax|flute|percuss|\borgan\b|harp|sampl|turntable|\bdj\b|perform|instrument|choir|\brap(per|ping)?\b|featur|clarinet|oboe|trombone|banjo|ukulele|vibraphone|marimba|bongo|congas|tambourine|whistle|scratch/.test(l))return 'Músicos';
 return 'Otros'}
-function inAdd(M,name,role,trk,src){name=String(name||'').replace(/\s\(\d+\)$/,'').trim();role=String(role||'').trim();if(!name||!role)return;
-var g=inGrp(role),key=nrm(name)+'|'+g,o=M[key]=M[key]||{n:name,g:g,r:{},tk:{},s:{}};o.r[inEs(role)]=1;if(trk!=null)o.tk[trk]=1;o.s[src]=1}
-function inRows(M){return Object.keys(M).map(function(q){var o=M[q];return {n:o.n,g:o.g,r:Object.keys(o.r),t:Object.keys(o.tk).length,s:Object.keys(o.s)}})}
+function inAdd(M,name,role,trk,src,url){name=String(name||'').replace(/\s\(\d+\)$/,'').trim();role=String(role||'').trim();if(!name||!role)return;
+var g=inGrp(role),key=nrm(name)+'|'+g,o=M[key]=M[key]||{n:name,g:g,r:{},tk:{},s:{},u:{}};o.r[inEs(role)]=1;if(trk!=null)o.tk[trk]=1;o.s[src]=1;if(url)o.u[src]=url}
+function inRows(M){return Object.keys(M).map(function(q){var o=M[q];return {n:o.n,g:o.g,r:Object.keys(o.r),t:Object.keys(o.tk).length,s:Object.keys(o.s),u:o.u||{}}})}
 /* --- Wikipedia: solo si el artículo es de ESTE álbum (título igual, categoría de álbum/EP y menciona al artista). Nunca el del artista. --- */
 async function inWiki(a){var base='https://en.wikipedia.org/w/api.php?format=json&origin=*&action=query&redirects=1';
 var parts=String(a.ar).split(/\s*(?:,|&|\band\b|\bfeat\.?|\bx\b)\s*/i).filter(Boolean),want=cln(a.al);
@@ -2129,10 +2132,10 @@ var cards=[],intro=(secs[0].t||hit.extract||'').trim();
 if(intro)cards.push({h:'Contexto',t:tidy(intro)});
 [['Grabación',/^(background|recording|production|development|writing|conception|writing and recording|recording and production)/],['Composición',/^(music|composition|lyrics|style|music and lyrics|musical style|themes|lyrical themes|content)/],['Lanzamiento',/^(release|promotion|marketing|artwork|title|packaging|release and promotion)/],['Recepción',/^(critical reception|reception|critical response|accolades|legacy)/]].forEach(function(x){var t=pick(x[1]);if(t)cards.push({h:x[0],t:tidy(t)})});
 var PM={},pm=txt.match(/\n==\s*(?:Personnel|Credits(?: and personnel)?|Credits adapted[^=\n]*|Album personnel)\s*==\s*\n([\s\S]*?)(?=\n==\s*[^=\n]+?\s*==\s*\n|$)/i);
-if(pm){var cur2='';pm[1].split('\n').forEach(function(ln){ln=ln.trim();if(!ln)return;var h3=ln.match(/^=+\s*([^=]+?)\s*=+$/);if(h3){cur2=h3[1];return}
+if(pm){var WU='https://en.wikipedia.org/wiki/'+encodeURIComponent(String(hit.title).replace(/ /g,'_'))+'#Personnel',cur2='';pm[1].split('\n').forEach(function(ln){ln=ln.trim();if(!ln)return;var h3=ln.match(/^=+\s*([^=]+?)\s*=+$/);if(h3){cur2=h3[1];return}
 var m2=ln.match(/^[•*\-]?\s*([^–—:]{2,60}?)\s*(?:[–—]|\s-\s|:)\s*(.{2,200})$/);if(!m2)return;var nm=m2[1].trim(),rl=m2[2].replace(/\(.*?\)/g,'').replace(/\.$/,'');
 if(/^(track|tracks|all tracks)\b/i.test(nm))return;
-rl.split(/\s*,\s*|\s+and\s+|\s*;\s*/).forEach(function(r){r=r.trim();if(r&&r.length<40)inAdd(PM,nm,r,null,'Wikipedia')})})}
+rl.split(/\s*,\s*|\s+and\s+|\s*;\s*/).forEach(function(r){r=r.trim();if(r&&r.length<40)inAdd(PM,nm,r,null,'Wikipedia',WU)})})}
 return {title:hit.title,url:'https://en.wikipedia.org/wiki/'+encodeURIComponent(String(hit.title).replace(/ /g,'_')),cards:cards,rows:inRows(PM)}}
 /* --- MusicBrainz: créditos del lanzamiento (nivel álbum y de cada pista) --- */
 function inMbRoles(r){var t=r.type,at=r.attributes||[];return (t=='instrument'||t=='vocal'||t=='performer')?(at.length?at:[t]):[at.concat([t]).join(' ')]}
@@ -2145,8 +2148,8 @@ rl.sort(function(x,y){return String(x.date||'9999').localeCompare(String(y.date|
 var M={};
 for(var ri=0;ri<Math.min(rl.length,3)&&!Object.keys(M).length;ri++){
 var r=await mbq('release/'+rl[ri].id+'?inc=artist-rels+recordings+recording-level-rels');if(!r||r.error)continue;
-var n=0;(r.relations||[]).forEach(function(x){if(x['target-type']!='artist'||!x.artist)return;inMbRoles(x).forEach(function(ro){inAdd(M,x.artist.name,ro,null,'MusicBrainz')})});
-(r.media||[]).forEach(function(md){(md.tracks||[]).forEach(function(t){n++;var rc=t.recording;if(!rc)return;(rc.relations||[]).forEach(function(x){if(x['target-type']!='artist'||!x.artist)return;inMbRoles(x).forEach(function(ro){inAdd(M,x.artist.name,ro,n,'MusicBrainz')})})})})}
+var n=0;(r.relations||[]).forEach(function(x){if(x['target-type']!='artist'||!x.artist)return;inMbRoles(x).forEach(function(ro){inAdd(M,x.artist.name,ro,null,'MusicBrainz','https://musicbrainz.org/artist/'+x.artist.id)})});
+(r.media||[]).forEach(function(md){(md.tracks||[]).forEach(function(t){n++;var rc=t.recording;if(!rc)return;(rc.relations||[]).forEach(function(x){if(x['target-type']!='artist'||!x.artist)return;inMbRoles(x).forEach(function(ro){inAdd(M,x.artist.name,ro,n,'MusicBrainz','https://musicbrainz.org/artist/'+x.artist.id)})})})})}
 return {rows:inRows(M)}}
 /* --- Discogs: créditos y datos de la edición (master → edición principal) --- */
 async function inDc(a){if(!dcOn()||DCBAD||!a.ar||a.ar=='Desconocido')return null;var ty=['master','release'],c=cln(a.al),rel=null;
@@ -2155,7 +2158,7 @@ var l=(d.results||[]).map(function(x){var s=String(x.title||''),j=s.indexOf(' - 
 var h=l.filter(function(x){return cln(x.al)==c})[0]||l.filter(function(x){return same(x.al,a.al)})[0];if(!h)continue;
 try{if(ty[i]=='master'){var m=await dcGet('masters/'+h.x.id);rel=m&&m.main_release?await dcGet('releases/'+m.main_release):null}else rel=await dcGet('releases/'+h.x.id)}catch(e){if(!(e&&e.nf))throw e}}
 if(!rel)return null;
-var M={};function add(x,trk){String(x.role||'').split(/,\s*(?![^\[]*\])/).forEach(function(ro){inAdd(M,x.name,ro,trk,'Discogs')})}
+var M={};function add(x,trk){String(x.role||'').split(/,\s*(?![^\[]*\])/).forEach(function(ro){inAdd(M,x.name,ro,trk,'Discogs',x.id?'https://www.discogs.com/artist/'+x.id:'')})}
 (rel.extraartists||[]).forEach(function(x){add(x,null)});
 (rel.tracklist||[]).forEach(function(t,ti){(t.extraartists||[]).forEach(function(x){add(x,ti+1)})});
 var info=[];
@@ -2174,14 +2177,16 @@ if(s.rest){go();return}s.rest=1;
 idbGet(INC+k).then(function(c){if(c&&c.d&&Date.now()-c.t<INT)['wp','mb','dc'].forEach(function(q){var x=c.d[q];if(x&&!s[q]&&!(x.s=='none'&&Date.now()-c.t>2*864e5))s[q]=x})}).catch(function(){}).then(function(){go();if(cur==k&&ui.tab=='in')rs2(k)})}
 function inBadge(l){return '<span class="srcb">'+esc(l)+'</span>'}
 function inCard(i,k,c,src,u){var op=ui.wx['i'+i],big=c.t.length>300;return '<div class="infc"'+(big?' data-a="wx" data-w="i'+i+'"':'')+'><h4>'+esc(c.h)+'</h4><div class="ds'+(op?' open':'')+'">'+esc(c.t)+'</div>'+(big?'<div class="h" style="margin-top:4px">'+(op?'Ver menos':'Ver más')+'</div>':'')+(u?'<a class="srcb" href="'+esc(u)+'" target="_blank" rel="noopener">'+esc(src)+'</a>':inBadge(src))+'</div>'}
-function inPeople(rows,groups,lim){var by={};rows.forEach(function(r){if(groups.indexOf(r.g)<0)return;var k=nrm(r.n)+'|'+r.g,o=by[k]=by[k]||{n:r.n,g:r.g,r:{},t:0,s:{}};r.r.forEach(function(x){o.r[x]=1});o.t=Math.max(o.t,r.t||0);r.s.forEach(function(x){o.s[x]=1})});
+function inPeople(rows,groups,lim){var by={};rows.forEach(function(r){if(groups.indexOf(r.g)<0)return;var k=nrm(r.n)+'|'+r.g,o=by[k]=by[k]||{n:r.n,g:r.g,r:{},t:0,s:{},u:{}};r.r.forEach(function(x){o.r[x]=1});o.t=Math.max(o.t,r.t||0);r.s.forEach(function(x){o.s[x]=1;if(r.u&&r.u[x])o.u[x]=r.u[x]})});
 var out='',n=0;groups.forEach(function(g){var l=Object.keys(by).map(function(q){return by[q]}).filter(function(o){return o.g==g}).sort(function(x,y){return x.n.localeCompare(y.n)});if(!l.length)return;
-out+='<div class="sec">'+g+'</div>'+l.slice(0,lim||40).map(function(o){n++;var h=hue(o.n);return '<div class="infr"><div class="infa" style="background:hsl('+h+',45%,38%)">'+esc(ini(o.n))+'</div><div style="min-width:0"><b>'+esc(o.n)+'</b><small>'+esc(Object.keys(o.r).join(', '))+(o.t?' · '+o.t+(o.t==1?' pista':' pistas'):'')+'</small></div>'+inBadge(Object.keys(o.s).join(' · '))+'</div>'}).join('')+(l.length>(lim||40)?'<div class="h" style="padding:8px 0">+'+(l.length-(lim||40))+' más</div>':'')});
+out+='<div class="sec">'+g+'</div>'+l.slice(0,lim||40).map(function(o){n++;var h=hue(o.n);return '<div class="infr"><div class="infa" style="background:hsl('+h+',45%,38%)">'+esc(ini(o.n))+'</div><div style="min-width:0"><b>'+esc(o.n)+'</b><small>'+esc(Object.keys(o.r).join(', '))+(o.t?' · '+o.t+(o.t==1?' pista':' pistas'):'')+'</small></div>'+'<span class="srcw">'+Object.keys(o.s).map(function(q){return o.u[q]?'<a class="srcb" href="'+esc(o.u[q])+'" target="_blank" rel="noopener">'+esc(q)+'</a>':inBadge(q)}).join('')+'</span></div>'}).join('')+(l.length>(lim||40)?'<div class="h" style="padding:8px 0">+'+(l.length-(lim||40))+' más</div>':'')});
 return n?out:''}
+function gSlug(t){t=String(t||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s*[\(\[][^\)\]]*[\)\]]\s*$/,'').replace(/&/g,' and ').replace(/['\u2019`"]/g,'').replace(/[^A-Za-z0-9]+/g,'-').replace(/^-+|-+$/g,'');return t?t.charAt(0).toUpperCase()+t.slice(1).toLowerCase():''}
+function genUrl(a){var x=gSlug(a.ar),y=gSlug(a.al);return x&&y?'https://genius.com/albums/'+x+'/'+y:'https://genius.com/search?q='+qe(a.ar+' '+a.al)}
 function infoTab(k){var a=S.a[k],ch=ui.ic||'rs',s=IN[k]||{},CH=[['rs','Resumen'],['cr','Créditos'],['mu','Músicos']];
 if(a.ar=='Desconocido')return '<div class="h" style="padding:14px 0">Esta pestaña necesita saber el artista del álbum.</div>';
 inLoad(k,ch);s=IN[k]||{};
-var h='<div class="chips" style="margin-top:12px">'+CH.map(function(q){return '<button data-a="ic" data-v="'+q[0]+'" class="'+(ch==q[0]?'on':'')+'">'+q[1]+'</button>'}).join('')+'</div>',
+var h='<div class="chips" style="margin-top:12px">'+CH.map(function(q){return '<button data-a="ic" data-v="'+q[0]+'" class="'+(ch==q[0]?'on':'')+'">'+q[1]+'</button>'}).join('')+'<a class="gn" href="'+esc(genUrl(a))+'" target="_blank" rel="noopener">Genius ↗</a></div>',
 st=function(q){return s[q]?s[q].s:'load'},ld=function(l){return '<div class="h" style="padding:10px 0">'+l+'</div>'};
 if(ch=='rs'){var wp=st('wp')=='ok'?s.wp.d:null,i=0;
 if(wp)h+='<div class="sec">Datos documentados</div>'+wp.cards.map(function(c){return inCard(i++,k,c,'Wikipedia',wp.url)}).join('')+'<div class="h" style="margin-top:6px;font-size:11.5px;opacity:.75">Texto de Wikipedia en inglés, licencia CC BY-SA.</div>';
@@ -2192,7 +2197,6 @@ body=ch=='cr'?inPeople(rows,['Producción','Ingeniería','Composición','Arte y 
 h+=body;if(st('mb')=='load')h+=ld('Buscando en MusicBrainz…');if(st('dc')=='load')h+=ld('Buscando en Discogs…');if(st('wp')=='load')h+=ld('Buscando en Wikipedia…');
 if(!body&&st('mb')!='load'&&st('dc')!='load'&&st('wp')!='load')h+=ld(st('mb')=='err'&&st('dc')=='err'?'No pude conectar con las fuentes. Revisa tu conexión y toca «Actualizar».':(ch=='cr'?'No encontré créditos de este álbum.':'No encontré músicos acreditados en este álbum.'))}
 var ok=(ch=='rs'?['wp']:['wp','mb','dc']).every(function(q){return st(q)!='load'});
-var ga=S.a[k];h+='<a href="https://genius.com/search?q='+qe(ga.ar+' '+ga.al)+'" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:18px;padding:13px 16px;border:1px solid var(--bd);border-radius:14px;color:var(--tx);font-weight:700;font-size:14px;text-decoration:none">Letras y notas en Genius <span style="opacity:.6">↗</span></a>';
 return h+'<div style="text-align:center;margin-top:16px"><span role="button" tabindex="0" data-a="inr" style="font-size:12px;color:var(--mut);opacity:.7;text-decoration:underline;cursor:pointer;padding:6px'+(ok?'':';pointer-events:none')+'">↻ Actualizar info</span></div>'}
 function sheet(k){var _sk=ui.sk;ui.sk=0;var o=$('nt');if(o&&cur==k)S.a[k].note=o.value;var same2=cur==k,sc=same2?$('sh').scrollTop:0;
 if(!same2){ui.tk=null;ui.op={};ui.wx={};ui.sm=false;ui.tab=(ui.tabRet&&ui.tabRet.k==k)?ui.tabRet.t:'tk';ui.ls=false;ui.rv=false}
