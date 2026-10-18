@@ -2658,13 +2658,13 @@ im.src=src}
 var ICDOTS='<svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="2" fill="currentColor" stroke="none"/><circle cx="12" cy="19" r="2" fill="currentColor" stroke="none"/></svg>';
 function colKeys(n){var ks=Object.keys(S.a).filter(function(k){return hasCol(S.a[k],n)&&!S.a[k].tmp}),s=ui.s;
 ks.sort(sortCmp(s));return ks}
-function CVS(){var v='full';try{v=localStorage.getItem('digz-cvs')||'full'}catch(e){}return /^(full|card|band|mini)$/.test(v)?v:'full'}
+function CVS(n){var ok=/^(full|card|band|mini)$/;if(n==null)n=(ui.vk&&String(ui.vk).indexOf('col:')==0)?String(ui.vk).slice(4):'';var v=(n&&S.cv&&S.cv[n])||'';if(ok.test(v))return v;try{v=localStorage.getItem('digz-cvs')||'full'}catch(e){v='full'}return ok.test(v)?v:'full'}
 var CVN={full:'Completa',card:'Tarjeta',band:'Banda',mini:'Compacta'};
 function sbInit(){var i=$('sbi'),b=$('sbs');if(!i||!b)return;var o=null;try{o=localStorage.getItem('digz-sat')}catch(e){}i.value=o==null?'':o;
 b.onclick=function(){var v=i.value.trim();try{if(v==='')localStorage.removeItem('digz-sat');else localStorage.setItem('digz-sat',String(Math.max(0,Math.min(80,parseFloat(v)||0))))}catch(e){}toast('Guardado · reiniciando');setTimeout(function(){location.reload()},600)}}
 function colPage(n,keepY){if(S.cols.indexOf(n)<0){hide();return}
 ui.keep=1;hide();ui.keep=0;ui.vk='col:'+n;CURCOL=n;SB=false;var ks=colKeys(n),L=vm('cd')=='l',ph=S.ci&&S.ci[n],first=ks[0]&&S.a[ks[0]],bg=ph||(first&&cvs(first,500))||'';
-show('<div class="hero colpg cs-'+CVS()+'" data-cpn="'+esc(n)+'"><div class="hbg">'+(bg?'<img alt="" src="'+esc(bg)+'" onerror="this.remove()">':'')+'</div><div class="htop"><button id="x" class="rb" aria-label="Atrás">'+ICBK+'</button><button id="cmb" class="rb" aria-label="Más opciones">'+ICDOTS+'</button></div>'
+show('<div class="hero colpg cs-'+CVS(n)+'" data-cpn="'+esc(n)+'"><div class="hbg">'+(bg?'<img alt="" src="'+esc(bg)+'" onerror="this.remove()">':'')+'</div><div class="htop"><button id="x" class="rb" aria-label="Atrás">'+ICBK+'</button><button id="cmb" class="rb" aria-label="Más opciones">'+ICDOTS+'</button></div>'
 +'<div class="ab"><div class="ccv">'+colMos(n,0,1)+'</div><h2>'+esc(n)+'</h2><div class="cdsc"><span>'+colCnt(n)+'</span><span>'+relT((S.cd&&S.cd[n])||Date.now())+'</span></div></div></div>'
 +'<div id="cpl" style="margin-top:40px">'+(ks.length?(L?ks.map(rowh).join(''):'<div class="grid">'+ks.map(tile).join('')+'</div>'):'<div class="emp" id="cem" role="button" tabindex="0" style="margin:18px 16px"><div class="et">Esta colección está vacía</div><div class="es">Toca aquí para añadir álbumes</div><div class="eb"><button class="p" type="button">Añadir álbumes</button></div></div>')+'</div>');
 CURCOL='';SB=true;colBar(bg,n);colFade();
@@ -2686,12 +2686,12 @@ function colBar(bg,n){CC={};if(!bg)return;if(CCR[bg]){CC.rows=CCR[bg];colBarUpd(
 im.onload=function(){try{var R=96,c=document.createElement('canvas');c.width=24;c.height=R;var x=c.getContext('2d');x.drawImage(im,0,0,24,R);var d=x.getImageData(0,0,24,R).data,rows=[];
 for(var r=0;r<R;r++){var a=0,g=0,b=0;for(var k=0;k<24;k++){var o=(r*24+k)*4;a+=d[o];g+=d[o+1];b+=d[o+2]}rows.push([Math.round(a/24),Math.round(g/24),Math.round(b/24)])}
 CCR[bg]=rows;if(ui.vk!=='col:'+n)return;CC.rows=rows;colBarUpd()}catch(e){}};im.src=bg}
-function colRename(o,nn){var i=S.cols.indexOf(o);if(i>-1)S.cols[i]=nn;Object.keys(S.a).forEach(function(k){var l=colList(S.a[k]),i=l.indexOf(o);if(i>-1)l[i]=nn});['ci','cs','cp','cd','cf'].forEach(function(f){if(S[f]&&S[f][o]!==undefined){S[f][nn]=S[f][o];delete S[f][o]}});if(ui.c==o)ui.c=nn}
+function colRename(o,nn){var i=S.cols.indexOf(o);if(i>-1)S.cols[i]=nn;Object.keys(S.a).forEach(function(k){var l=colList(S.a[k]),i=l.indexOf(o);if(i>-1)l[i]=nn});['ci','cs','cp','cd','cf','cv'].forEach(function(f){if(S[f]&&S[f][o]!==undefined){S[f][nn]=S[f][o];delete S[f][o]}});if(ui.c==o)ui.c=nn}
 function colEditDlg(n){var P={ci:(S.ci&&S.ci[n])||null,cs:(S.cs&&S.cs[n])||null,cp:(S.cp&&S.cp[n])||null},w=document.createElement('div');
 w.className='cedw dzmod';w.style.zIndex=55;
 w.innerHTML='<div class="cedb cedd"><div class="cedt">Editar colección</div><div class="ccv cdprev"></div><input id="cdn" maxlength="40" placeholder="Nombre de la colección" autocomplete="off"><div class="cdbt"></div><div class="cdsl">Estilo de portada</div><div class="cdbt cdst"></div><div class="row"><button id="cdc" style="flex:1">Cancelar</button><button class="p" id="cds" style="flex:1">Guardar</button></div></div>';
 document.body.appendChild(w);
-var nm=w.querySelector('#cdn'),pv=w.querySelector('.cdprev'),bt=w.querySelector('.cdbt'),stb=w.querySelector('.cdst'),SV=CVS();nm.value=n;
+var nm=w.querySelector('#cdn'),pv=w.querySelector('.cdprev'),bt=w.querySelector('.cdbt'),stb=w.querySelector('.cdst'),SV=CVS(n);nm.value=n;
 function paintSt(){stb.innerHTML=Object.keys(CVN).map(function(k){return '<button type="button" data-st="'+k+'"'+(k==SV?' class="on"':'')+'>'+(k==SV?'✓ ':'')+CVN[k]+'</button>'}).join('')}
 paintSt();stb.onclick=function(e){var b=e.target.closest('button');if(!b)return;SV=b.dataset.st;paintSt()};
 function paint(){pv.innerHTML=P.ci?'<div class="mos"><img class="cp" alt="" src="'+P.ci+'"></div>':colMos(n,true);
@@ -2704,7 +2704,7 @@ else if(a=='rmp'){P.ci=P.cs=P.cp=null;paint()}};
 w.querySelector('#cdc').onclick=function(){w.remove()};
 w.querySelector('#cds').onclick=function(){var nn=nm.value.trim();if(!nn){toast('Ponle un nombre a la colección');return}
 if(nn!=n&&S.cols.indexOf(nn)>-1){toast('Ya existe una colección con ese nombre');return}
-var y=$('sh').scrollTop;try{localStorage.setItem('digz-cvs',SV)}catch(x){}if(nn!=n)colRename(n,nn);
+var y=$('sh').scrollTop;if(nn!=n)colRename(n,nn);S.cv=S.cv||{};S.cv[nn]=SV;
 ['ci','cs','cp'].forEach(function(f){S[f]=S[f]||{};if(P[f])S[f][nn]=P[f];else delete S[f][nn]});
 save();w.remove();render();colPage(nn,y)}}
 function colAddDlg(n){var sel={},AV=null,GA=[],G={},gl=[],gst=0,qid=0,gt=0,w=document.createElement('div');w.className='cedw dzmod';w.style.zIndex=55;
@@ -2761,7 +2761,7 @@ else if(a=='ad')colAddDlg(n);
 else if(a=='sl')msStart(null,n);
 else if(a=='vw'){setVm(L?'g':'l','cd');colPage(n,y)}
 else if(a=='del')colDelete(n,true)}}
-function colDelete(n,page){dzAsk('¿Eliminar la colección «'+n+'»? Los álbumes se quedan en tu biblioteca, solo pierden la colección.','Eliminar',function(){Object.keys(S.a).forEach(function(k){rmCol(S.a[k],n)});S.cols=S.cols.filter(function(c){return c!=n});['ci','cs','cp','cd','cf'].forEach(function(f){if(S[f])delete S[f][n]});save();if(page){hide();ui.cv=true}render()},1)}
+function colDelete(n,page){dzAsk('¿Eliminar la colección «'+n+'»? Los álbumes se quedan en tu biblioteca, solo pierden la colección.','Eliminar',function(){Object.keys(S.a).forEach(function(k){rmCol(S.a[k],n)});S.cols=S.cols.filter(function(c){return c!=n});['ci','cs','cp','cd','cf','cv'].forEach(function(f){if(S[f])delete S[f][n]});save();if(page){hide();ui.cv=true}render()},1)}
 function colRenameDlg(n){var w=document.createElement('div');w.className='cedw dzmod';w.style.zIndex=55;
 w.innerHTML='<div class="cedb cedd"><div class="cedt">Renombrar colección</div><input id="crn" maxlength="40" placeholder="Nombre de la colección" autocomplete="off" enterkeyhint="done"><div class="row"><button id="crc" style="flex:1">Cancelar</button><button class="p" id="crs" style="flex:1">Guardar</button></div></div>';
 document.body.appendChild(w);var i=w.querySelector('#crn');i.value=n;setTimeout(function(){try{i.focus();i.select()}catch(x){}},60);
