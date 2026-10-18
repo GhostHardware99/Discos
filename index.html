@@ -812,6 +812,16 @@ var KEY='discos2',S={a:{},cols:[]},ui={cv:false,cn:0,ot:'lib',f:'all',v:'g',s:'a
 try{var r=localStorage.getItem(KEY);if(r)S=JSON.parse(r)}catch(e){}
 var _svT=0;function saveNow(){clearTimeout(_svT);_svT=0;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 function save(){if(_svT)return;_svT=setTimeout(saveNow,400)}
+var IMD={},IDBp=null;
+function imgDb(){if(IDBp)return IDBp;IDBp=new Promise(function(ok,no){try{var r=indexedDB.open('digz-img',1);r.onupgradeneeded=function(){r.result.createObjectStore('k')};r.onsuccess=function(){ok(r.result)};r.onerror=function(){no()}}catch(e){no()}});return IDBp}
+function imgSrc(v){return typeof v=='string'&&v.slice(0,4)=='idb:'?(IMD[v]||''):v}
+function imgPut(d){if(typeof d!='string'||d.slice(0,5)!='data:')return Promise.resolve(d);var t='idb:'+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+return imgDb().then(function(db){return new Promise(function(ok,no){var x=db.transaction('k','readwrite');x.objectStore('k').put(d,t);x.oncomplete=function(){IMD[t]=d;ok(t)};x.onerror=function(){no()}})}).catch(function(){return d})}
+function imgLoad(){return imgDb().then(function(db){return new Promise(function(ok){var o=db.transaction('k').objectStore('k').openCursor();o.onsuccess=function(){var c=o.result;if(c){IMD[c.key]=c.value;c.continue()}else ok()};o.onerror=function(){ok()}})}).catch(function(){})}
+async function imgMigrate(){var n=0;async function mv(o,k){var v=o&&o[k];if(typeof v=='string'&&v.slice(0,5)=='data:'&&v.length>3000){var t=await imgPut(v);if(t!==v){o[k]=t;n++}}}
+for(var k in S.a)await mv(S.a[k],'mc');
+for(var f of ['ci','cs'])if(S[f])for(var c in S[f])await mv(S[f],c);
+if(n)save();return n}
 addEventListener('pagehide',function(){if(_svT)saveNow()});document.addEventListener('visibilitychange',function(){if(document.hidden&&_svT)saveNow()});
 try{if(!localStorage.getItem('digz-fix1')){Object.keys(S.a).forEach(function(k){var a=S.a[k];if(a.done&&a.t===1){a.done=false;a.t=0;delete a.pc}});localStorage.setItem('digz-fix1','1');save()}}catch(e){}
 try{Object.keys(S.a).forEach(function(k){if(S.a[k].tmp)delete S.a[k]})}catch(e){}
@@ -831,8 +841,8 @@ var cm=/^(.*coverartarchive\.org\/release-group\/[\w-]+\/front-)(\d+)(.*)$/.exec
 if(/\d+x\d+bb\.(jpg|png|webp)/i.test(u)){[n,600,500,300].forEach(function(z){if(z<=n&&o.indexOf(z)<0)o.push(z)});return o.map(function(z){return u.replace(/\d+x\d+bb\.(jpg|png|webp)/i,z+'x'+z+'bb.$1')})}
 if(isDz(u)&&/\/(\d{2,4})x\1-/.test(u)){[dz,500,250].forEach(function(z){if(z<=dz&&o.indexOf(z)<0)o.push(z)});return o.map(function(z){return u.replace(/\/(\d{2,4})x\1-/,'/'+z+'x'+z+'-')})}
 return [u]}
-function coverURLs(a,sz){var th=sz&&sz<=150,n=th?400:(sz&&sz>=500?800:600),dz=th?400:(sz&&sz>=500?800:600),mz=th?250:500,out=[];
-if(a&&a.mc)return [a.mc];
+function coverURLs(a,sz){var th=sz&&sz<=150,hi=sz&&sz>=900,n=th?400:(hi?1200:(sz&&sz>=500?800:600)),dz=th?400:(hi?1000:(sz&&sz>=500?800:600)),mz=th?250:(hi?1200:500),out=[];
+if(a&&a.mc)return [imgSrc(a.mc)];
 if(a&&a.img&&isDz(a.img))out=out.concat(ups(a.img,n,dz));
 if(a&&a.cu)out=out.concat(ups(a.cu,n,dz));
 if(a&&a.img&&!isDz(a.img))out=out.concat(ups(a.img,n,dz));
@@ -1035,6 +1045,7 @@ var _ldT=0;function lduSave(){if(_ldT)return;_ldT=setTimeout(function(){_ldT=0;t
 function lduAdd(u){if(!u||!/^https?:/.test(u))return;var h=uh(u);if(LDH[h])return;LDH[h]=1;LDL.push(h);if(LDL.length>4000){LDL.splice(0,LDL.length-4000).forEach(function(x){delete LDH[x]})}lduSave()}
 /* GOODC: la mejor portada que YA cargó bien para cada álbum/tamaño. Así cada re-dibujado empieza por esa y no vuelve a la de baja calidad o a la que falló (eso era el parpadeo). */
 var GOODC={};try{GOODC=JSON.parse(localStorage.getItem('digz-gc')||'{}')}catch(e){}
+try{if(!localStorage.getItem('digz-fix4')){Object.keys(GOODC).forEach(function(k){if(/\|b$/.test(k))delete GOODC[k]});localStorage.setItem('digz-gc',JSON.stringify(GOODC));localStorage.setItem('digz-fix4','1')}}catch(e){}
 try{Object.keys(GOODC).forEach(function(k){var g=GOODC[k];if(g&&g[0])lduAdd(g[0])})}catch(e){}
 var _gcT=0;function gcSave(){if(_gcT)return;_gcT=setTimeout(function(){_gcT=0;try{var ks=Object.keys(GOODC);if(ks.length>700)ks.slice(0,ks.length-700).forEach(function(k){delete GOODC[k]});localStorage.setItem('digz-gc',JSON.stringify(GOODC))}catch(e){}},2500)}
 var KEEP={},KEEPN=0;
@@ -2097,7 +2108,7 @@ function avgCol(im){try{var c=document.createElement('canvas');c.width=c.height=
 function rgb2h(r,g,b){r/=255;g/=255;b/=255;var mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn,h=0;if(d){h=mx==r?((g-b)/d)%6:mx==g?(b-r)/d+2:(r-g)/d+4;h=Math.round(h*60);if(h<0)h+=360}return {h:h,s:mx?d/mx:0}}
 function stTheme(k,im){var a=S.a[k];if(AS.t=='custom'&&DS.c1)return hexTheme(DS.c1);if(AS.t!='auto'){var t=TH[AS.t];return {b:t.b,p:t.p,a:t.a,x:t.x,m:t.m,light:t.light}}
 return mkAuto(im?domCols(im):[],hue(a.al+a.ar))}
-function covCands(k){var a=S.a[k],m=M[k]||{},l=[],mb=a.mb||m.id;if(a.mc)return [a.mc];
+function covCands(k){var a=S.a[k],m=M[k]||{},l=[],mb=a.mb||m.id;if(a.mc)return [imgSrc(a.mc)];
 /* de mayor a menor resolución: Deezer 1000, iTunes 1200, Cover Art Archive 1200, y luego los tamaños medianos */
 if(a.img&&isDz(a.img))l.push(String(a.img).replace(/\/(\d{2,4})x\1-/,'/1000x1000-'));
 if(a.id)l.push('https://api.deezer.com/album/'+a.id+'/image?size=xl');
@@ -2548,7 +2559,7 @@ return fetch(px+(px.indexOf('?')>-1?'&':'?')+'url='+encodeURIComponent(q)).then(
 return '<div class="h"><b>iTunes (vía tu Worker)</b> — '+(ok?'✓ responde':'✗ Apple devolvió '+us+(us=='403'?' (bloquea la IP del Worker)':us=='429'?' (límite de peticiones)':us=='502'?' (el Worker no llegó a Apple)':''))+'</div>'})}).catch(function(){return '<div class="h"><b>iTunes (vía tu Worker)</b> — ✗ sin conexión con tu Worker</div>'})}
 Promise.all(T.map(function(x){return Promise.all([t(x[1],{dx:1,nc:1}),t(x[1],{px:1,nc:1})]).then(function(r){return '<div class="h"><b>'+x[0]+'</b> — directo '+r[0]+' · proxy '+r[1]+'</div>'})})).then(function(l){return Promise.all([itest(),dtest()]).then(function(d){el.innerHTML=l.join('')+d[0]+d[1];b.disabled=false})})}}
 else if(sub=='bk'){
-$('ex').onclick=function(){saveNow();$('bk').value=JSON.stringify(S)};
+$('ex').onclick=function(){saveNow();$('bk').value=JSON.stringify(S,function(k,v){return typeof v=='string'&&v.slice(0,4)=='idb:'?imgSrc(v):v})};
 $('rs').onclick=function(){try{var o=JSON.parse($('bk').value);if(o.a){S=o;save();render();toast('Restaurado')}else toast('Texto de respaldo no válido')}catch(e){toast('Texto de respaldo no válido')}}}}
 
 /* ---------- Añadir álbum (catálogo de MusicBrainz) ---------- */
@@ -2584,7 +2595,7 @@ if(b.dataset.g!==undefined){ui.cv=false;if(b.dataset.g===''){ui.g='';ui.f='all';
 if(b.dataset.f!==undefined){ui.cv=false;ui.f=ui.f==b.dataset.f?'all':b.dataset.f;ui.lim=120;render()}};
 $('seg').onclick=$('chips').onclick;
 /* ---------- Colecciones (pestaña propia) ---------- */
-function colMos(c,np,full){if(!np&&S.ci&&S.ci[c])return '<div class="mos"><img class="cp" alt="" src="'+S.ci[c]+'"></div>';
+function colMos(c,np,full){if(!np&&S.ci&&S.ci[c])return '<div class="mos"><img class="cp" alt="" src="'+imgSrc(S.ci[c])+'"></div>';
 var ks=Object.keys(S.a).filter(function(k){return hasCol(S.a[k],c)&&!S.a[k].tmp}),m='';
 if(full){var n=Math.min(ks.length,4);for(var j=0;j<n;j++)m+=cv(S.a[ks[j]],'mini',ks[j],500);return '<div class="mos m'+n+'">'+m+'</div>'}
 for(var i=0;i<4;i++)m+=ks[i]?cv(S.a[ks[i]],'mini',ks[i],120):'<i></i>';return '<div class="mos">'+m+'</div>'}
@@ -2629,9 +2640,9 @@ L.addEventListener('keydown',function(e){if(e.target.id!='cni')return;if(e.key==
 L.addEventListener('focusout',function(e){if(e.target.id!='cni'||!ui.cn)return;setTimeout(function(){if(!ui.cn)return;if(ui.cnPick||document.querySelector('.cedw')||Date.now()-(ui.cnTap||0)<800)return;var c=$('cni');if(c&&document.activeElement===c)return;cnCommit()},120)});
 var r0=render;render=function(){r0.apply(this,arguments);try{if(ui.cn&&ui.cv&&!ui.cnPick&&!document.querySelector('.cedw')){var i=$('cni');if(i&&document.activeElement!==i){i.focus();try{i.setSelectionRange(i.value.length,i.value.length)}catch(x){}}}}catch(x){}}})();
 function pickPhoto(cb){var i=document.createElement('input');i.type='file';i.accept='image/*';window.__pi=i;var done=0;function fin(v){if(done)return;done=1;cb(v)}
-i.onchange=function(){var f=i.files&&i.files[0];if(!f){fin(null);return}var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var m=Math.min(1,900/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*m);c.height=Math.round(im.height*m);c.getContext('2d').drawImage(im,0,0,c.width,c.height);fin(c.toDataURL('image/jpeg',.85))};im.onerror=function(){fin(null)};im.src=r.result};r.onerror=function(){fin(null)};r.readAsDataURL(f)};
+i.onchange=function(){var f=i.files&&i.files[0];if(!f){fin(null);return}var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var m=Math.min(1,1600/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*m);c.height=Math.round(im.height*m);c.getContext('2d').drawImage(im,0,0,c.width,c.height);fin(c.toDataURL('image/jpeg',.92))};im.onerror=function(){fin(null)};im.src=r.result};r.onerror=function(){fin(null)};r.readAsDataURL(f)};
 i.addEventListener('cancel',function(){fin(null)});i.click()}
-function colAdjust(n){var src=(S.cs&&S.cs[n])||(S.ci&&S.ci[n]);if(!src)return;colEdit(n,src,(S.cp&&S.cp[n])||null,!(S.cs&&S.cs[n]))}
+function colAdjust(n){var src=imgSrc((S.cs&&S.cs[n])||(S.ci&&S.ci[n]));if(!src)return;colEdit(n,src,(S.cp&&S.cp[n])||null,!(S.cs&&S.cs[n]))}
 /* Editor: arrastra para mover, pellizca o usa el control para acercar */
 function colEdit(n,src,pr,isNew,cb){var im=new Image();im.onload=function(){
 var V=Math.min(window.innerWidth-64,340),iw=im.naturalWidth,ih=im.naturalHeight,base=V/Math.min(iw,ih),z=(pr&&pr.z)||1,cx=pr&&pr.cx!=null?pr.cx:.5,cy=pr&&pr.cy!=null?pr.cy:.5,ox=0,oy=0;
@@ -2651,8 +2662,8 @@ function up(ev){delete P[ev.pointerId]}vw.addEventListener('pointerup',up);vw.ad
 vw.addEventListener('wheel',function(ev){ev.preventDefault();var r=vw.getBoundingClientRect();setZ(z*(ev.deltaY<0?1.1:.9),ev.clientX-r.left,ev.clientY-r.top)},{passive:false});
 rg.oninput=function(){setZ(rg.value/100,V/2,V/2)};
 w.querySelector('#cedc').onclick=function(){w.remove();if(cb)cb(null)};
-w.querySelector('#ceds').onclick=function(){var s=base*z,c=document.createElement('canvas');c.width=c.height=400;c.getContext('2d').drawImage(im,-ox/s,-oy/s,V/s,V/s,0,0,400,400);
-if(cb){w.remove();cb({ci:c.toDataURL('image/jpeg',.85),cs:isNew?src:null,cp:{z:z,cx:(V/2-ox)/(iw*s),cy:(V/2-oy)/(ih*s)}});return}S.ci=S.ci||{};S.cs=S.cs||{};S.cp=S.cp||{};S.ci[n]=c.toDataURL('image/jpeg',.85);if(isNew)S.cs[n]=src;S.cp[n]={z:z,cx:(V/2-ox)/(iw*s),cy:(V/2-oy)/(ih*s)};save();w.remove();render();var y=$('sh').scrollTop;if($('sh').querySelector('.colpg'))colPage(n,y)}};
+w.querySelector('#ceds').onclick=async function(){var s=base*z,c=document.createElement('canvas');c.width=c.height=800;c.getContext('2d').drawImage(im,-ox/s,-oy/s,V/s,V/s,0,0,800,800);
+if(cb){w.remove();cb({ci:await imgPut(c.toDataURL('image/jpeg',.92)),cs:isNew?await imgPut(src):null,cp:{z:z,cx:(V/2-ox)/(iw*s),cy:(V/2-oy)/(ih*s)}});return}S.ci=S.ci||{};S.cs=S.cs||{};S.cp=S.cp||{};S.ci[n]=await imgPut(c.toDataURL('image/jpeg',.92));if(isNew)S.cs[n]=await imgPut(src);S.cp[n]={z:z,cx:(V/2-ox)/(iw*s),cy:(V/2-oy)/(ih*s)};save();w.remove();render();var y=$('sh').scrollTop;if($('sh').querySelector('.colpg'))colPage(n,y)}};
 im.src=src}
 /* ---------- Pantalla completa de una colección ---------- */
 var ICDOTS='<svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="2" fill="currentColor" stroke="none"/><circle cx="12" cy="19" r="2" fill="currentColor" stroke="none"/></svg>';
@@ -2663,7 +2674,7 @@ var CVN={full:'Completa',card:'Tarjeta',band:'Banda',mini:'Compacta'};
 function sbInit(){var i=$('sbi'),b=$('sbs');if(!i||!b)return;var o=null;try{o=localStorage.getItem('digz-sat')}catch(e){}i.value=o==null?'':o;
 b.onclick=function(){var v=i.value.trim();try{if(v==='')localStorage.removeItem('digz-sat');else localStorage.setItem('digz-sat',String(Math.max(0,Math.min(80,parseFloat(v)||0))))}catch(e){}toast('Guardado · reiniciando');setTimeout(function(){location.reload()},600)}}
 function colPage(n,keepY){if(S.cols.indexOf(n)<0){hide();return}
-ui.keep=1;hide();ui.keep=0;ui.vk='col:'+n;CURCOL=n;SB=false;var ks=colKeys(n),L=vm('cd')=='l',ph=S.ci&&S.ci[n],first=ks[0]&&S.a[ks[0]],bg=ph||(first&&cvs(first,500))||'';
+ui.keep=1;hide();ui.keep=0;ui.vk='col:'+n;CURCOL=n;SB=false;var ks=colKeys(n),L=vm('cd')=='l',ph=S.ci&&imgSrc(S.ci[n]),first=ks[0]&&S.a[ks[0]],bg=ph||(first&&cvs(first,500))||'';
 show('<div class="hero colpg cs-'+CVS(n)+'" data-cpn="'+esc(n)+'"><div class="hbg">'+(bg?'<img alt="" src="'+esc(bg)+'" onerror="this.remove()">':'')+'</div><div class="htop"><button id="x" class="rb" aria-label="Atrás">'+ICBK+'</button><button id="cmb" class="rb" aria-label="Más opciones">'+ICDOTS+'</button></div>'
 +'<div class="ab"><div class="ccv">'+colMos(n,0,1)+'</div><h2>'+esc(n)+'</h2><div class="cdsc"><span>'+colCnt(n)+'</span><span>'+relT((S.cd&&S.cd[n])||Date.now())+'</span></div></div></div>'
 +'<div id="cpl" style="margin-top:40px">'+(ks.length?(L?ks.map(rowh).join(''):'<div class="grid">'+ks.map(tile).join('')+'</div>'):'<div class="emp" id="cem" role="button" tabindex="0" style="margin:18px 16px"><div class="et">Esta colección está vacía</div><div class="es">Toca aquí para añadir álbumes</div><div class="eb"><button class="p" type="button">Añadir álbumes</button></div></div>')+'</div>');
@@ -2687,7 +2698,7 @@ im.onload=function(){try{var R=96,c=document.createElement('canvas');c.width=24;
 for(var r=0;r<R;r++){var a=0,g=0,b=0;for(var k=0;k<24;k++){var o=(r*24+k)*4;a+=d[o];g+=d[o+1];b+=d[o+2]}rows.push([Math.round(a/24),Math.round(g/24),Math.round(b/24)])}
 CCR[bg]=rows;if(ui.vk!=='col:'+n)return;CC.rows=rows;colBarUpd()}catch(e){}};im.src=bg}
 function colRename(o,nn){var i=S.cols.indexOf(o);if(i>-1)S.cols[i]=nn;Object.keys(S.a).forEach(function(k){var l=colList(S.a[k]),i=l.indexOf(o);if(i>-1)l[i]=nn});['ci','cs','cp','cd','cf','cv'].forEach(function(f){if(S[f]&&S[f][o]!==undefined){S[f][nn]=S[f][o];delete S[f][o]}});if(ui.c==o)ui.c=nn}
-function colEditDlg(n){var P={ci:(S.ci&&S.ci[n])||null,cs:(S.cs&&S.cs[n])||null,cp:(S.cp&&S.cp[n])||null},w=document.createElement('div');
+function colEditDlg(n){var P={ci:imgSrc(S.ci&&S.ci[n])||null,cs:imgSrc(S.cs&&S.cs[n])||null,cp:(S.cp&&S.cp[n])||null},w=document.createElement('div');
 w.className='cedw dzmod';w.style.zIndex=55;
 w.innerHTML='<div class="cedb cedd"><div class="cedt">Editar colección</div><div class="ccv cdprev"></div><input id="cdn" maxlength="40" placeholder="Nombre de la colección" autocomplete="off"><div class="cdbt"></div><div class="cdsl">Estilo de portada</div><div class="cdbt cdst"></div><div class="row"><button id="cdc" style="flex:1">Cancelar</button><button class="p" id="cds" style="flex:1">Guardar</button></div></div>';
 document.body.appendChild(w);
@@ -2811,8 +2822,8 @@ var gk=kof(a.ar,a.al);delete GOODC[gk+'|b'];delete GOODC[gk+'|s'];gcSave();save(
 function pickCover(k){var inp=document.createElement('input');inp.type='file';inp.accept='image/*';inp.style.display='none';document.body.appendChild(inp);
 inp.addEventListener('cancel',function(){inp.remove()});
 inp.onchange=function(){var f=inp.files&&inp.files[0];inp.remove();if(!f)return;var u=URL.createObjectURL(f),im=new Image();
-im.onload=function(){try{var s=Math.min(im.naturalWidth,im.naturalHeight),mx=Math.min(800,s),c=document.createElement('canvas');c.width=c.height=mx;
-c.getContext('2d').drawImage(im,(im.naturalWidth-s)/2,(im.naturalHeight-s)/2,s,s,0,0,mx,mx);var d=c.toDataURL('image/jpeg',.85);if(d.length>300000)d=c.toDataURL('image/jpeg',.7);URL.revokeObjectURL(u);setCover(k,d)}catch(e){toast('No pude usar esa imagen')}};
+im.onload=function(){try{var s=Math.min(im.naturalWidth,im.naturalHeight),mx=Math.min(1000,s),c=document.createElement('canvas');c.width=c.height=mx;
+c.getContext('2d').drawImage(im,(im.naturalWidth-s)/2,(im.naturalHeight-s)/2,s,s,0,0,mx,mx);var d=c.toDataURL('image/jpeg',.92);URL.revokeObjectURL(u);imgPut(d).then(function(t){setCover(k,t)})}catch(e){toast('No pude usar esa imagen')}};
 im.onerror=function(){URL.revokeObjectURL(u);toast('No pude abrir esa imagen')};im.src=u};
 inp.click()}
 function coverMenu(k){var a=S.a[k];if(!a)return;lpClose();
@@ -3102,5 +3113,6 @@ document.addEventListener('contextmenu',function(e){if(!tf(e.target))e.preventDe
 document.addEventListener('dragstart',function(e){if(!tf(e.target))e.preventDefault()});
 document.addEventListener('selectstart',function(e){var t=e.target&&e.target.nodeType==1?e.target:(e.target&&e.target.parentElement);if(!tf(t))e.preventDefault()})})();
 </script>
+<script>imgLoad().then(imgMigrate).then(function(){try{render();if(typeof cur!=='undefined'&&cur&&typeof sheet==='function')sheet(cur)}catch(e){}})</script>
 </body>
 </html>
