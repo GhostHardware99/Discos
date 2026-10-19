@@ -1938,7 +1938,7 @@ function libInfo(n,d,rs,rn){var sc=function(a,b){return '<div class="sc"><b>'+a+
 function emptyLib(){return '<div class="emp" data-em="add" role="button" tabindex="0"><div class="et">Tu biblioteca está vacía</div><div class="es">Toca aquí para buscar y añadir tu primer álbum</div><div class="eb"><button class="p" data-em="add">Buscar álbum</button><button data-em="imp">Importar CSV o lista</button></div></div>'}
 function favDone(a){if(!a.done){a.done=true;a.t=Date.now()}}
 var TABC={};
-function keepImg(o,n){var os=o.getAttribute('src'),ns=n.getAttribute('src');if(os===ns)return !!(o.complete&&o.naturalWidth);if(!o.complete||!o.naturalWidth||o.naturalWidth<240)return false;if(/^data:/.test(os||'')||/^data:/.test(ns||''))return false;var g=GOODC[n.dataset.gk||''];if(g&&g[0]===ns&&g[1]>o.naturalWidth*1.2)return false;return true}
+function keepImg(o,n){var os=o.getAttribute('src'),ns=n.getAttribute('src');if(os===ns)return !!(o.complete&&o.naturalWidth);if(!o.dataset.gk||o.dataset.gk!==n.dataset.gk)return false;if(!o.complete||!o.naturalWidth||o.naturalWidth<240)return false;if(/^data:/.test(os||'')||/^data:/.test(ns||''))return false;var g=GOODC[n.dataset.gk||''];if(g&&g[0]===ns&&g[1]>o.naturalWidth*1.2)return false;return true}
 function swK(x,y){try{var xi=x.querySelectorAll('.cv img,.ap img'),yi=y.querySelectorAll('.cv img,.ap img');if(xi.length==yi.length)for(var j=0;j<yi.length;j++){var o=xi[j],n=yi[j];if(o.parentNode.className===n.parentNode.className&&keepImg(o,n))n.parentNode.replaceChild(o,n)}}catch(e){}x.replaceWith(y)}
 function mk(el){[].forEach.call(el.children,function(c){c.__o=c.outerHTML;if(c.classList.contains('grid'))[].forEach.call(c.children,function(g){g.__o=g.outerHTML})})}
 function pk(a,b){var bl=[].slice.call(b.children),k;for(k=0;k<bl.length;k++){var x=a.children[k],y=bl[k];if(!x)a.appendChild(y);else if(x.__o!==y.__o)swK(x,y)}while(a.children.length>bl.length)a.removeChild(a.lastElementChild)}
@@ -2410,7 +2410,7 @@ if(ac=='rate'||ac=='trr'){return}
 else if(ac=='tfv'){var ti=t.dataset.i;a.tf=a.tf||{};if(a.tf[ti])delete a.tf[ti];else a.tf[ti]=1;save();sheet(k)}
 else if(ac=='trk'){var j=+t.dataset.i;ui.tk=ui.tk===j?null:j;sheet(k)}
 else if(ac=='done'){a.done=!a.done;a.t=a.done?Date.now():0;if(!a.done)a.fav=false;save();render();sheet(k)}
-else if(ac=='fav'){a.fav=!a.fav;if(a.fav)favDone(a);save();render();sheet(k)}
+else if(ac=='fav'){a.fav=!a.fav;if(a.fav)favDone(a);else if(ui.f=='fav'){a.done=false;a.t=0}save();render();sheet(k)}
 else if(ac=='pp'){if(e.target.closest('a'))return;var po=INPR[+t.dataset.pi];if(po)pSheet(po,k)}
 else if(ac=='art')artistPage(a.ar);
 else if(ac=='rved'){ui.rv=true;sheet(k);var nt=$('nt');if(nt){nt.focus();try{nt.setSelectionRange(nt.value.length,nt.value.length)}catch(x){}}}
@@ -2808,7 +2808,7 @@ function lpClose(){var e=$('lpm');if(e)e.remove()}
 function albumMenu(k,ctx,start){var a=S.a[k];if(!a)return;lpClose();
 var w=document.createElement('div');w.id='lpm';w.className='lpm dzmod';w.innerHTML='<div class="lpc"></div>';document.body.appendChild(w);var box=w.firstChild;
 function head(){return '<div class="lph">'+cv(a,'sm',k,120)+'<div class="in"><div class="t">'+esc(a.al)+'</div><div class="a">'+esc(a.ar)+'</div></div></div>'}
-function home(){box.innerHTML=head()+(ctx?'<button data-p="col">Añadir a otra colección</button><button class="dg" data-p="uncol">Quitar de colección</button>':'<button data-p="fav">'+(a.fav?'Quitar de favoritos':'Añadir a favoritos')+'</button>'+(a.done||ui.f=='done'||ui.f=='fav'?'':'<button data-p="done">Marcar como escuchado</button>')+'<button data-p="col">Añadir a una colección</button><button class="dg" data-p="del">Quitar de mi biblioteca</button>')}
+function home(){box.innerHTML=head()+(ctx?'<button data-p="col">Añadir a otra colección</button><button class="dg" data-p="uncol">Quitar de colección</button>':'<button data-p="fav">'+(a.fav?'Quitar de favoritos':'Añadir a favoritos')+'</button>'+(ui.f=='done'&&a.done?'<button data-p="done">Quitar de escuchados</button>':(a.done||ui.f=='done'||ui.f=='fav'?'':'<button data-p="done">Marcar como escuchado</button>'))+'<button data-p="col">Añadir a una colección</button><button class="dg" data-p="del">Quitar de mi biblioteca</button>')}
 function pick(){var cs=S.cols.filter(function(c){return !hasCol(a,c)});
 box.innerHTML='<div class="lpt">Añadir a colección</div>'+(cs.length?'<button data-p="ex">Existente</button>':'')+'<button data-p="new">＋ Nueva colección</button><button class="lpx" data-p="bk">‹ Volver</button>'}
 function pickEx(){var cs=S.cols.filter(function(c){return !hasCol(a,c)});
@@ -2820,7 +2820,7 @@ w.onclick=function(e){if(e.target===w){lpClose();return}var b=e.target.closest('
 if(b.dataset.c!==undefined){put(b.dataset.c);return}
 var p=b.dataset.p;
 if(p=='done'){a.done=!a.done;a.t=a.done?Date.now():0;if(!a.done)a.fav=false;save();lpClose();render();toast(a.done?'Marcado como escuchado':'Quitado de escuchados')}
-else if(p=='fav'){a.fav=!a.fav;if(a.fav)favDone(a);save();lpClose();render();toast(a.fav?'Añadido a favoritos':'Quitado de favoritos')}
+else if(p=='fav'){a.fav=!a.fav;if(a.fav)favDone(a);else if(ui.f=='fav'){a.done=false;a.t=0}save();lpClose();render();toast(a.fav?'Añadido a favoritos':'Quitado de favoritos')}
 else if(p=='col'||p=='pk')pick();
 else if(p=='ex')pickEx();
 else if(p=='multi'){lpClose();msStart(k,ctx)}
@@ -2926,7 +2926,7 @@ else if(a=='all'){var ks=[].map.call(MS.box.querySelectorAll('[data-k]'),functio
 else if(a=='rm'){var c=MS.ctx,l=msKeys();l.forEach(function(k){if(S.a[k])rmCol(S.a[k],c)});msDone(l.length+(l.length==1?' álbum quitado':' álbumes quitados')+' de «'+c+'»')}
 else if(a=='add')msPick();
 else if(a=='und'){var l4=msKeys().filter(function(k){return S.a[k]});l4.forEach(function(k){S.a[k].done=false;S.a[k].fav=false;S.a[k].t=0});msDone(l4.length==1?'Quitado de escuchados':'Quitados de escuchados')}
-else if(a=='unf'){var l5=msKeys().filter(function(k){return S.a[k]});l5.forEach(function(k){S.a[k].fav=false});msDone(l5.length==1?'Quitado de favoritos':'Quitados de favoritos')}
+else if(a=='unf'){var l5=msKeys().filter(function(k){return S.a[k]});l5.forEach(function(k){S.a[k].fav=false;S.a[k].done=false;S.a[k].t=0});msDone(l5.length==1?'Quitado de favoritos':'Quitados de favoritos')}
 else if(a=='lib'){var l3=msKeys().filter(function(k){return S.a[k]});if(!l3.length)return;dzAsk(l3.length==1?'¿Quitar este álbum de tu biblioteca?':'¿Quitar '+l3.length+' álbumes de tu biblioteca?','Quitar',function(){l3.forEach(function(k){delete S.a[k]});msDone(l3.length==1?'Álbum quitado de tu biblioteca':l3.length+' álbumes quitados de tu biblioteca')},1)}
 else if(a=='fv'){var l1=msKeys().filter(function(k){return S.a[k]}),af=l1.length&&l1.every(function(k){return S.a[k].fav});l1.forEach(function(k){S.a[k].fav=!af;if(!af)favDone(S.a[k])});msDone(af?'Quitados de favoritos':'Añadidos a favoritos')}
 else if(a=='dn'){var l2=msKeys().filter(function(k){return S.a[k]});l2.forEach(function(k){var x=S.a[k];if(!x.done){x.done=true;x.t=Date.now()}});msDone(l2.length==1?'Marcado como escuchado':'Marcados como escuchados')}
