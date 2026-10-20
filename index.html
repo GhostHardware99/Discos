@@ -746,6 +746,12 @@ textarea.tin::placeholder{color:var(--mut)}
 /* Chip del corazón: el fondo no cambia nunca; solo se rellena el icono */
 .btns .hb,.btns .hb.on,.btns .hb:hover,.btns .hb:focus,.btns .hb:active,.btns .shb{background:var(--card);border:1px solid var(--bd);box-shadow:none}
 .btns .hb{color:var(--mut)}.btns .hb.on{color:#ff4d6d}
+.gn span{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.gn span.gdrag{position:relative;z-index:30;box-shadow:0 8px 22px rgba(0,0,0,.3);transition:none;filter:brightness(1.06)}
+/* Corazón y compartir: mismo estilo que el botón de volver (mezcla suave del color de acento con la tarjeta) */
+.btns .hb,.btns .hb.on,.btns .hb:hover,.btns .hb:focus,.btns .hb:active,.btns .shb,.btns .shb:hover,.btns .shb:focus,.btns .shb:active{background:color-mix(in srgb,color-mix(in srgb,rgb(var(--acr)) calc(10%*var(--k)),var(--card)) 94%,transparent)!important;border:1px solid rgba(var(--acr),.22)!important;box-shadow:0 1px 6px rgba(0,0,0,.14)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+.btns .hb{color:var(--tx)}.btns .hb.on{color:#ff4d6d}.btns .shb{color:var(--tx)}
+
 
 /* Portada de colección (pantalla completa y banda): imagen hasta arriba, bajo la barra de estado, sin capa de color; botones sueltos en blanco */
 html:has(.colpg.cs-full):before,html:has(.colpg.cs-band):before,#ov:has(.colpg.cs-full):before,#ov:has(.colpg.cs-band):before{opacity:var(--fo2,0)!important}
@@ -1277,7 +1283,8 @@ delete wq[k];if(W[k])rs2(k)}
 var AGC={},GX={},gq=[],gqd={},gbz=0,gt={},gRT=0;
 try{GX=JSON.parse(localStorage.getItem('digz-gx3')||'{}');Object.keys(GX).forEach(function(k){if(GX[k]&&GX[k].v>=3&&!(GX[k].g||[]).length)delete GX[k]})}catch(e){}
 function saveGX(){clearTimeout(saveGX.t);saveGX.t=setTimeout(function(){try{localStorage.setItem('digz-gx3',JSON.stringify(GX))}catch(e){}},1500)}
-function needG(k,front){if(!S.a[k]||(GX[k]&&(GX[k].v>=5||gAuto(k).length>=2||(GX[k].v==2&&Date.now()-GX[k].t<86400000))))return;if(gqd[k]){if(front){var i=gq.indexOf(k);if(i>0){gq.splice(i,1);gq.unshift(k)}}return}
+function stNeed(k){return !!(GX[k]&&GX[k].ds===undefined&&dcOn()&&!DCBAD)}
+function needG(k,front){if(!S.a[k]||(GX[k]&&(GX[k].v>=5||gAuto(k).length>=2||(GX[k].v==2&&Date.now()-GX[k].t<86400000))&&!stNeed(k)))return;if(gqd[k]){if(front){var i=gq.indexOf(k);if(i>0){gq.splice(i,1);gq.unshift(k)}}return}
 gqd[k]=1;front?gq.unshift(k):gq.push(k);gPump()}
 var gDirty=0;
 function gPump(){if(gbz||!gq.length)return;gbz=1;var k=gq.shift();
@@ -1298,13 +1305,14 @@ async function dcGenres(a){if(!dcOn()||DCBAD||!a.ar||a.ar=='Desconocido')return 
 for(var i=0;i<ty.length;i++){var d;try{d=await dcGet('database/search?type='+ty[i]+'&release_title='+qe(a.al)+'&artist='+qe(a.ar)+'&per_page=10')}catch(e){if(e&&e.message=='h401'){DCBAD=1;toast('Token de Discogs no válido');return []}if(e&&e.nf)continue;throw e}
 var l=(d.results||[]).map(function(x){var s=String(x.title||''),j=s.indexOf(' - ');return j<0?null:{ar:s.slice(0,j),al:s.slice(j+3),x:x}}).filter(function(x){return x&&same(x.ar,a.ar)});
 var h=l.filter(function(x){return cln(x.al)==c})[0]||l.filter(function(x){return same(x.al,a.al)})[0];
-if(h){var g=[].concat(h.x.style||[],h.x.genre||[]);if(g.length)return g}}return []}
-async function loadG(k){var a=S.a[k];if(!a)return true;DCB=gF[k]?'&_='+Date.now():'';var g=[],ok=0,src='',h,r,id,dcg=[];
+if(h){var g=[].concat(h.x.style||[],h.x.genre||[]);g.st=(h.x.style||[]).slice();if(g.length)return g}}var e0=[];e0.st=[];return e0}
+async function loadG(k){var a=S.a[k];if(!a)return true;DCB=gF[k]?'&_='+Date.now():'';
+if(stNeed(k)&&!gF[k]){try{var d0=await dcGenres(a);if(S.a[k]&&GX[k]){GX[k].ds=(d0.st||[]).slice(0,8);saveGX()}return true}catch(e){return false}}var g=[],ok=0,src='',h,r,id,dcg=[];
 /* Orden de fiabilidad (todas son del ÁLBUM, nunca del artista, y no se rellena hasta tener 2):
    1) Discogs (si hay token)  2) MusicBrainz  3) Deezer + iTunes, solo si las anteriores no tienen nada */
 if(dcOn()&&!DCBAD){try{dcg=await dcGenres(a)}catch(e){if(!gF[k]&&(gt[k]||0)<2)return false}}
 var parts=[];
-if(dcg.length){g=dcg.slice(0,4);ok=1;parts.push('Discogs')}
+var dst=(dcg.st||[]).slice(0,8);if(dcg.length){g=dcg.slice(0,4);ok=1;parts.push('Discogs')}
 /* Deezer + iTunes se consultan SIEMPRE y se suman a Discogs; los repetidos se unifican (Electronic = Electrónica) */
 {var dzg=[];try{id=a.id;if(!id){r=await jsonp('https://api.deezer.com/search/album?limit=10&q='+qe('artist:"'+a.ar+'" album:"'+a.al+'"'));
 var dh=pickAlb(r.data||[],function(x){return x.title},function(x){return (x.artist||{}).name},a);
@@ -1322,7 +1330,7 @@ if(!g.length){try{var mg=await mbGen(a);ok=1;if(mg.length){g=mg;parts.push('Musi
 src=parts.join(' + ');
 g=g.filter(function(x){return x&&!/^(music|m[uú]sica)$/i.test(x)});
 if(!S.a[k])return true;if(!ok)return false;
-var fg=gcl(g).slice(0,12);if(gF[k]&&!fg.length&&GX[k]&&(GX[k].g||[]).length){fg=GX[k].g;src=GX[k].s||src}GX[k]={g:fg,s:src,t:Date.now(),v:cgn(fg)?5:2};saveGX();return true}
+var fg=gcl(g).slice(0,12);if(gF[k]&&!fg.length&&GX[k]&&(GX[k].g||[]).length){fg=GX[k].g;src=GX[k].s||src}GX[k]={g:fg,s:src,t:Date.now(),v:cgn(fg)?5:2};if(dcOn()&&!DCBAD)GX[k].ds=dst;saveGX();return true}
 function bulkG(){Object.keys(S.a).forEach(function(k){if(!S.a[k].tmp)needG(k)})}
 
 /* ---------- Last.fm ---------- */
@@ -1761,8 +1769,29 @@ var GCI={};
 /* Géneros reales de un álbum (hasta 3, canónicos). Usa iTunes/Deezer, MusicBrainz y Last.fm; si no hay, hereda del mismo artista */
 function agen(k,noArt){return S.a[k]?gm(k):[]}
 function inFolder(k){var o=ui.o;return o.t=='ge'?agen(k).indexOf(o.n)>-1:gk(k,o.t)==o.n}
-function genTab(k){var l=gm(k),ed=ui.ga==k;
-var h='<div class="gn">'+l.map(function(x){return '<span role="button" tabindex="0" data-a="ge" data-ge="'+esc(x)+'">'+esc(cap(x))+'<i data-a="grm" data-g="'+esc(x)+'" aria-label="Quitar '+esc(x)+'" style="font-style:normal;margin-left:8px;padding:0 2px;opacity:.7">×</i></span>'}).join('')+(ed?'':'<span role="button" tabindex="0" data-a="gadd">+ Añadir</span>')+'</div>';
+function gst(k){var o=[],s={},a=S.a[k],hg={};if(!a)return o;(a.hg||[]).forEach(function(x){hg[nrm(x)]=1});gm(k).forEach(function(x){s[nrm(x)]=1});((GX[k]&&GX[k].ds)||[]).forEach(function(x){var z=nrm(x);if(!z||s[z]||hg[z])return;s[z]=1;o.push(x)});return o}
+function gord(k,l){var a=S.a[k],go=a&&a.go;if(!go||!go.length)return l;var ix={};go.forEach(function(x,i){ix[nrm(x)]=i});var big=1e6;return l.map(function(x,i){var j=ix[nrm(x)];return [j===undefined?big+i:j,x]}).sort(function(p,q){return p[0]-q[0]}).map(function(p){return p[1]})}
+function genAll(k){return gord(k,gm(k).concat(gst(k)))}
+/* Pulsación larga + arrastre sobre un género de la ficha: se mueve como una burbuja dentro de la misma pantalla */
+(function(){var tm=0,sx=0,sy=0,el=null,dr=null,id0=null;function tg(e){return e.target&&e.target.closest&&e.target.closest('#sh .gn span[data-ge]')}
+function put(px,py){if(!dr.el.isConnected){var nn=[].filter.call(document.querySelectorAll('#sh .gn span[data-ge]'),function(c){return c.dataset.ge===dr.g})[0];if(!nn){dr=null;return}dr.el=nn;dr.cont=nn.parentNode;nn.classList.add('gdrag');try{nn.setPointerCapture(id0)}catch(x){}}var el=dr.el,cont=dr.cont;
+var o=[].slice.call(cont.querySelectorAll('span[data-ge]')).filter(function(c){return c!==el});
+for(var i=0;i<o.length;i++){var r=o[i].getBoundingClientRect();if(px>=r.left&&px<=r.right&&py>=r.top&&py<=r.bottom){cont.insertBefore(el,px<r.left+r.width/2?o[i]:o[i].nextSibling);break}}
+el.style.transform='none';var r0=el.getBoundingClientRect();el.style.transform='translate('+(px-(r0.left+r0.width/2))+'px,'+(py-(r0.top+r0.height/2))+'px) scale(1.07)'}
+function start(){tm=0;window.gnLP=Date.now();if(navigator.vibrate)try{navigator.vibrate(15)}catch(x){}
+var cont=el.parentNode;dr={el:el,cont:cont,k:cur,g:el.dataset.ge,before:[].map.call(cont.querySelectorAll('span[data-ge]'),function(c){return c.dataset.ge}).join('|')};
+el.classList.add('gdrag');try{el.setPointerCapture(id0)}catch(x){}put(sx,sy)}
+function end(save0){if(!dr)return;var d=dr;dr=null;window.gnLP=Date.now();d.el.classList.remove('gdrag');d.el.style.transform='';if(!d.cont.isConnected){var c2=document.querySelector('#sh .gn');if(!c2)return;d.cont=c2}
+var names=[].map.call(d.cont.querySelectorAll('span[data-ge]'),function(c){return c.dataset.ge}),a=S.a[d.k];
+if(save0&&a&&names.join('|')!==d.before){a.go=names;save();render();if(cur==d.k)sheet(d.k)}}
+document.addEventListener('pointerdown',function(e){var t=tg(e);clearTimeout(tm);tm=0;if(!t||!cur||e.target.closest('i[data-a="grm"]'))return;el=t;id0=e.pointerId;sx=e.clientX;sy=e.clientY;tm=setTimeout(start,450)},true);
+document.addEventListener('pointermove',function(e){if(dr){e.preventDefault();put(e.clientX,e.clientY);return}if(tm&&(Math.abs(e.clientX-sx)>10||Math.abs(e.clientY-sy)>10)){clearTimeout(tm);tm=0}},true);
+document.addEventListener('pointerup',function(){clearTimeout(tm);tm=0;end(1)},true);
+document.addEventListener('pointercancel',function(){clearTimeout(tm);tm=0;end(1)},true);
+document.addEventListener('touchmove',function(e){if(dr)e.preventDefault()},{passive:false,capture:true});
+document.addEventListener('contextmenu',function(e){if(tg(e))e.preventDefault()},true)})();
+function genTab(k){var l=genAll(k),ed=ui.ga==k;
+var h='<div class="gn">'+l.map(function(x){return '<span role="button" tabindex="0" data-a="ge" data-ge="'+esc(x)+'">'+esc(cap(x))+'<i data-a="grm" data-g="'+esc(x)+'" aria-label="Quitar '+esc(x)+'" style="display:inline-block;font-style:normal;margin:-8px -12px -8px 2px;padding:8px 12px 8px 8px;opacity:.7">×</i></span>'}).join('')+(ed?'':'<span role="button" tabindex="0" data-a="gadd">+ Añadir</span>')+'</div>';
 return h}
 /* ---------- Añadir género: cartel con lista, igual que «Añadir álbumes» de las colecciones ---------- */
 function genDlg(k){var a=S.a[k];if(!a)return;var old=document.querySelector('.cedw.gdlg');if(old)old.remove();
@@ -1879,10 +1908,10 @@ function gAuto(k){var s={},o=[],raw=(GX[k]&&GX[k].g)||[];raw.forEach(function(x)
 if(o.length<2)raw.forEach(function(x){if(o.length>=2||!x)return;var m=gman(x);if(!m||GGEN.test(nf(x).trim()))return;var z=nrm(m.n);if(s[z])return;
 var tk=gtok(x),dup=o.some(function(n){var nt=gtok(n);return tk.every(function(t){return nt.indexOf(t)>-1})});if(dup)return;s[z]=1;GCI[m.n]=m;o.push(m.n)});
 return o}
-function gm(k){var a=S.a[k],s={},o=[];if(!a)return o;var hg={};(a.hg||[]).forEach(function(x){hg[nrm(x)]=1});(a.mg||[]).forEach(function(x){var c=gman(x);if(!c)return;var z=nrm(c.n);if(s[z])return;s[z]=1;GCI[c.n]=c;o.push(c.n)});var n=0;gAuto(k).forEach(function(x){var z=nrm(x);if(s[z]||hg[z]||n>=3)return;s[z]=1;n++;o.push(x)});return o}
+function gm(k){var a=S.a[k],s={},o=[];if(!a)return o;var hg={};(a.hg||[]).forEach(function(x){hg[nrm(x)]=1});(a.mg||[]).forEach(function(x){var c=gman(x);if(!c)return;var z=nrm(c.n);if(s[z])return;s[z]=1;GCI[c.n]=c;o.push(c.n)});var n=0;gAuto(k).forEach(function(x){var z=nrm(x);if(s[z]||hg[z]||n>=3)return;s[z]=1;n++;o.push(x)});return gord(k,o)}
 function gl(k){return gm(k)}
 function gmx(k){return gm(k)}
-function has(k,g){var n=nrm(g);if(!n)return false;var c=gcan(g);if(c&&agen(k).indexOf(c.n)>-1)return true;return gl(k).some(function(x){return nrm(x)===n})}
+function has(k,g){var n=nrm(g);if(!n)return false;if(gst(k).some(function(x){return nrm(x)===n}))return true;var c=gcan(g);if(c&&agen(k).indexOf(c.n)>-1)return true;return gl(k).some(function(x){return nrm(x)===n})}
 function gNorm(n){var z=nf(String(n||'')).trim();if(GGEN.test(z)){var c=gcan(n);if(c)return c.n}return n}
 function gMatch(k,n){var z=nrm(n),c=GGEN.test(nf(String(n)).trim())?gcan(n):null,cz=c?nrm(c.n):'';return gm(k).some(function(x){var y=nrm(x);return y==z||(cz&&y==cz)})}
 function goGenre(g){navTrack(function(){ui.ge=g;ui.g='';ui.f='all';ui.o=null;ui.c='';ui.q='';$('q').value='';$('nav').classList.remove('qs');ui.lim=120;obUpd();hide();render();window.scrollTo(0,0)},1)}
@@ -1901,14 +1930,15 @@ var CSO=['cn','cnz','cold','cnew','cfav'];
 function sortOpts(){var sec=vmk(),ks;if(sec=='cols')return CSO.map(function(k){return [k,SALL[k]]});if(sec=='ar')ks=['ar','arz','fav','t','add'];else if(sec=='ge')ks=['ar','arz','fav','t'];else if(sec=='todo')ks=['ar','arz','al','alz','add'];else if(sec=='done')ks=['ar','arz','al','alz','rate','fav','t'];else if(sec=='fav')ks=['ar','arz','al','alz','rate','t','add'];else ks=['ar','arz','al','alz','rate','fav','t','add'];
 return ks.map(function(k){return [k,sec=='ge'&&k=='ar'?'Género A-Z':sec=='ge'&&k=='arz'?'Género Z-A':SALL[k]]})}
 function defS(){return vmk()=='cols'?'cn':'ar'}
-function curS(){var sec=vmk();if(sec=='cols'){if(ui.sc===undefined){try{ui.sc=localStorage.getItem('digz-sc')||'cn'}catch(e){ui.sc='cn'}}return CSO.indexOf(ui.sc)>-1?ui.sc:'cn'}if(sec=='ar'||sec=='ge'){var v=sec=='ar'?ui.sa:ui.sg;return sortOpts().some(function(o){return o[0]==v})?v:'ar'}return sortOpts().some(function(o){return o[0]==ui.s})?ui.s:'ar'}
+function curS(){var sec=vmk();if(sec=='cols'){if(ui.sc===undefined){try{ui.sc=localStorage.getItem('digz-sc')||'cn'}catch(e){ui.sc='cn'}}return CSO.indexOf(ui.sc)>-1?ui.sc:'cn'}var v=SO[sec];return sortOpts().some(function(o){return o[0]==v})?v:'ar'}
 function sortAct(){return curS()!=defS()}
-function setS(k){var sec=vmk();if(sec=='cols'){ui.sc=k;try{localStorage.setItem('digz-sc',k)}catch(e){}return}if(sec=='ar')ui.sa=k;else if(sec=='ge')ui.sg=k;else ui.s=k}
+var SOK='digz-so',SO={};try{SO=JSON.parse(localStorage.getItem(SOK)||'{}')||{}}catch(e){SO={}}
+function setS(k){var sec=vmk();if(sec=='cols'){ui.sc=k;try{localStorage.setItem('digz-sc',k)}catch(e){}return}SO[sec]=k;if(sec!='ar'&&sec!='ge')ui.s=k;try{localStorage.setItem(SOK,JSON.stringify(SO))}catch(e){}}
 function sortCmp(s){var ix={},i=0;Object.keys(S.a).forEach(function(k){ix[k]=i++});var A=function(p,q){return p.ar.localeCompare(q.ar)||p.al.localeCompare(q.al)},L=function(p,q){return p.al.localeCompare(q.al)||p.ar.localeCompare(q.ar)};
 return function(x,y){var a=S.a[x],b=S.a[y];
 if(s=='arz')return A(b,a);if(s=='al')return L(a,b);if(s=='alz')return L(b,a);if(s=='rate')return (b.rate||0)-(a.rate||0)||A(a,b);if(s=='fav')return (b.fav?1:0)-(a.fav?1:0)||A(a,b);if(s=='t')return (b.t||0)-(a.t||0)||A(a,b);if(s=='add')return (b.ad||0)-(a.ad||0)||ix[y]-ix[x];return A(a,b)}}
 var SB=true,SBF=false,CURCOL='';
-function cv(a,c,k,sz,nb){var urls=coverURLs(a,sz||(c=='sm'?120:0)),gk=kof(a.ar,a.al)+(c=='big'?'|b':'|s'),gd=a.mc?null:GOODC[gk];if(gd&&gd[0])urls=[gd[0]].concat(urls.filter(function(x){return x!==gd[0]}));var src=urls[0]||'',mn=c=='big'?480:(c=='sm'?240:360);
+function cv(a,c,k,sz,nb){var urls=coverURLs(a,sz||(c=='sm'?120:(c=='big'&&a.tmp?900:0))),gk=kof(a.ar,a.al)+(c=='big'?'|b':'|s'),gd=a.mc?null:GOODC[gk];if(gd&&gd[0])urls=[gd[0]].concat(urls.filter(function(x){return x!==gd[0]}));var src=urls[0]||'',mn=c=='big'?480:(c=='sm'?240:360);
 var kno=!!src&&isLd(src),ph='',grad='linear-gradient(145deg,hsl('+hue(a.al+a.ar)+',50%,42%),hsl('+((hue(a.al+a.ar)+50)%360)+',55%,20%))';
 if(src&&c=='big'&&!a.mc){var g2=GOODC[kof(a.ar,a.al)+'|s'];if(g2&&g2[0]&&/^https?:/.test(g2[0]))ph=g2[0]}
 var cbg=ph?'url(&quot;'+esc(ph)+'&quot;) center/cover':(kno?'rgba(128,128,128,.16)':grad);
@@ -2265,7 +2295,7 @@ if((cat||alb)&&art){hit={title:pg.title,extract:ex};txt=t2}}
 if(!hit)return null;
 var sp=txt.split(/\n+(={2,})\s*([^=\n]+?)\s*\1\s*\n/),secs=[{n:'',t:sp[0]}];for(var i=1;i+2<sp.length+1;i+=3)secs.push({n:sp[i+1],t:sp[i+2]||''});
 function pick(re){var o=secs.filter(function(x){return x.n&&re.test(x.n.toLowerCase())&&x.t.trim().length>80});return o.slice(0,2).map(function(x){return x.t.trim()}).join('\n\n')}
-function tidy(s){return cutT(String(s).replace(/\n{3,}/g,'\n\n').trim(),1400)}
+function tidy(s){return cutT(wkClean(s),1400)}
 var cards=[],intro=(secs[0].t||hit.extract||'').trim();
 if(intro)cards.push({h:'Contexto',t:tidy(intro)});
 [['Grabación',/^(background|recording|production|development|writing|conception|writing and recording|recording and production)/],['Composición',/^(music|composition|lyrics|style|music and lyrics|musical style|themes|lyrical themes|content)/],['Lanzamiento',/^(release|promotion|marketing|artwork|title|packaging|release and promotion)/],['Recepción',/^(critical reception|reception|critical response|accolades|legacy)/]].forEach(function(x){var t=pick(x[1]);if(t)cards.push({h:x[0],t:tidy(t)})});
@@ -2314,7 +2344,8 @@ var go=function(){inRun(k,'wp',inWiki);if(ch!='rs'){inRun(k,'dc',inDc);inRun(k,'
 if(s.rest){go();return}s.rest=1;
 idbGet(INC+k).then(function(c){if(c&&c.d&&Date.now()-c.t<INT)['wp','mb','dc'].forEach(function(q){var x=c.d[q];if(x&&!s[q]&&!(x.s=='none'&&Date.now()-c.t>2*864e5))s[q]=x})}).catch(function(){}).then(function(){go();if(cur==k&&ui.tab=='in')rs2(k)})}
 function inBadge(l){return '<span class="srcb">'+esc(l)+'</span>'}
-function inCard(i,k,c,src,u){var op=ui.wx['i'+i],big=c.t.length>300;return '<div class="infc"'+(big?' data-a="wx" data-w="i'+i+'"':'')+'><h4>'+esc(c.h)+'</h4><div class="ds'+(op?' open':'')+'">'+esc(c.t)+'</div>'+(big?'<div class="h" style="margin-top:4px">'+(op?'Ver menos':'Ver más')+'</div>':'')+(u?'<a class="srcb" href="'+esc(u)+'" target="_blank" rel="noopener">'+esc(src)+'</a>':inBadge(src))+'</div>'}
+function wkClean(s){return String(s).replace(/[ \t]*={2,}[ \t]*[^=\n]+?[ \t]*={2,}[ \t]*/g,'\n').replace(/\n{3,}/g,'\n\n').trim()}
+function inCard(i,k,c,src,u){c={h:c.h,t:wkClean(c.t)};var op=ui.wx['i'+i],big=c.t.length>300;return '<div class="infc"'+(big?' data-a="wx" data-w="i'+i+'"':'')+'><h4>'+esc(c.h)+'</h4><div class="ds'+(op?' open':'')+'">'+esc(c.t)+'</div>'+(big?'<div class="h" style="margin-top:4px">'+(op?'Ver menos':'Ver más')+'</div>':'')+(u?'<a class="srcb" href="'+esc(u)+'" target="_blank" rel="noopener">'+esc(src)+'</a>':inBadge(src))+'</div>'}
 function inPeople(rows,groups,lim){var by={};rows.forEach(function(r){if(groups.indexOf(r.g)<0)return;var k=nrm(r.n)+'|'+r.g,o=by[k]=by[k]||{n:r.n,g:r.g,r:{},t:0,s:{},u:{},tt:{}};Object.keys(r.tt||{}).forEach(function(q){o.tt[q]=o.tt[q]||{};Object.keys(r.tt[q]).forEach(function(n){o.tt[q][n]=1})});r.r.forEach(function(x){o.r[x]=1});o.t=Math.max(o.t,r.t||0);r.s.forEach(function(x){o.s[x]=1;if(r.u&&r.u[x])o.u[x]=r.u[x]})});
 var out='',n=0;groups.forEach(function(g){var l=Object.keys(by).map(function(q){return by[q]}).filter(function(o){return o.g==g}).sort(function(x,y){return x.n.localeCompare(y.n)});if(!l.length)return;
 out+='<div class="sec">'+g+'</div>'+l.slice(0,lim||40).map(function(o){n++;var h=hue(o.n);var pi=INPR.push(o)-1;return '<div class="infr'+(o.t?' infp':'')+'"'+(o.t?' data-a="pp" data-pi="'+pi+'"':'')+'><div class="infa" style="background:hsl('+h+',45%,38%)">'+esc(ini(o.n))+'</div><div style="min-width:0"><b>'+esc(o.n)+'</b><small>'+esc(Object.keys(o.r).join(', '))+(o.t?' · '+o.t+(o.t==1?' pista':' pistas'):'')+'</small></div>'+'<span class="srcw">'+Object.keys(o.s).map(function(q){return o.u[q]?'<a class="srcb" href="'+esc(o.u[q])+'" target="_blank" rel="noopener">'+esc(q)+'</a>':inBadge(q)}).join('')+'</span></div>'}).join('')+(l.length>(lim||40)?'<div class="h" style="padding:8px 0">+'+(l.length-(lim||40))+' más</div>':'')});
@@ -2367,7 +2398,7 @@ var hasN=!!(a.note&&a.note.trim()),edN=!hasN||ui.rv;
 body='<div class="sec rvh"><span>Mi reseña</span>'+(!edN?'<button type="button" class="rve" data-a="rved">Editar reseña</button>':'')+'</div>'+(edN?'<div class="rvc '+rvCls()+'"><textarea id="nt" rows="3" maxlength="600" placeholder="Escribe tu reseña de este álbum…">'+esc(a.note)+'</textarea><div class="rvf"><span class="rvn" id="ntc">'+String(a.note||'').length+' / 600</span><div class="btns rvb">'+(hasN?'<button class="dgb" data-a="rvdel">Eliminar</button><button data-a="rvcx">Cancelar</button>':'')+'<button class="p" data-a="rvsv">Guardar</button></div></div></div>':'<div class="rvc '+rvCls()+'"><div class="rvt">'+esc(a.note)+'</div></div>')
 +'<div class="sec">Críticas y reseñas de webs</div>'+lkRow(CRL,u2)
 +'<div class="sec">Más información</div>'+lkRow(INF,u2)}
-else if(tb=='ge')body=('<div class="sec">Géneros</div>'+genTab(k)+(gen?'<div class="h" style="margin-top:8px">Toca un género para ver tus álbumes de ese estilo.'+(GX[k]&&GX[k].s?' Fuente: '+esc(GX[k].s)+'.':'')+'</div>':(GX[k]?'<div class="h" style="padding:10px 0">Sin género</div>':'<div class="h" style="padding:10px 0">Buscando géneros…</div>')))+(lfx?'<div class="sec">Last.fm</div>'+lfx:'')+'<div style="text-align:center;margin-top:18px"><span role="button" tabindex="0" data-a="gref" style="font-size:12px;color:var(--mut);opacity:.7;text-decoration:underline;cursor:pointer;padding:6px'+(gF[k]?';pointer-events:none':'')+'">'+(gF[k]?'↻ Actualizando…':'↻ Actualizar géneros')+'</span></div>'||'<div class="h" style="padding:18px 0">Sin datos de género todavía.</div>';
+else if(tb=='ge')body=('<div class="sec">Géneros</div>'+genTab(k)+(gen?'<div class="h" style="margin-top:8px">Toca un género para ver tus álbumes de ese estilo. Mantén apretado y arrastra para cambiar el orden.'+(GX[k]&&GX[k].s?' Fuente: '+esc(GX[k].s)+'.':'')+'</div>':(GX[k]?'<div class="h" style="padding:10px 0">Sin género</div>':'<div class="h" style="padding:10px 0">Buscando géneros…</div>')))+(lfx?'<div class="sec">Last.fm</div>'+lfx:'')+'<div style="text-align:center;margin-top:18px"><span role="button" tabindex="0" data-a="gref" style="font-size:12px;color:var(--mut);opacity:.7;text-decoration:underline;cursor:pointer;padding:6px'+(gF[k]?';pointer-events:none':'')+'">'+(gF[k]?'↻ Actualizando…':'↻ Actualizar géneros')+'</span></div>'||'<div class="h" style="padding:18px 0">Sin datos de género todavía.</div>';
 else if(tb=='in')body=infoTab(k);
 else{var avg=tv.length?tv.reduce(function(p,c){return p+c},0)/tv.length:0,cls=colList(a),nfv=Object.keys(a.tf||{}).length,dtx=(a.done&&a.t)?new Date(a.t).toLocaleDateString('es',{day:'numeric',month:'short'}).replace('.',''):'—';
 body='<div class="mn-card"><div class="mn-big">'+(a.rate?fr(a.rate):'—')+'</div><div class="mn-in">'+stars(a.rate||0,'mnr')+'<div class="mn-sub">'+(tv.length?'Media de canciones '+avg.toFixed(1)+' · '+tv.length+' de '+(hast?m.t.length:tv.length)+' puntuadas':'Aún no has puntuado canciones')+'</div></div></div>'
@@ -2402,7 +2433,7 @@ $('sh').addEventListener('pointerdown',function(e){var el=e.target.closest('.sr[
 SD={el:el,id:e.pointerId,x:e.clientX,mv:false,v:starVal(el,e)};try{el.setPointerCapture(e.pointerId)}catch(_){}setSt(el,SD.v)});
 $('sh').addEventListener('pointermove',function(e){if(!SD||e.pointerId!=SD.id)return;if(Math.abs(e.clientX-SD.x)>4)SD.mv=true;SD.v=starVal(SD.el,e);setSt(SD.el,SD.v)});
 $('sh').addEventListener('pointerup',function(e){if(!SD||e.pointerId!=SD.id)return;var d=SD;SD=null;var k=cur,a=k&&S.a[k];if(!a)return;var v=d.v;
-if(d.el.dataset.a=='rate'){if(!d.mv&&a.rate==v)v=0;a.rate=v;if(a.rate&&!a.done){a.done=true;a.t=Date.now()}save();render();sheet(k)}
+if(d.el.dataset.a=='rate'){if(!d.mv&&a.rate==v)v=0;var pr=a.rate;a.rate=v;if(a.rate&&!a.done){a.done=true;a.t=Date.now()}else if(!a.rate&&pr&&a.done){a.done=false;a.fav=false;a.t=0}save();render();sheet(k)}
 else{var i=d.el.dataset.i;a.tr=a.tr||{};if(!d.mv&&a.tr[i]==v)delete a.tr[i];else a.tr[i]=v;save();sheet(k)}});
 $('sh').addEventListener('pointercancel',function(e){if(!SD)return;SD=null;if(cur)sheet(cur)});
 $('sh').addEventListener('click',function(e){var t=e.target.closest('[data-a]');if(!t||!cur)return;var k=cur,a=S.a[k],ac=t.dataset.a;if(!a)return;
@@ -2419,7 +2450,7 @@ else if(ac=='rvcx'){var nt2=$('nt');if(nt2)nt2.value=a.note||'';ui.rv=false;shee
 else if(ac=='rvdel'){dzAsk('¿Eliminar tu reseña?','Eliminar',function(){var nt3=$('nt');if(nt3)nt3.value='';a.note='';ui.rv=false;save();sheet(k);toast('Reseña eliminada')},1)}
 else if(ac=='shm'){ui.sm=false;studio(k)}
 else if(ac=='addl'){delete a.tmp;save();render();sheet(k)}
-else if(ac=='ge'){ui.tabRet={k:k,t:ui.tab||'tk'};genrePage(t.dataset.ge)}
+else if(ac=='ge'){if(Date.now()-(window.gnLP||0)<900)return;ui.tabRet={k:k,t:ui.tab||'tk'};genrePage(t.dataset.ge)}
 else if(ac=='gadd'){genDlg(k)}
 else if(ac=='gcn'){ui.ga='';sheet(k)}
 else if(ac=='gsv'){var gv=$('gin')?$('gin').value.trim():'',gc=gv?gman(gv):null;if(!gc){toast(gv?'Género no válido':'Escribe un género');return}
