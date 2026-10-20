@@ -1616,9 +1616,10 @@ function dsgn(th){var L=!!th.light,r=hx3(th.a),hs=rgb2hsl(r[0],r[1],r[2]),h=hs.h
 if(DS.tx!='plain'){if(L){th.x=hsl2hex(h,sa*55,13);th.m=hsl2hex(h,sa*30,34);th.st=th.a}
 else{th.x=hsl2hex(h,sa*85,87);th.m=hsl2hex(h,sa*55,72);th.a=hsl2hex(h,sa*92,70);th.st=hsl2hex(h,sa*95,70)}}
 else{if(L){th.x='#151515';th.m='#666666';th.a='#2b2b2b'}else{th.x='#ffffff';th.m='#bdbdbd';th.a='#e8e8e8'}}
-if(DS.bg=='grad'){var A,B;
-if(L){A=hx3((th.p&&th.p[0])||th.b[0]);B=hx3(DS.g2||(th.p&&th.p[1])||th.b[1])}
-else{A=capLum(hx3(th.c0||(th.p&&th.p[0])||th.b[1]),.10);B=capLum(hx3(DS.g2||(th.p&&th.p[1])||th.b[1]),DS.g2?.10:.05)}
+if(DS.bg=='grad'){var A,B,bA=hx3(th.b[0]),bB=hx3(th.b[1]),pA=hx3(th.c0||(th.p&&th.p[0])||th.b[1]),pB=hx3((th.p&&th.p[1])||th.b[1]);
+/* Degradado = el mismo fondo base del tema que «Suave», con sus colores integrados en un barrido (así los dos estilos se parecen) */
+if(L){A=dzMix(bA,pA,.5);B=DS.g2?hx3(DS.g2):dzMix(bB,pB,.5)}
+else{A=dzMix(bA,pA,.3);B=DS.g2?capLum(hx3(DS.g2),.10):dzMix(bB,pB,.34)}
 th.grad=[dzHex(A),dzHex(B)]}
 var bc=th.grad?th.grad:[th.b[0],th.b[1]],l1=dzLum(hx3(bc[0])),l2=dzLum(hx3(bc[1])),bl=(l1+l2)/2<=.4?Math.max(l1,l2):Math.min(l1,l2);
 function fixc(c,min){if(!/^#[0-9a-f]{6}$/i.test(c))return c;var rgb=hx3(c),n=0,tg=bl>.4?[0,0,0]:[255,255,255];
