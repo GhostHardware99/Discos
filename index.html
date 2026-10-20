@@ -833,6 +833,7 @@ if(n)save();return n}
 addEventListener('pagehide',function(){if(_svT)saveNow()});document.addEventListener('visibilitychange',function(){if(document.hidden&&_svT)saveNow()});
 try{if(!localStorage.getItem('digz-fix1')){Object.keys(S.a).forEach(function(k){var a=S.a[k];if(a.done&&a.t===1){a.done=false;a.t=0;delete a.pc}});localStorage.setItem('digz-fix1','1');save()}}catch(e){}
 try{Object.keys(S.a).forEach(function(k){if(S.a[k].tmp)delete S.a[k]})}catch(e){}
+try{if(!localStorage.getItem('digz-fix5')){Object.keys(S.a).forEach(function(k){var a=S.a[k];if(a&&a.done&&a.t===1&&!a.fav&&!a.rate){a.done=false;a.t=0;delete a.pc}});localStorage.setItem('digz-fix5','1');save()}}catch(e){}
 try{if(!localStorage.getItem('digz-fix2')){Object.keys(S.a).forEach(function(k){var a=S.a[k];if(a&&a.id&&!a.img&&!a.cu&&!a.mc){a.dzx=0;delete a.dzn}});localStorage.setItem('digz-fix2','1');save()}}catch(e){}
 var ICHT='<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>',ICBK='<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>',BR={'Spotify':['#1db954','S'],'Deezer':['#a238ff','D'],'YouTube Music':['#ff0033','▶'],'Apple Music':['#fa243c','♪'],'SoundCloud':['#ff5500','☁'],'Tidal':['#111','T'],'Amazon Music':['#25d1da','a'],'Bandcamp':['#1da0c3','b']};
 var ICSH='<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:26px;height:26px"><g transform="translate(0 .5)"><path d="M12 14.5V3M7.5 7.5L12 3l4.5 4.5"/><path d="M8.5 10.5H7A1.5 1.5 0 0 0 5.5 12v7A1.5 1.5 0 0 0 7 20.5h10a1.5 1.5 0 0 0 1.5-1.5v-7a1.5 1.5 0 0 0-1.5-1.5h-1.5"/></g></svg>';
@@ -1349,12 +1350,13 @@ if(d.error==10||d.error==26){lq[k]=0;return}
 LC[k]={gv:2,g:g,pc:i?+i.userplaycount||0:0,ls:i?+i.listeners||0:0};try{localStorage.setItem('digz-lc',JSON.stringify(LC))}catch(e){}}catch(e){}
 delete lq[k];if(LC[k])rs2(k)}
 async function bulkL(){var ks=Object.keys(S.a);for(var i=0;i<ks.length;i++){if(!LC[ks[i]]||LC[ks[i]].gv!=2){await loadL(ks[i]);await sleep(260)}}render()}
+/* Last.fm NUNCA marca álbumes como escuchados: solo guarda cuántas reproducciones tienes. Escuchado se marca a mano. */
 async function syncL(){var by={},n=0,tot=0;Object.keys(S.a).forEach(function(k){(by[nrm(S.a[k].ar)]=by[nrm(S.a[k].ar)]||[]).push(k)});
 for(var p=1;p<=8;p++){var d=await lf('user.gettopalbums',{user:LF.u,period:'overall',limit:500,page:p});
 if(d.error)return 'Error de Last.fm: '+(d.message||d.error);var l=(d.topalbums||{}).album;if(!l||!l.length)break;
-l.forEach(function(x){tot++;var ks=by[nrm(x.artist.name)]||[],k=ks.filter(function(q){return cln(S.a[q].al)==cln(x.name)&&+x.playcount>=2})[0];
-if(k){var a=S.a[k];if(!a.done)n++;a.done=true;a.pc=+x.playcount;a.t=a.t||1}})}
-save();render();return tot+' álbumes en tu historial de Last.fm; '+n+' marcados como escuchados en Digz.'}
+l.forEach(function(x){tot++;var ks=by[nrm(x.artist.name)]||[],k=ks.filter(function(q){return cln(S.a[q].al)==cln(x.name)&&+x.playcount>=1})[0];
+if(k){var a=S.a[k];n++;a.pc=+x.playcount}})}
+save();render();return tot+' álbumes en tu historial de Last.fm; '+n+' coinciden con tu biblioteca (no se marcan como escuchados).'}
 
 /* ---------- Plataformas ---------- */
 var SV0=[['Spotify','https://open.spotify.com/search/{q}'],['Deezer','https://www.deezer.com/search/{q}'],['YouTube Music','https://music.youtube.com/search?q={q}'],['Apple Music','https://music.apple.com/search?term={q}'],['SoundCloud','https://soundcloud.com/search/albums?q={q}'],['Tidal','https://listen.tidal.com/search?q={q}'],['Amazon Music','https://music.amazon.com/search/{q}'],['Bandcamp','https://bandcamp.com/search?q={q}']],SV=[];
