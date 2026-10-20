@@ -762,6 +762,20 @@ html:has(.colpg.cs-full):before,html:has(.colpg.cs-band):before,#ov:has(.colpg.c
 .hero.colpg.cs-full+#cpl{margin-top:22px!important}
 #ov .hero.colpg.cs-full>.htop .rb,#ov .hero.colpg.cs-band>.htop .rb{background:none!important;border:0!important;box-shadow:none!important;color:#fff!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
 .hero.colpg.cs-full>.htop .rb svg,.hero.colpg.cs-band>.htop .rb svg{filter:drop-shadow(0 0 3px rgba(0,0,0,.5))}
+
+/* Número de la canción alineado con el nombre (no en el medio de la fila) */
+.tr1{align-items:flex-start;padding:0 2px}
+.tr1 .n{line-height:17.55px;padding-top:11px}
+.tr1 .nm{padding:11px 8px 11px 0}
+.tr1 .tfh,.tr1 .rv3,.tr1 .tfw,.tr1 .du{align-self:center}
+/* Botones secundarios: mismo estilo que los de los cuadros (siguen el color y el modo de la app) */
+.btns button:not(.p):not(.dg):not(.hb):not(.shb),.emp .eb button:not(.p){background:rgba(var(--acr),.1);border:1px solid rgba(var(--acr),.28);color:var(--tx);font-weight:700}
+/* Ventanas flotantes de colecciones */
+.cnph{width:132px;height:132px;border-radius:18px;overflow:hidden;background:rgba(var(--acr),.1);border:1px dashed rgba(var(--acr),.45);display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none}
+.cnph .cdempty{display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--mut);font-size:13px;font-weight:600}
+.cnph svg{width:30px;height:30px}
+.cnph img{width:100%;height:100%;object-fit:cover;display:block}
+.csdlg .li .mos{border-radius:8px}
 </style>
 <script>
 /* Tema: modo claro/oscuro y color. Se aplica antes de pintar para evitar parpadeos */
@@ -1913,7 +1927,7 @@ var tk=gtok(x),dup=o.some(function(n){var nt=gtok(n);return tk.every(function(t)
 return o}
 function gm(k){var a=S.a[k],s={},o=[];if(!a)return o;var hg={};(a.hg||[]).forEach(function(x){hg[nrm(x)]=1});(a.mg||[]).forEach(function(x){var c=gman(x);if(!c)return;var z=nrm(c.n);if(s[z])return;s[z]=1;GCI[c.n]=c;o.push(c.n)});var n=0;gAuto(k).forEach(function(x){var z=nrm(x);if(s[z]||hg[z]||n>=3)return;s[z]=1;n++;o.push(x)});return gord(k,o)}
 function gl(k){return gm(k)}
-function gmx(k){return gm(k)}
+function gmx(k){return genAll(k)}
 function has(k,g){var n=nrm(g);if(!n)return false;if(gst(k).some(function(x){return nrm(x)===n}))return true;var c=gcan(g);if(c&&agen(k).indexOf(c.n)>-1)return true;return gl(k).some(function(x){return nrm(x)===n})}
 function gNorm(n){var z=nf(String(n||'')).trim();if(GGEN.test(z)){var c=gcan(n);if(c)return c.n}return n}
 function gMatch(k,n){var z=nrm(n),c=GGEN.test(nf(String(n)).trim())?gcan(n):null,cz=c?nrm(c.n):'';return gm(k).some(function(x){var y=nrm(x);return y==z||(cz&&y==cz)})}
@@ -2046,7 +2060,9 @@ if(ui.sy&&ui.sy.k===key)$('sh').scrollTop=ui.sy.v;
 if(window.DZTC0&&!$('sh').querySelector('.colpg')){window.DZTC=window.DZTC0;window.DZTC0=null;document.documentElement.style.setProperty('--hcr',dzRgbs(window.DZTC))}
 /* El color de la barra del teléfono cambia DESPUÉS de pintar la nueva pantalla (antes se adelantaba cientos de ms en pantallas pesadas como Compartir álbum y la barra y la pantalla quedaban descoordinadas) */
 window.DZDEF=1;try{if(cur&&S.a[cur]&&$('sh').querySelector('.hbg'))albumBar(cur);else dzHc(null)}finally{window.DZDEF=0}}
-function cleanTmp(){var ch=0;Object.keys(S.a).forEach(function(k){var t=S.a[k];if(!t||!t.tmp)return;if(t.rate||t.done||t.fav||colList(t).length||t.note)delete t.tmp;else delete S.a[k];ch=1});if(ch){save();render()}}
+/* Marca ✓ en los resultados de la búsqueda global cuando el álbum ya quedó en la biblioteca (p. ej. añadido desde la ficha) */
+function gMarks(){[].forEach.call(document.querySelectorAll('#gauto [data-gk],#list [data-gk]'),function(r){var a=S.a[r.dataset.gk],b=r.lastElementChild;if(!b||b.tagName!='B')return;if(a&&!a.tmp){b.textContent='✓';b.classList.remove('gp')}else if(b.textContent=='✓')b.textContent='＋'})}
+function cleanTmp(){var ch=0;Object.keys(S.a).forEach(function(k){var t=S.a[k];if(!t||!t.tmp)return;if(t.rate||t.done||t.fav||colList(t).length||t.note)delete t.tmp;else delete S.a[k];ch=1});if(ch){save();render()}try{gMarks()}catch(e){}}
 function hide(){var cmx=document.getElementById('cmenu');if(cmx)cmx.remove();if(!ui.keep&&typeof MS!='undefined'&&MS)msEnd();if(!ui.keep)cleanTmp();
 if(!ui.keep){ui.tabRet=null;$('ov').style.display='none';$('ov').className='';OVS=[];APT={};ui.ovk=null;ui.sy=null;ui.ls=false;ui.lh=null}
 if(window.DZTC0){window.DZTC=window.DZTC0;window.DZTC0=null}window.DZDEF=1;try{dzHc(null)}finally{window.DZDEF=0}ui.st=false;ui.back=null;cur=null;mbPause=false;pump()}
@@ -2621,7 +2637,7 @@ $('cq').oninput=function(){clearTimeout(tm);if(mbAb)mbAb.abort();ui.cqv=this.val
 tm=setTimeout(function(){var my=++tok;$('cr').innerHTML='<div class="h">Buscando…</div>';
 Promise.all([buscarMB(v),buscarArt(v).catch(function(){return []})]).then(function(rs){var d=rs[0],ars=rs[1];if(my!=tok)return;var l=d['release-groups']||[];
 $('cr').innerHTML=ahtml(ars)+(l.length?'<div class="sec">Álbumes</div>':'')+l.map(function(x,i){var ar=acs(x)[0]||'Desconocido',y=(x['first-release-date']||'').slice(0,4),h=hue(x.title+ar),ty=x['primary-type']&&x['primary-type']!='Album'?' · '+esc(x['primary-type']):'';
-return '<div class="li" data-i="'+i+'"><div class="cv sm" style="background:linear-gradient(145deg,hsl('+h+',50%,42%),hsl('+((h+50)%360)+',55%,20%))"><span>'+esc(ini(x.title))+'</span>'+(x._cu?'<img alt="" src="'+esc(x._cu)+'" onerror="this.remove()">':(NC[x.id]?'':'<img loading="lazy" alt="" data-m="'+x.id+'" src="'+covurl(x.id,250)+'" onerror="ncv(this)">'))+'</div><div class="in"><div class="t">'+esc(x.title)+'</div><div class="a">'+esc(ar)+(y?' · '+y:'')+ty+'</div></div><b>'+(S.a[kof(ar,x.title)]?'✓':'＋')+'</b></div>'}).join('')||(ars.length?'':'<div class="empty">Sin resultados</div>');
+return '<div class="li" data-i="'+i+'" data-gk="'+esc(kof(ar,x.title))+'"><div class="cv sm" style="background:linear-gradient(145deg,hsl('+h+',50%,42%),hsl('+((h+50)%360)+',55%,20%))"><span>'+esc(ini(x.title))+'</span>'+(x._cu?'<img alt="" src="'+esc(x._cu)+'" onerror="this.remove()">':(NC[x.id]?'':'<img loading="lazy" alt="" data-m="'+x.id+'" src="'+covurl(x.id,250)+'" onerror="ncv(this)">'))+'</div><div class="in"><div class="t">'+esc(x.title)+'</div><div class="a">'+esc(ar)+(y?' · '+y:'')+ty+'</div></div><b>'+(S.a[kof(ar,x.title)]?'✓':'＋')+'</b></div>'}).join('')||(ars.length?'':'<div class="empty">Sin resultados</div>');
 [].forEach.call($('cr').querySelectorAll('[data-ar]'),function(r){r.onclick=function(){artistPage(ars[r.dataset.ar])}});
 [].forEach.call($('cr').querySelectorAll('[data-i]'),function(r){r.onclick=function(){var x=l[r.dataset.i],ar=acs(x)[0]||'Desconocido',k=kof(ar,x.title);if(S.a[k]){sheet(k);return}add(ar,x.title,x._did||'',x.id);S.a[k].cu=x._cu||'';if(x._iid)S.a[k].iid=String(x._iid);S.a[k].tmp=1;if(x.id)M[k]=pickM(x);save();saveM();sheet(k)}})
 }).catch(function(e){if(e&&e.name=='AbortError')return;if(my==tok)$('cr').textContent='No pude conectar con el buscador. Revisa tu internet e inténtalo de nuevo.'})},400)};
@@ -2670,8 +2686,8 @@ return h}
 $('list').addEventListener('click',function(e){var em=e.target.closest('[data-em]');if(em){if(em.dataset.em=='imp')settings('imp');else $('bs').click();return}
 var t=e.target.closest('[data-cf],[data-cn],[data-cb],[data-cd],[data-cp],[data-cx]');if(!t)return;
 if(t.dataset.cf!==undefined){colPage(t.dataset.cf)}
-else if(t.dataset.cn=='new'){ui.cn=1;ui.cnn='';ui.cnp=null;render();window.scrollTo(0,0);var i=$('cni');if(i)i.focus()}
-else if(t.dataset.cn=='srch'){if(Date.now()-(ui.cqt||0)<500)return;ui.cqo=!ui.cqo;if(!ui.cqo)ui.cqq='';render();var cq=$('cqi');if(cq)cq.focus()}
+else if(t.dataset.cn=='new'){colNewDlg()}
+else if(t.dataset.cn=='srch'){colSearchDlg()}
 else if(t.dataset.cn=='ph'){cnPhoto()}});
 document.addEventListener('focusout',function(e){if(!e.target||e.target.id!='cqi')return;setTimeout(function(){var q=$('cqi');if(ui.cqo&&!ui.cqq&&(!q||document.activeElement!==q)){ui.cqo=0;ui.cqt=Date.now();render()}},120)});
 document.addEventListener('focusin',function(e){var t=e.target;if(!t||t.id!='cni')return;document.documentElement.classList.add('kbcn');var go=function(){if(document.activeElement!==t)return;var card=t.closest('.cfold,.crow,.card')||t,vv=window.visualViewport,vh=vv?vv.height:innerHeight,tp=vv?vv.offsetTop:0,r=card.getBoundingClientRect(),dy=r.bottom-(tp+vh-16);if(r.top-dy<60)dy=r.top-60;if(dy>2)window.scrollBy({top:dy,behavior:'smooth'})};setTimeout(go,120);setTimeout(go,380);if(window.visualViewport)window.visualViewport.addEventListener('resize',go,{once:true})});
@@ -2824,6 +2840,28 @@ else if(a=='sl')msStart(null,n);
 else if(a=='vw'){setVm(L?'g':'l','cd');colPage(n,y)}
 else if(a=='del')colDelete(n,true)}}
 function colDelete(n,page){dzAsk('¿Eliminar la colección «'+n+'»? Los álbumes se quedan en tu biblioteca, solo pierden la colección.','Eliminar',function(){Object.keys(S.a).forEach(function(k){rmCol(S.a[k],n)});S.cols=S.cols.filter(function(c){return c!=n});['ci','cs','cp','cd','cf','cv'].forEach(function(f){if(S[f])delete S[f][n]});save();if(page){hide();ui.cv=true}render()},1)}
+function dlgFit(w){function f(){var v=window.visualViewport;if(!v)return;w.style.inset='auto';w.style.left='0';w.style.right='0';w.style.top=v.offsetTop+'px';w.style.height=v.height+'px'}f();if(window.visualViewport){window.visualViewport.addEventListener('resize',f);window.visualViewport.addEventListener('scroll',f)}}
+function colSearchDlg(){var old=document.querySelector('.cedw.csdlg');if(old)old.remove();
+var w=document.createElement('div');w.className='cedw dzmod csdlg';w.style.zIndex=55;
+w.innerHTML='<div class="cedb cadd"><div class="cedt">Buscar colección</div><input id="csq" type="search" placeholder="Nombre de la colección" autocomplete="off"><div class="calst"></div><div class="row"><button id="csc" style="flex:1">Cerrar</button></div></div>';
+document.body.appendChild(w);dlgFit(w);
+var q=w.querySelector('#csq'),L=w.querySelector('.calst');
+function f(x){return String(x).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')}
+function draw(){var v=f(q.value.trim()),l=colsSorted().filter(function(c){return !v||f(c).indexOf(v)>-1});
+L.innerHTML=l.length?l.map(function(c){return '<div class="li" data-c="'+esc(c)+'"><div style="width:48px;flex:none">'+colMos(c)+'</div><div class="in"><div class="t">'+esc(c)+'</div><div class="a">'+colCnt(c)+'</div></div></div>'}).join(''):'<div class="h" style="text-align:center;padding:24px 0">Sin resultados</div>'}
+draw();q.oninput=draw;setTimeout(function(){try{q.focus()}catch(x){}},60);
+L.onclick=function(e){var r=e.target.closest('[data-c]');if(!r)return;var c=r.dataset.c;w.remove();colPage(c)};
+w.querySelector('#csc').onclick=function(){w.remove()}}
+function colNewDlg(){var old=document.querySelector('.cedw.cndlg');if(old)old.remove();var P=null;
+var w=document.createElement('div');w.className='cedw dzmod cndlg';w.style.zIndex=55;
+w.innerHTML='<div class="cedb cedd"><div class="cedt">Nueva colección</div><div class="cnph" id="cnp"><div class="cdempty">'+ICIMG+'<span>Añadir foto</span></div></div><input id="cnn" maxlength="40" placeholder="Nombre" autocomplete="off" enterkeyhint="done"><div class="row"><button id="cnc" style="flex:1">Cancelar</button><button class="p" id="cns" style="flex:1">Crear</button></div></div>';
+document.body.appendChild(w);dlgFit(w);
+var i=w.querySelector('#cnn'),ph=w.querySelector('#cnp');setTimeout(function(){try{i.focus()}catch(x){}},60);
+ph.onclick=function(){pickPhoto(function(src){if(!src)return;colEdit('',src,null,true,function(r){if(!r)return;P=r;ph.innerHTML='<img alt="" src="'+r.ci+'">'})})};
+function go(){var v=i.value.trim();if(!v){toast('Ponle un nombre a la colección');return}if(S.cols.indexOf(v)>-1){toast('Ya existe una colección con ese nombre');return}
+S.cols.push(v);colStamp(v);if(P){S.ci=S.ci||{};S.cs=S.cs||{};S.cp=S.cp||{};S.ci[v]=P.ci;if(P.cs)S.cs[v]=P.cs;S.cp[v]=P.cp}save();w.remove();render()}
+i.onkeydown=function(ev){if(ev.key=='Enter'){ev.preventDefault();go()}};
+w.querySelector('#cnc').onclick=function(){w.remove()};w.querySelector('#cns').onclick=go}
 function colRenameDlg(n){var w=document.createElement('div');w.className='cedw dzmod';w.style.zIndex=55;
 w.innerHTML='<div class="cedb cedd"><div class="cedt">Renombrar colección</div><input id="crn" maxlength="40" placeholder="Nombre de la colección" autocomplete="off" enterkeyhint="done"><div class="row"><button id="crc" style="flex:1">Cancelar</button><button class="p" id="crs" style="flex:1">Guardar</button></div></div>';
 document.body.appendChild(w);var i=w.querySelector('#crn');i.value=n;setTimeout(function(){try{i.focus();i.select()}catch(x){}},60);
@@ -3022,7 +3060,7 @@ function gsearch(now,auto){var T=function(){return auto?$('gauto'):$('list')},OK
 gTm=setTimeout(function(){var my=++gTok;T().innerHTML='<div class="h">Buscando…</div>';
 Promise.all([buscarMB(v),buscarArt(v).catch(function(){return []})]).then(function(rs){var d=rs[0],ars=rs[1];if(my!=gTok||!OK())return;var l=d['release-groups']||[];
 T().innerHTML=(auto?'<div class="sch">Búsqueda global</div>':'')+ahtml(ars)+(l.length?'<div class="sec">Álbumes</div>':'')+l.map(function(x,i){var ar=acs(x)[0]||'Desconocido',y=(x['first-release-date']||'').slice(0,4),h=hue(x.title+ar),ty=x['primary-type']&&x['primary-type']!='Album'?' · '+esc(x['primary-type']):'';
-return '<div class="li" data-i="'+i+'"><div class="cv sm" style="background:linear-gradient(145deg,hsl('+h+',50%,42%),hsl('+((h+50)%360)+',55%,20%))"><span>'+esc(ini(x.title))+'</span>'+(x._cu?'<img alt="" src="'+esc(x._cu)+'" onerror="this.remove()">':(NC[x.id]?'':'<img loading="lazy" alt="" data-m="'+x.id+'" src="'+covurl(x.id,250)+'" onerror="ncv(this)">'))+'</div><div class="in"><div class="t">'+esc(x.title)+'</div><div class="a">'+esc(ar)+(y?' · '+y:'')+ty+'</div></div><b>'+(S.a[kof(ar,x.title)]&&!S.a[kof(ar,x.title)].tmp?'✓':'＋')+'</b></div>'}).join('')||(ars.length?'':'<div class="empty">Sin resultados</div>');
+return '<div class="li" data-i="'+i+'" data-gk="'+esc(kof(ar,x.title))+'"><div class="cv sm" style="background:linear-gradient(145deg,hsl('+h+',50%,42%),hsl('+((h+50)%360)+',55%,20%))"><span>'+esc(ini(x.title))+'</span>'+(x._cu?'<img alt="" src="'+esc(x._cu)+'" onerror="this.remove()">':(NC[x.id]?'':'<img loading="lazy" alt="" data-m="'+x.id+'" src="'+covurl(x.id,250)+'" onerror="ncv(this)">'))+'</div><div class="in"><div class="t">'+esc(x.title)+'</div><div class="a">'+esc(ar)+(y?' · '+y:'')+ty+'</div></div><b>'+(S.a[kof(ar,x.title)]&&!S.a[kof(ar,x.title)].tmp?'✓':'＋')+'</b></div>'}).join('')||(ars.length?'':'<div class="empty">Sin resultados</div>');
 [].forEach.call(T().querySelectorAll('[data-ar]'),function(r){r.onclick=function(){artistPage(ars[r.dataset.ar])}});
 [].forEach.call(T().querySelectorAll('[data-i]'),function(r){r.onclick=function(){var x=l[r.dataset.i],ar=acs(x)[0]||'Desconocido',k=kof(ar,x.title);if(S.a[k]){sheet(k);return}add(ar,x.title,x._did||'',x.id);S.a[k].cu=x._cu||'';if(x._iid)S.a[k].iid=String(x._iid);S.a[k].tmp=1;if(x.id)M[k]=pickM(x);save();saveM();sheet(k)}});
 [].forEach.call(T().querySelectorAll('[data-i]'),function(r){var bt=r.lastElementChild,x=l[r.dataset.i],ar=acs(x)[0]||'Desconocido',k=kof(ar,x.title);if(S.a[k]&&!S.a[k].tmp){bt.textContent='✓';return}bt.classList.add('gp');bt.onclick=function(e){e.stopPropagation();if(S.a[k]&&!S.a[k].tmp)return;if(!S.a[k]){add(ar,x.title,x._did||'',x.id);S.a[k].cu=x._cu||'';if(x._iid)S.a[k].iid=String(x._iid);if(x.id)M[k]=pickM(x)}else delete S.a[k].tmp;save();saveM();bt.textContent='✓';bt.classList.remove('gp');toast('Añadido a tu biblioteca')}});
