@@ -776,6 +776,14 @@ html:has(.colpg.cs-full):before,html:has(.colpg.cs-band):before,#ov:has(.colpg.c
 .cnph svg{width:30px;height:30px}
 .cnph img{width:100%;height:100%;object-fit:cover;display:block}
 .csdlg .li .mos{border-radius:8px}
+
+#dsc{position:fixed;left:0;right:0;top:0;bottom:0;z-index:5;overflow-y:auto;padding:20px 16px 110px;-webkit-overflow-scrolling:touch}
+body.dsco #hd,body.dsco #list{display:none}
+#dsc .dh{font-size:30px;font-weight:800;text-align:center;margin:0 0 6px}
+#dsc .dst{margin:22px 0 0;font-size:20px;font-weight:800}
+#dsc .dsb{position:absolute;left:6px;top:6px;background:rgba(0,0,0,.55);color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:9px}
+#dsc .dtg{font-size:12px;font-weight:700;color:var(--act,var(--ac));margin-top:6px}
+#dsc .cv img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 </style>
 <script>
 /* Tema: modo claro/oscuro y color. Se aplica antes de pintar para evitar parpadeos */
@@ -819,7 +827,7 @@ try{matchMedia('(prefers-color-scheme:dark)').addListener(function(){var t=dzLoa
 </header>
 <div id="list"></div>
 <div id="gauto"></div>
-<nav id="nav"><button id="nl" class="on" aria-label="Biblioteca"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.6"/><path d="M6.8 9.2a6 6 0 0 1 3-2.6M17.2 14.8a6 6 0 0 1-3 2.6"/></svg><span>Biblioteca</span></button><button id="fv" aria-label="Favoritos"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg><span>Favoritos</span></button><button id="bs" aria-label="Buscar o añadir álbum"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span>Buscar</span></button><button id="nst" aria-label="Resumen"><svg viewBox="0 0 24 24"><path d="M5 20V11M12 20V4M19 20v-6"/></svg><span>Resumen</span></button><button id="cfg" aria-label="Ajustes"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span>Ajustes</span></button><div class="sbx"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" placeholder="Buscar en tu biblioteca" type="search" autocomplete="off"><button id="qx" aria-label="Cerrar búsqueda">✕</button></div></nav>
+<nav id="nav"><button id="nl" class="on" aria-label="Biblioteca"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.6"/><path d="M6.8 9.2a6 6 0 0 1 3-2.6M17.2 14.8a6 6 0 0 1-3 2.6"/></svg><span>Biblioteca</span></button><button id="fv" aria-label="Favoritos"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg><span>Favoritos</span></button><button id="bs" aria-label="Buscar o añadir álbum"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span>Buscar</span></button><button id="nst" aria-label="Descubrir"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg><span>Descubrir</span></button><button id="cfg" aria-label="Ajustes"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span>Ajustes</span></button><div class="sbx"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" placeholder="Buscar en tu biblioteca" type="search" autocomplete="off"><button id="qx" aria-label="Cerrar búsqueda">✕</button></div></nav>
 <div id="ov"><div id="sh"></div></div>
 <div id="toast"></div>
 <script>
@@ -1409,6 +1417,10 @@ function shCanvas(W,H){var c=document.createElement('canvas');c.width=W*SHQ;c.he
 function shPrev(c){var w=Math.min(c.width,1600),h=Math.round(c.height*w/c.width),t=document.createElement('canvas');t.width=w;t.height=h;var x=t.getContext('2d');try{x.imageSmoothingQuality='high'}catch(e){}x.drawImage(c,0,0,w,h);return t.toDataURL('image/jpeg',.92)}
 function loadImg(u,t){return new Promise(function(ok){var im=new Image();im.crossOrigin='anonymous';var to=setTimeout(function(){ok(null)},t||6000);im.onload=function(){clearTimeout(to);ok(im)};im.onerror=function(){clearTimeout(to);ok(null)};im.src=u})}
 function rr(x,X,Y,w,h,r){x.beginPath();x.moveTo(X+r,Y);x.arcTo(X+w,Y,X+w,Y+h,r);x.arcTo(X+w,Y+h,X,Y+h,r);x.arcTo(X,Y+h,X,Y,r);x.arcTo(X,Y,X+w,Y,r);x.closePath()}
+/* Textos completos en la imagen de compartir: nunca se cortan; se reduce la letra y, si hace falta, se parten en más líneas */
+function wrapAll(x,t,mw){var out=[],c='';String(t).split(' ').forEach(function(w){var n=c?c+' '+w:w;if(x.measureText(n).width<=mw){c=n;return}if(c)out.push(c);c=w;while(x.measureText(c).width>mw&&c.length>1){var i=c.length-1;while(i>1&&x.measureText(c.slice(0,i)+'-').width>mw)i--;out.push(c.slice(0,i)+'-');c=c.slice(i)}});if(c)out.push(c);return out}
+function fitAll(x,t,mw,fs,F,bold,maxL,minR){var f=fs,l;for(;;){x.font=(bold?'bold ':'')+f+'px '+F;l=wrapAll(x,t,mw);if(l.length<=maxL||f<=fs*(minR||.6))break;f-=2}return {l:l,f:f}}
+function favTxt(x,t,mw,fs,F){var q=fitAll(x,t,mw,fs,F,0,1,.74);if(q.l.length<=1)return q;return fitAll(x,t,mw,Math.round(fs*.82),F,0,2,.7)}
 function wrapT(x,t,mw,max){var w=String(t).split(' '),l=[],c='';w.forEach(function(p){var n=c?c+' '+p:p;if(x.measureText(n).width>mw&&c){l.push(c);c=p}else c=n});if(c)l.push(c);if(l.length>max){l=l.slice(0,max);l[max-1]=l[max-1].replace(/.{0,2}$/,'…')}return l}
 async function card(o){var W2=1080,H=1350,c=shCanvas(W2,H);var x=c.getContext('2d'),y;
 var g=x.createLinearGradient(0,0,W2*.4,H);g.addColorStop(0,'hsl('+o.h+',45%,24%)');g.addColorStop(1,'hsl('+((o.h+40)%360)+',55%,8%)');x.fillStyle=g;x.fillRect(0,0,W2,H);
@@ -1617,9 +1629,9 @@ if(DS.tx!='plain'){if(L){th.x=hsl2hex(h,sa*55,13);th.m=hsl2hex(h,sa*30,34);th.st
 else{th.x=hsl2hex(h,sa*85,87);th.m=hsl2hex(h,sa*55,72);th.a=hsl2hex(h,sa*92,70);th.st=hsl2hex(h,sa*95,70)}}
 else{if(L){th.x='#151515';th.m='#666666';th.a='#2b2b2b'}else{th.x='#ffffff';th.m='#bdbdbd';th.a='#e8e8e8'}}
 if(DS.bg=='grad'){var A,B,bA=hx3(th.b[0]),bB=hx3(th.b[1]),pA=hx3(th.c0||(th.p&&th.p[0])||th.b[1]),pB=hx3((th.p&&th.p[1])||th.b[1]);
-/* Degradado = el mismo fondo base del tema que «Suave», con sus colores integrados en un barrido (así los dos estilos se parecen) */
-if(L){A=dzMix(bA,pA,.5);B=DS.g2?hx3(DS.g2):dzMix(bB,pB,.5)}
-else{A=dzMix(bA,pA,.3);B=DS.g2?capLum(hx3(DS.g2),.10):dzMix(bB,pB,.34)}
+/* Degradado: barrido de color propio, pero partiendo del fondo base del tema para que el salto desde «Suave» no sea brusco */
+if(L){A=dzMix(bA,pA,.78);B=DS.g2?hx3(DS.g2):dzMix(bB,pB,.78)}
+else{A=dzMix(bA,pA,.42);B=DS.g2?capLum(hx3(DS.g2),.10):dzMix(bB,pB,.46)}
 th.grad=[dzHex(A),dzHex(B)]}
 var bc=th.grad?th.grad:[th.b[0],th.b[1]],l1=dzLum(hx3(bc[0])),l2=dzLum(hx3(bc[1])),bl=(l1+l2)/2<=.4?Math.max(l1,l2):Math.min(l1,l2);
 function fixc(c,min){if(!/^#[0-9a-f]{6}$/i.test(c))return c;var rgb=hx3(c),n=0,tg=bl>.4?[0,0,0]:[255,255,255];
@@ -2064,7 +2076,7 @@ window.DZDEF=1;try{if(cur&&S.a[cur]&&$('sh').querySelector('.hbg'))albumBar(cur)
 /* Marca ✓ en los resultados de la búsqueda global cuando el álbum ya quedó en la biblioteca (p. ej. añadido desde la ficha) */
 function gMarks(){[].forEach.call(document.querySelectorAll('#gauto [data-gk],#list [data-gk]'),function(r){var a=S.a[r.dataset.gk],b=r.lastElementChild;if(!b||b.tagName!='B')return;if(a&&!a.tmp){b.textContent='✓';b.classList.remove('gp')}else if(b.textContent=='✓')b.textContent='＋'})}
 function cleanTmp(){var ch=0;Object.keys(S.a).forEach(function(k){var t=S.a[k];if(!t||!t.tmp)return;if(t.rate||t.done||t.fav||colList(t).length||t.note)delete t.tmp;else delete S.a[k];ch=1});if(ch){save();render()}try{gMarks()}catch(e){}}
-function hide(){var cmx=document.getElementById('cmenu');if(cmx)cmx.remove();if(!ui.keep&&typeof MS!='undefined'&&MS)msEnd();if(!ui.keep)cleanTmp();
+function hide(){var dsx=document.getElementById('dsc');if(dsx)dsx.remove();document.body.classList.remove('dsco');var cmx=document.getElementById('cmenu');if(cmx)cmx.remove();if(!ui.keep&&typeof MS!='undefined'&&MS)msEnd();if(!ui.keep)cleanTmp();
 if(!ui.keep){ui.tabRet=null;$('ov').style.display='none';$('ov').className='';OVS=[];APT={};ui.ovk=null;ui.sy=null;ui.ls=false;ui.lh=null}
 if(window.DZTC0){window.DZTC=window.DZTC0;window.DZTC0=null}window.DZDEF=1;try{dzHc(null)}finally{window.DZDEF=0}ui.st=false;ui.back=null;cur=null;mbPause=false;pump()}
 var _rs2t=0;function rs2(k){if(cur!=k||SD)return;if(ui.st){if($('spv'))stdraw(k);return}clearTimeout(_rs2t);_rs2t=setTimeout(function(){if(cur!=k||SD||ui.st)return;var f=document.activeElement;if(f&&(f.id=='nt'||f.id=='sc'))return;ui.sk=1;sheet(k)},140)}
@@ -2179,7 +2191,13 @@ if(a.img)l.push(String(a.img));if(a.id)l.push('https://api.deezer.com/album/'+a.
 return l.filter(function(x,i){return x&&l.indexOf(x)===i})}
 function pxu(u){return 'https://images.weserv.nl/?w=1400&we&q=90&output=jpg&url='+encodeURIComponent(u)}
 /* Devuelve la mejor portada disponible (≥ min px: sale enseguida; si no, espera un poco por una mejor y usa la más grande que haya cargado) */
-function loadCover(k,min){min=min||900;var cs=covCands(k);if(!cs.length)return Promise.resolve(null);return new Promise(function(ok){var d=0,f=0,st=0,best=null,tm=0,np=Math.min(4,cs.length),tot=cs.length+np;
+function loadCover(k,min){var mn=min||900;return loadCover0(k,min).then(function(im){if(im&&Math.min(im.naturalWidth||im.width,im.naturalHeight||im.height)>=mn)return im;return covExtra(k).then(function(us){if(!us.length)return im;return Promise.all(us.map(function(u){return loadImg(u,9000)})).then(function(is){is.forEach(function(i){if(i&&(!im||(i.naturalWidth||i.width)>(im.naturalWidth||im.width)))im=i});return im})}).catch(function(){return im})})}
+/* Si las portadas guardadas son pequeñas, se busca el álbum por artista y título en iTunes y MusicBrainz (Cover Art Archive) */
+function covExtra(k){var a=S.a[k]||{},us=[],P=[];
+P.push(jsonp('https://itunes.apple.com/search?media=music&entity=album&limit=8&term='+qe(a.ar+' '+a.al)).then(function(d){var r=((d&&d.results)||[]).filter(function(x){return x.artworkUrl100&&nrm(x.artistName||'')==nrm(a.ar)&&cln(x.collectionName||'')==cln(a.al)})[0];if(r){if(!a.cu){a.cu=r.artworkUrl100;save()}us.push(r.artworkUrl100.replace(/\d+x\d+(bb)?(?=\.)/,'3000x3000bb'),r.artworkUrl100.replace(/\d+x\d+(bb)?(?=\.)/,'1200x1200bb'))}}).catch(function(){}));
+P.push(cfetch('https://musicbrainz.org/ws/2/release-group/?fmt=json&limit=5&query='+qe('releasegroup:"'+a.al+'" AND artist:"'+a.ar+'"'),6048e5).then(function(r){return r.json()}).then(function(d){var g=((d&&d['release-groups'])||[]).filter(function(x){return cln(x.title||'')==cln(a.al)&&(x['artist-credit']||[]).some(function(c){return nrm((c.artist||{}).name||c.name||'')==nrm(a.ar)})})[0];if(g)us.push('https://coverartarchive.org/release-group/'+g.id+'/front-1200')}).catch(function(){}));
+return Promise.all(P).then(function(){return us})}
+function loadCover0(k,min){min=min||900;var cs=covCands(k);if(!cs.length)return Promise.resolve(null);return new Promise(function(ok){var d=0,f=0,st=0,best=null,tm=0,np=Math.min(4,cs.length),tot=cs.length+np;
 function fin(){if(f)return;f=1;clearTimeout(tm);ok(best)}
 function got(im){if(f)return;d++;if(im&&(!best||im.naturalWidth>best.naturalWidth))best=im;if(best&&best.naturalWidth>=min){fin();return}if(best&&!tm)tm=setTimeout(fin,1500);if(d>=tot)fin()}
 function px(){if(st||f||best)return;st=1;cs.slice(0,np).forEach(function(u){loadImg(pxu(u),9000).then(got)})}
@@ -2209,29 +2227,29 @@ x.fillStyle=th.light?'rgba(0,0,0,.15)':'rgba(255,255,255,.22)';x.fillText('★�
 x.save();x.beginPath();x.rect(x0,y-sz*1.1,tw*a.rate/5,sz*1.4);x.clip();x.fillStyle=th.st||'#f5b301';x.fillText('★★★★★',x0,y);x.restore()}
 var foot=H-(hist?120:55),y;
 if(sq){var tx=X+Z+52,tw=W2-tx-72,cy,gs=gl.join(' · ');x.textAlign='left';
-x.font='bold 54px '+F;var tl=wrapT(x,a.al,tw,3);x.font='bold 38px '+F;var arl=wrapT(x,a.ar,tw,2);x.font='30px '+F;var ml=(yr?[yr]:[]).concat(gs?wrapT(x,gs,tw,2):[]);
-var bh=tl.length*62+6+arl.length*46+12+ml.length*38+(a.rate?84:0);cy=Y+Math.max(0,(Z-bh)/2);
+var tq=fitAll(x,a.al,tw,54,F,1,3,.55),tl=tq.l,tfs=tq.f,aq=fitAll(x,a.ar,tw,38,F,1,2,.6),arl=aq.l,afs=aq.f;x.font='30px '+F;var ml=(yr?[yr]:[]).concat(gs?wrapAll(x,gs,tw):[]);
+var bh=tl.length*Math.round(tfs*1.15)+6+arl.length*Math.round(afs*1.2)+12+ml.length*38+(a.rate?84:0);cy=Y+Math.max(0,(Z-bh)/2);
 function ln(t,font,col,lh,fs){x.font=font;x.fillStyle=col;x.fillText(t,tx,cy+fs*.82);cy+=lh}
-tl.forEach(function(l){ln(l,'bold 54px '+F,th.x,62,54)});cy+=6;
-arl.forEach(function(l){ln(l,'bold 38px '+F,th.m,46,38)});cy+=12;
+tl.forEach(function(l){ln(l,'bold '+tfs+'px '+F,th.x,Math.round(tfs*1.15),tfs)});cy+=6;
+arl.forEach(function(l){ln(l,'bold '+afs+'px '+F,th.m,Math.round(afs*1.2),afs)});cy+=12;
 ml.forEach(function(l){ln(l,'30px '+F,th.m,38,30)});
 if(a.rate){cy+=22;stars(tx,cy+52,56);cy+=62}
 var hb=Math.max(Y+Z,cy),cx2=W2/2,y2=hb+44,foot2=H-55;
 function hair(yy){x.save();x.globalAlpha=.3;x.fillStyle=th.m;x.fillRect(X,yy,W2-2*X,2);x.restore()}
 var fl=(AS.c&&m.t)?favList(3):[],st=AS.s?sumOf(k):'';
 if(fl.length){hair(y2);y2+=64;x.textAlign='center';x.fillStyle=th.a;x.font='bold 26px '+F;x.fillText('CANCIONES FAVORITAS',cx2,y2);y2+=14;
-fl.forEach(function(p){y2+=50;x.fillStyle=th.x;x.font='34px '+F;x.fillText((wrapT(x,m.t[p.i][0],W2-2*X-(p.r&&p.f?220:120),1)[0]||'')+(p.r&&p.f?'  ★'+fr(p.r):''),cx2,y2)})}
+fl.forEach(function(p){y2+=50;x.fillStyle=th.x;var q=favTxt(x,m.t[p.i][0],W2-2*X-(p.r&&p.f?220:120),34,F),sf=(p.r&&p.f?'  ★'+fr(p.r):'');q.l.forEach(function(ln,j){if(j)y2+=Math.round(q.f*1.2);x.font=q.f+'px '+F;x.fillText(ln+(j==q.l.length-1?sf:''),cx2,y2)})})}
 if(st){st=st.length>400?st.slice(0,400):st;if(!fl.length){hair(y2);y2+=22}else y2+=30;var sn=Math.min(4,Math.floor((foot2-60-y2)/42));
 if(sn>=2){x.textAlign='center';x.fillStyle=th.m;x.font='30px '+F;wrapT(x,st,W2-2*X-40,sn).forEach(function(l){y2+=42;x.fillText(l,cx2,y2)})}}
 x.textAlign='center';x.fillStyle=th.m;x.font='bold 30px '+F;x.fillText('Digz',cx2,foot2);stCanvas.bt=Math.max(hb,y2);return c}
 var cx=W2/2,lh=hist?80:72;y=Y+Z+(hist?125:84);x.textAlign='center';x.fillStyle=th.x;x.font='bold '+(hist?70:62)+'px '+F;
-wrapT(x,a.al,W2-140,2).forEach(function(l){x.fillText(l,cx,y);y+=lh});y=y-lh+68;
-x.fillStyle=th.a;x.font='bold 44px '+F;x.fillText(wrapT(x,a.ar,W2-140,1)[0],cx,y);
-var mls=(yr?[yr]:[]);x.font='34px '+F;if(gl.length)mls=mls.concat(wrapT(x,gl.join(' · '),W2-140,2));if(mls.length){y+=56;x.fillStyle=th.m;mls.forEach(function(l,i){if(i)y+=46;x.fillText(l,cx,y)})}
+var tq=fitAll(x,a.al,W2-140,hist?70:62,F,1,2,.5),tlh=Math.round(lh*tq.f/(hist?70:62));tq.l.forEach(function(l){x.font='bold '+tq.f+'px '+F;x.fillText(l,cx,y);y+=tlh});y=y-tlh+68;
+x.fillStyle=th.a;var aq=fitAll(x,a.ar,W2-140,44,F,1,1,.6);aq.l.forEach(function(l,i){if(i)y+=Math.round(aq.f*1.2);x.font='bold '+aq.f+'px '+F;x.fillText(l,cx,y)});
+var mls=(yr?[yr]:[]);x.font='34px '+F;if(gl.length)mls=mls.concat(wrapAll(x,gl.join(' · '),W2-140));if(mls.length){y+=56;x.fillStyle=th.m;mls.forEach(function(l,i){if(i)y+=46;x.fillText(l,cx,y)})}
 if(a.rate){y+=hist?125:96;stars(null,y,hist?100:80);x.textAlign='center'}
 if(AS.c&&m.t){var tr=favList(hist?5:3),av=Math.floor((foot-60-(y+(hist?130:112)))/(hist?56:52));tr=tr.slice(0,Math.max(0,av));
 if(tr.length){y+=hist?44:36;x.save();x.globalAlpha=.3;x.fillStyle=th.m;x.fillRect(cx-230,y,460,2);x.restore();y+=hist?62:54;x.textAlign='center';x.fillStyle=th.a;x.font='bold 30px '+F;x.fillText('CANCIONES FAVORITAS',cx,y);y+=hist?20:16;
-tr.forEach(function(p){y+=hist?56:52;x.fillStyle=th.x;x.font='38px '+F;x.fillText((wrapT(x,m.t[p.i][0],W2-(p.r&&p.f?460:300),1)[0]||'')+(p.r&&p.f?'  ★'+fr(p.r):''),cx,y)})}}
+tr.forEach(function(p){y+=hist?56:52;x.fillStyle=th.x;var q=favTxt(x,m.t[p.i][0],W2-(p.r&&p.f?460:300),38,F),sf=(p.r&&p.f?'  ★'+fr(p.r):'');q.l.forEach(function(ln,j){if(j)y+=Math.round(q.f*1.2);x.font=q.f+'px '+F;x.fillText(ln+(j==q.l.length-1?sf:''),cx,y)})})}}
 if(AS.s){var tx2=((a.note||'').trim())||(w.al&&w.al.t)||'';
 if(tx2){tx2=tx2.length>600?tx2.slice(0,600):tx2;y+=hist?80:65;var n=Math.min(hist?7:4,Math.floor((foot-60-y)/50));
 if(n>=2){x.textAlign='center';x.fillStyle=th.m;x.font='36px '+F;wrapT(x,tx2,W2-200,n).forEach(function(l){x.fillText(l,cx,y);y+=50})}}}
@@ -2548,7 +2566,7 @@ $('sra').onclick=function(){var n=$('srn').value.trim(),u=$('sru').value.trim();
 if(!n||!/^https?:\/\/[^\s.]+\.[^\s]+$/i.test(u)){toast('Escribe un nombre y un enlace válido');return}
 SRX.push({n:n,u:u});srcSave();$('srn').value='';$('sru').value='';srcUI();toast(n+' añadida')}}
 var CHV='<svg class="cfg-ch" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>';
-var CFI={fm:'<path d="M3 12h3l3-7 4 14 3-7h5"/>',pl:'<circle cx="12" cy="12" r="9"/><path d="M10 8.5l5 3.5-5 3.5z"/>',lk:'<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4"/>',im:'<path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19h14"/>',co:'<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',rs:'<path d="M5 20V11M12 20V4M19 20v-6"/>',bk:'<path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/>',sr:'<path d="M4 5h16v14H4zM4 9h16M8 13h5"/>',ld:'<path d="M20 11a8 8 0 0 0-14.5-4M4 4v4h4M4 13a8 8 0 0 0 14.5 4M20 20v-4h-4"/>',cl:'<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/>'};
+var CFI={st:'<path d="M5 20V10M12 20V4M19 20v-7"/>',fm:'<path d="M3 12h3l3-7 4 14 3-7h5"/>',pl:'<circle cx="12" cy="12" r="9"/><path d="M10 8.5l5 3.5-5 3.5z"/>',lk:'<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4"/>',im:'<path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19h14"/>',co:'<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',rs:'<path d="M5 20V11M12 20V4M19 20v-6"/>',bk:'<path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/>',sr:'<path d="M4 5h16v14H4zM4 9h16M8 13h5"/>',ld:'<path d="M20 11a8 8 0 0 0-14.5-4M4 4v4h4M4 13a8 8 0 0 0 14.5 4M20 20v-4h-4"/>',cl:'<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/>'};
 var CFT={lastfm:'Last.fm',plat:'Plataformas de escucha',look:'Apariencia',imp:'Importar música',bk:'Respaldo y restauración',cx:'Conexión y APIs',src:'Fuentes'};
 function cfRow(a,ic,t,v,o){return '<button class="cfg-i'+(o&&o.indexOf('d')>-1?' dn':'')+'" '+a+'><span class="cfg-ic"><svg viewBox="0 0 24 24">'+CFI[ic]+'</svg></span><span class="cfg-t">'+t+'</span>'+(v?'<span class="cfg-v">'+v+'</span>':'')+(o&&o.indexOf('c')>-1?CHV:'')+'</button>'}
 function settings(sub){cur=null;if(!CFT[sub])sub='';ui.vk='settings'+(sub?':'+sub:'');var conn=LF.u&&lfKey(),h;
@@ -2562,7 +2580,7 @@ h=bhd('Ajustes')
 +'<div class="cfg-h">Descubrir</div><div class="cfg-g">'+cfRow('data-go="src"','sr','Fuentes','Reseñas y música','c')+'</div>'
 +'<div class="cfg-h">Biblioteca</div><div class="cfg-g">'
 
-+cfRow('data-go="imp"','im','Importar música','','c')+'</div>'
++cfRow('data-go="imp"','im','Importar música','','c')+cfRow('data-do="st"','st','Resumen','Estadísticas','c')+'</div>'
 +'<div class="cfg-h">Datos</div><div class="cfg-g">'
 +cfRow('data-go="bk"','bk','Respaldo y restauración','','c')
 +cfRow('data-go="cx"','ld','Conexión y APIs','','c')
@@ -2584,6 +2602,7 @@ h='<div class="hd"><div class="hl"><button id="x" class="cfg-bk" aria-label="Atr
 show(h);$('x').onclick=ovBack;$('sh').scrollTop=ovsy();
 if(!sub){
 [].forEach.call($('sh').querySelectorAll('[data-go]'),function(b){b.onclick=function(){settings(b.dataset.go)}});
+$('sh').querySelector('[data-do="st"]').onclick=function(){stats()};
 $('sh').querySelector('[data-do="ld"]').onclick=function(){Object.keys(S.a).forEach(function(k){need(k)});if(lfKey()&&LF.u)bulkL();toast('Descargando portadas y datos…')};
 $('sh').querySelector('[data-do="cl"]').onclick=function(){if(this.dataset.s){S={a:{},cols:[]};save();render();hide()}else{this.dataset.s=1;this.querySelector('.cfg-t').textContent='¿Seguro? Toca otra vez'}};
 return}
@@ -3052,7 +3071,7 @@ document.addEventListener('click',function(e){if($('opt').style.display=='block'
 document.addEventListener('pointerdown',function(e){if($('opt').style.display=='block'&&!e.target.closest('#opt,#ob')){closeOpt();swallowClick()}},true);
 ['scroll','touchmove','wheel'].forEach(function(t){document.addEventListener(t,function(e){if($('opt').style.display=='block'&&!(e.target&&e.target.closest&&e.target.closest('#opt'))&&Date.now()-(ui.optT||0)>350)closeOpt()},{capture:true,passive:true})});
 
-$('nst').onclick=function(){stats()};
+$('nst').onclick=function(){navTrack(function(){hide();ui.o=null;openDsc()})};
 $('bs').onclick=function(){navTrack(function(){hide();ui.o=null;$('nav').classList.add('qs');$('q').focus()})};
 /* ---------- Búsqueda: pestañas «Tu biblioteca» / «Búsqueda global» ---------- */
 ui.sm='lib';var gTm,gTok=0;
@@ -3114,6 +3133,21 @@ if(s.ov){OVS=s.ov.s.slice();if(!ovOpen({k:s.ov.k,y:s.ov.y}))hide()}}
 function navPop(){if(ui.cn){ui.cn=0;render();return true}var cs=sk(snap());while(NAV.length){var s=NAV.pop();if(sk(s)!==cs){navApply(s);return true}}
 if($('nav').classList.contains('qs')){closeQs();return true}
 return false}
+/* ---------- Descubrir: aniversarios y novedades (fuentes públicas) ---------- */
+function dscCard(x){var h=hue(x.t+x.a);return '<div class="tl" data-dq="'+esc(x.a+' '+x.t)+'"><div style="position:relative"><div class="cv" style="background:linear-gradient(145deg,hsl('+h+',50%,42%),hsl('+((h+50)%360)+',55%,20%))"><span>'+esc(ini(x.t))+'</span>'+(x.img?'<img loading="lazy" alt="" src="'+esc(x.img)+'" onerror="this.remove()">':'')+'</div>'+(x.b?'<span class="dsb">'+esc(x.b)+'</span>':'')+'</div><div class="dtg">'+esc(x.tag)+'</div><div class="t">'+esc(x.t)+'</div><div class="a">'+esc(x.a)+'</div></div>'}
+function dscSec(id,t,sub){return '<div class="dst">'+t+'</div><div class="h" style="margin:2px 0 10px">'+sub+'</div><div class="hs" id="'+id+'"><div class="h">Cargando…</div></div>'}
+function dscFill(id,l){var e=document.getElementById(id);if(!e)return;if(!l.length){var sc=e.previousElementSibling;if(sc)sc.remove();if(e.previousElementSibling)e.previousElementSibling.remove();e.remove();return}e.innerHTML=l.map(dscCard).join('')}
+function dscDays(d){var n=Math.round((Date.now()-new Date(d).getTime())/864e5);return n<=0?'Hoy':n==1?'Ayer':n<14?'Hace '+n+' días':n<60?'Hace '+Math.round(n/7)+' semanas':'Hace '+Math.round(n/30)+' meses'}
+function dscNov(){return jsonp('https://api.deezer.com/editorial/0/releases?limit=24').then(function(d){return ((d&&d.data)||[]).slice(0,20).map(function(a){var rd=a.release_date||'';return {t:a.title,a:(a.artist||{}).name||'',img:a.cover_medium||a.cover,tag:rd?dscDays(rd):'Nuevo',b:rd&&Date.now()-new Date(rd).getTime()<4*864e5?'NUEVO':''}})}).catch(function(){return []})}
+function dscAniv(){var n=new Date(),Y=n.getFullYear(),a=new Date(n-3*864e5),b=new Date(+n+3*864e5),f=function(d,y){return y+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2)+'T00:00:00Z'},ys=[5,10,15,20,25,30,40,50],u=ys.map(function(k){return '{?al wdt:P577 ?d. FILTER(?d>="'+f(a,Y-k)+'"^^xsd:dateTime && ?d<="'+f(b,Y-k)+'"^^xsd:dateTime)}'}).join(' UNION '),
+q='SELECT ?alLabel ?artLabel ?d ?sl WHERE{?al wdt:P31 wd:Q482994; wikibase:sitelinks ?sl. '+u+' OPTIONAL{?al wdt:P175 ?art} SERVICE wikibase:label{bd:serviceParam wikibase:language "es,en".}} ORDER BY DESC(?sl) LIMIT 30';
+return cfetch('https://query.wikidata.org/sparql?format=json&query='+encodeURIComponent(q),864e5).then(function(r){return r.json()}).then(function(d){var seen={};return ((d.results||{}).bindings||[]).map(function(x){var t=x.alLabel&&x.alLabel.value,ar=(x.artLabel&&x.artLabel.value)||'',y=(x.d&&x.d.value||'').slice(0,4),k=Y-(+y);return /^Q\d+$/.test(t||'Q1')||seen[t+ar]||!y?null:(seen[t+ar]=1,{t:t,a:ar,tag:'Hace '+k+' años',y:y})}).filter(Boolean).slice(0,12)}).catch(function(){return []})}
+function dscCover(l,id){l.forEach(function(x,i){setTimeout(function(){jsonp('https://itunes.apple.com/search?media=music&entity=album&limit=1&term='+qe(x.a+' '+x.t)).then(function(d){var r=(d.results||[])[0];if(r&&r.artworkUrl100){x.img=r.artworkUrl100.replace('100x100','300x300');var e=document.getElementById(id);if(e&&e.children[i])e.children[i].outerHTML=dscCard(x)}}).catch(function(){})},i*350)})}
+function openDsc(){var o=document.getElementById('dsc');if(o)o.remove();var d=document.createElement('div');d.id='dsc';
+d.innerHTML='<div class="dh">Descubrir</div>'+dscSec('dsa','Aniversarios','Álbumes famosos que cumplen años esta semana')+dscSec('dsn','Novedades','Lo último que ha salido');document.body.appendChild(d);document.body.classList.add('dsco');
+[].forEach.call(document.querySelectorAll('#nav button'),function(b){b.classList.toggle('on',b.id=='nst')});
+d.onclick=function(e){var c=e.target.closest('[data-dq]');if(!c)return;var q=c.dataset.dq;hide();$('nav').classList.add('qs');$('q').value=q;$('q').dispatchEvent(new Event('input',{bubbles:true}));$('q').focus()};
+dscAniv().then(function(l){dscFill('dsa',l);dscCover(l,'dsa')});dscNov().then(function(l){dscFill('dsn',l)})}
 function navTrack(fn,ov){var s=snap();if(ov&&ui.ovk)s.ov={k:ui.ovk,s:OVS.slice(),y:$('sh').scrollTop};fn();if(sk(s)!==sk(snap())){NAV.push(s);if(NAV.length>40)NAV.shift()}}
 function closeFolds(){var o=$('sh').querySelectorAll('#fos .dfo.open');if(!o.length)return false;SP.fo={};[].forEach.call(o,function(f){f.classList.remove('open')});return true}
 
