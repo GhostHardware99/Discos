@@ -57,7 +57,8 @@ html:before{content:"";position:fixed;left:0;right:0;top:0;height:calc(10px + va
 .chips button.on{background:var(--ac2);border-color:var(--ac)}
 #nav .sbx{display:none;flex:1;align-items:center;gap:8px;padding:0 4px 0 12px;min-width:0}
 #nav .sbx>svg{width:22px;height:22px;flex:none;fill:none;stroke:var(--mut);stroke-width:1.9;stroke-linecap:round}
-#nav .sbx input{border:0;background:none;padding:12px 2px;font-size:16px;min-width:0;outline:none}
+#nav .sbx input{border:0;background:none;padding:12px 2px;font-size:16px;min-width:0;flex:1;width:100%;text-overflow:ellipsis;outline:none}
+#nav .sbx input::placeholder{font-size:14.5px;opacity:.65}
 #nav .sbx button svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}
 #nav .sbx button{flex:none;width:38px;height:38px;padding:0;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;background:var(--bd);border:0;color:var(--tx)}
 #nav.qs>button{display:none}
@@ -873,7 +874,7 @@ try{matchMedia('(prefers-color-scheme:dark)').addListener(function(){var t=dzLoa
 </header>
 <div id="list"></div>
 <div id="gauto"></div>
-<nav id="nav"><button id="nl" class="on" aria-label="Biblioteca"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.6"/><path d="M6.8 9.2a6 6 0 0 1 3-2.6M17.2 14.8a6 6 0 0 1-3 2.6"/></svg><span>Biblioteca</span></button><button id="fv" aria-label="Favoritos"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg><span>Favoritos</span></button><button id="bs" aria-label="Buscar o añadir álbum"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span>Buscar</span></button><button id="nst" aria-label="Descubrir"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg><span>Descubrir</span></button><button id="cfg" aria-label="Ajustes"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span>Ajustes</span></button><div class="sbx"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" placeholder="Buscar álbumes, artistas o géneros" type="search" autocomplete="off"><button id="qx" aria-label="Cerrar búsqueda">✕</button></div></nav>
+<nav id="nav"><button id="nl" class="on" aria-label="Biblioteca"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.6"/><path d="M6.8 9.2a6 6 0 0 1 3-2.6M17.2 14.8a6 6 0 0 1-3 2.6"/></svg><span>Biblioteca</span></button><button id="fv" aria-label="Favoritos"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg><span>Favoritos</span></button><button id="bs" aria-label="Buscar o añadir álbum"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span>Buscar</span></button><button id="nst" aria-label="Descubrir"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg><span>Descubrir</span></button><button id="cfg" aria-label="Ajustes"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span>Ajustes</span></button><div class="sbx"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" placeholder="Buscar álbum, artista o género" type="search" autocomplete="off"><button id="qx" aria-label="Cerrar búsqueda">✕</button></div></nav>
 <div id="ov"><div id="sh"></div></div>
 <div id="toast"></div>
 <script>
@@ -1237,7 +1238,11 @@ function(e){gap=e=='q'?4000:1500;tries[k]=(tries[k]||0)+1;delete qd[k];if(tries[
 var FBq={};
 function tmo(p,ms){return Promise.race([p,new Promise(function(_,no){setTimeout(function(){no(new Error('t'))},ms)})])}
 function hasT(k){var m=M[k];return !!(m&&m.t&&m.t.length)}
-function pickAlb(l,tk,ak,a){var c=cln(a.al),e=l.filter(function(x){return cln(tk(x))==c&&same(ak(x),a.ar)});return e[0]||l.filter(function(x){return same(tk(x),a.al)&&same(ak(x),a.ar)})[0]}
+function pkTy(x){var t=String(x.record_type||'').toLowerCase();if(t=='single'||t=='ep'||t=='album')return t;var n=String(x.collectionName||'');if(/\s-\sSingle$/i.test(n))return 'single';if(/\s-\sEP$/i.test(n))return 'ep';return ''}
+function pickAlb(l,tk,ak,a){var c=cln(a.al),e=l.filter(function(x){return cln(tk(x))==c&&same(ak(x),a.ar)}),w=a.ty||(/\((sencillo|single)\)\s*$/i.test(a.al)?'single':'');
+if(!e.length)e=l.filter(function(x){return same(tk(x),a.al)&&same(ak(x),a.ar)});
+if(w&&e.length){var m=e.filter(function(x){return pkTy(x)==w});if(m.length)return m[0];if(w=='album'){var nm=e.filter(function(x){return pkTy(x)!='single'});return nm[0]}}
+return e[0]}
 function fbCheck(k){if(!S.a[k]||hasT(k)||FBq[k])return;fbLoad(k)}
 async function fbLoad(k,force){if(!S.a[k]||hasT(k)||(FBq[k]&&!force))return;FBq[k]=1;var a=S.a[k],o=null,r,h,id;
 /* 1) Deezer: rápido y fiable */
@@ -2211,6 +2216,13 @@ function gnMatch(v){var q=nf(v).trim().replace(/\s+/g,' ');if(q.length<3&&q!='r&
 L.forEach(function(g){var z=nf(g);if(z==q)ex.push(g);else if(z.indexOf(q)==0)st.push(g);else if(q.length>=3&&(' '+z.replace(/[-\/]/g,' ')).indexOf(' '+q)>-1)wd.push(g)});
 var o=ex.concat(st.sort(function(a,b){return a.length-b.length}),wd.sort(function(a,b){return a.length-b.length})),r=[],s2={};o.forEach(function(g){var z=nf(g);if(!s2[z]&&r.length<4){s2[z]=1;r.push(g)}});return r}
 function ghtml(gs){return gs.length?'<div class="sec">Géneros</div>'+gs.map(function(g,i){var c=hue(nf(g));return '<div class="li" data-gn="'+i+'"><div class="cv sm" style="background:linear-gradient(145deg,hsl('+c+',50%,42%),hsl('+((c+50)%360)+',55%,20%))"><span>#</span></div><div class="in"><div class="t">'+esc(g)+'</div><div class="a">Género · ver álbumes populares</div></div><b>›</b></div>'}).join(''):''}
+var SUPC={};
+/* Si de un sencillo no aparece el álbum con el mismo nombre en la lista del artista, se busca aparte (igual que en la búsqueda global) */
+async function artistSup(n,d){if(!d||!d.length)return d;var ks=d.filter(function(x){return x.ty=='single'&&!d.some(function(y){return y.ty!='single'&&cln(y.al)==cln(x.al)})}).slice(0,8);if(!ks.length)return d;
+var ck=nrm(n)+'|'+ks.map(function(x){return cln(x.al)}).join(','),ex=SUPC[ck];
+if(!ex){ex=await Promise.race([Promise.all(ks.map(function(x){return seAlbumOf({ar:x.ar||n,al:x.al})})),sleep(5000).then(function(){return null})]);if(!ex)return d;SUPC[ck]=ex}
+var add=[];ex.forEach(function(l){(l||[]).forEach(function(x){add.push({al:x.al,ar:x.ar,ty:x.type||'album',d:x.y||'',img:x.img||'',cu:x.cu||'',id:x.id||'',iid:x.iid||'',mb:x.mb||''})})});
+return add.length?d.concat(add):d}
 async function artistPage(n){ui.keep=1;hide();ui.keep=0;ui.vk='artist:'+n;var my=++apTok,allK=Object.keys(S.a).filter(function(k){return !S.a[k].tmp&&aMatch(S.a[k].ar,n)}),ks=allK;
 var items=[];
 ks.sort(function(x,y){return String((M[y]||{}).d||'').localeCompare(String((M[x]||{}).d||''))||S.a[x].al.localeCompare(S.a[y].al)}).forEach(function(q){var a=S.a[q];items.push({al:a.al,ar:a.ar,y:String((M[q]||{}).d||'').slice(0,4),img:cvs(a,300),cu:a.cu||'',id:a.id||'',iid:a.iid||'',k:q,done:a.done,ty:a.ty||(isSgK(q)?'single':'')})});
@@ -2226,6 +2238,7 @@ $('tg').onclick=function(){$('pg').style.display='';$('pl').style.display='none'
 $('sh').scrollTop=ovsy();$('x').onclick=function(){if(!tabBack())ovBack()};if(APT['artist:'+n])$('tg').onclick();
 if(nl)bind($('dl'));aiNeed(n);aiWatch($('sh'));
 var d=[];try{d=await artistAlbums(n)}catch(e){}
+try{d=await artistSup(n,d)}catch(e){}
 if(my!=apTok)return;var el=$('dg');if(!el)return;
 var seen={};allK.forEach(function(q){seen[cln(S.a[q].al)+(isSgK(q)?'|s':'')]=1});
 var more=[];d.sort(function(x,y){return String(y.d||'').localeCompare(String(x.d||''))}).forEach(function(x){var c=cln(x.al)+(x.ty=='single'?'|s':'');if(!cln(x.al)||seen[c])return;seen[c]=1;more.push({al:x.al,ar:x.ar,y:String(x.d||'').slice(0,4),ty:x.ty||'album',img:x.img,cu:x.cu,id:x.id,iid:x.iid||'',k:''})});
