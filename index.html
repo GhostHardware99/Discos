@@ -1198,7 +1198,9 @@ function ncv(im){var m=im.dataset.m,p=im.parentNode;im.remove();if(p&&p.classLis
 function sleep(t){return new Promise(function(r){setTimeout(r,t)})}
 function mbq(p){var run=mbC.then(function(){return sleep(Math.max(0,mbT+1100-Date.now()))}).then(function(){mbT=Date.now();return netGet('https://musicbrainz.org/ws/2/'+p+(p.indexOf('?')>-1?'&':'?')+'fmt=json',15000,(DCB||inForce())?{nc:1}:undefined)});mbC=run.catch(function(){});return run}
 function mbs(p,sig){return fetch('https://musicbrainz.org/ws/2/'+p+'&fmt=json',{signal:sig}).then(function(r){if(r.status==503||r.status==429)throw 'q';if(!r.ok)throw 'e';return r.json()})}
-function rg(a,l){var c=l.filter(function(x){return same(x.title,a.al)&&(a.ar=='Desconocido'||acs(x).some(function(n){return same(n,a.ar)}))});c.sort(function(x,y){return (x['primary-type']=='Album'?0:1)-(y['primary-type']=='Album'?0:1)});return c[0]}
+function rg(a,l){var c=l.filter(function(x){return same(x.title,a.al)&&(a.ar=='Desconocido'||acs(x).some(function(n){return same(n,a.ar)}))}),w=a.ty||(/\((sencillo|single)\)\s*$/i.test(a.al)?'single':''),isS=function(x){return String(x['primary-type']||'').toLowerCase()=='single'};
+if(w=='album')c=c.filter(function(x){return !isS(x)});else if(w=='single'){var ss=c.filter(isS);if(ss.length)c=ss}
+c.sort(function(x,y){return (x['primary-type']=='Album'?0:1)-(y['primary-type']=='Album'?0:1)});return c[0]}
 async function load(k){var a=S.a[k],d=null;
 if(a.mb){d=await mbq('release-group/'+a.mb+'?inc=genres+tags+artist-credits');if(!d||d.error)d=null}
 if(!d){var s=await mbq('release-group?limit=10&query='+encodeURIComponent('releasegroup:"'+esq(a.al)+'" AND artist:"'+esq(a.ar)+'"')),m=rg(a,s['release-groups']||[]);
