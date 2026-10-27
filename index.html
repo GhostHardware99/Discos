@@ -935,6 +935,18 @@ try{matchMedia('(prefers-color-scheme:dark)').addListener(function(){var t=dzLoa
 #cpk .rxs{display:flex;gap:6px;margin:2px 0 8px}
 #cpk .rxs button{flex:1;padding:10px;border-radius:12px;border:1px solid var(--bd);background:var(--gl);color:var(--tx);font:inherit;font-weight:600}
 #cpk .rxs button.on{background:rgba(var(--acr),.2);border-color:rgba(var(--acr),.5)}
+/* v213: diálogos de ficha (nota, calendario, programar, avisos) = misma hoja inferior que el menú del álbum */
+#cpk.cedw{align-items:flex-end;justify-content:center;background:rgba(0,0,0,.5);padding:0 12px calc(12px + env(safe-area-inset-bottom,0px));-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+#cpk .cpp{max-width:480px;max-height:min(100%,72vh);overflow-y:auto;overscroll-behavior:contain;background:var(--cgo)!important;border:1px solid var(--bdc);border-radius:22px;padding:12px 12px 6px;box-shadow:0 12px 40px rgba(0,0,0,.35);animation:lpin .16s ease-out}
+#cpk .cph{padding:6px 6px 12px;margin-bottom:6px;border-bottom:1px solid var(--bdc);font-size:16px;font-weight:700}
+#cpk .cph button{display:none}
+#cpk .cmb{padding:15px 8px;border-top:0;border-radius:12px}#cpk .cmb:active{background:var(--ac2)}
+#cpk .cgo{border-radius:14px}
+#cpk .cpl{flex:1 1 auto;min-height:0}
+/* v213: nombres de álbum completos en la cuadrícula (como Spotify): se parten en varias líneas */
+.grid .tl .t{white-space:normal;text-overflow:clip;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:4;line-height:1.25;overflow-wrap:anywhere;word-break:break-word}
+.grid .tl .a{white-space:normal;text-overflow:clip;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;line-height:1.25;overflow-wrap:anywhere}
+.grid{align-items:start}
 </style>
 </head>
 <body>
@@ -1708,7 +1720,10 @@ function stats(){if(!SP.v)SP.v='me';if(SP.v=='me')statsMe();else statsLF()}
 function statsTabs(){return '<div class="seg" id="stv"><button data-sv2="me" class="'+(SP.v=='me'?'on':'')+'">Mis notas</button><button data-sv2="lf" class="'+(SP.v=='lf'?'on':'')+'">Last.fm</button></div>'}
 function statsTabsBind(){[].forEach.call($('sh').querySelectorAll('[data-sv2]'),function(b){b.onclick=function(){SP.v=b.dataset.sv2;stats()}})}
 /* Datos del resumen "Mis notas" (se usan en pantalla y en la imagen) */
-function meData(){var ks=Object.keys(S.a),D={ks:ks,done:0,rated:[],revs:[],favs:[],plays:[],sum:0,trN:0,tfN:0,dist:[0,0,0,0,0],tracks:[],tfs:[],gen:{}};
+function weekR(){var d=new Date(),off=(d.getDay()+6)%7,m=new Date(d.getFullYear(),d.getMonth(),d.getDate()-off),e=new Date(m.getFullYear(),m.getMonth(),m.getDate()+6);return {a:dkey(m.getTime()),b:dkey(e.getTime()),m:m,e:e}}
+function weekKeys(){var W=weekR();return Object.keys(S.a).filter(function(k){var a=S.a[k];if(!a||a.tmp||!a.done)return false;var ds=[];if(a.t>1e11)ds.push(dkey(a.t));(a.ld||[]).forEach(function(x){ds.push(x)});return ds.some(function(x){return x>=W.a&&x<=W.b})})}
+function weekTxt(){var W=weekR(),f=function(x){return x.toLocaleDateString('es',{day:'numeric',month:'short'})};return 'Semana del '+f(W.m)+' al '+f(W.e)}
+function meData(){var ks=weekKeys(),D={ks:ks,done:0,rated:[],revs:[],favs:[],plays:[],sum:0,trN:0,tfN:0,dist:[0,0,0,0,0],tracks:[],tfs:[],gen:{}};
 ks.forEach(function(k){var a=S.a[k];if(a.done)D.done++;if(a.rate){D.rated.push(k);D.sum+=a.rate;D.dist[Math.min(5,Math.max(1,Math.round(a.rate)))-1]++}
 if((a.note||'').trim())D.revs.push(k);if(a.fav)D.favs.push(k);var tr=a.tr||{},tf=a.tf||{};D.trN+=Object.keys(tr).length;D.tfN+=Object.keys(tf).length;
 var mt=M[k]&&M[k].t;Object.keys(tr).forEach(function(i){if(mt&&mt[i])D.tracks.push({n:mt[i][0],k:k,r:tr[i],f:!!tf[i]})});
@@ -1727,14 +1742,14 @@ function hrt(){return '<span class="hrt">'+ICHT+'</span>'}
 function trRow(t,i,mode){var a=S.a[t.k];return '<div class="li" data-k="'+esc(t.k)+'"><b>'+(i+1)+'</b><div class="in"><div class="t">'+esc(t.n)+'</div><div class="a">'+esc(a.ar)+' · '+esc(a.al)+'</div></div><div>'+(mode=='f'?hrt():(t.r?'★'+fr(t.r):''))+'</div></div>'}
 function rowAl(k,mode){var a=S.a[k];return '<div class="li" data-k="'+esc(k)+'">'+cv(a,'sm',k)+'<div class="in"><div class="t">'+esc(a.al)+'</div><div class="a">'+esc(a.ar)+'</div></div><div>'+(mode=='f'?hrt():(a.rate?'★'+fr(a.rate):''))+'</div></div>'}
 var any=rated.length||D.revs.length||D.trN||D.tfN||D.favs.length;
-var h=bhd('Resumen')+statsTabs();
+var h=bhd('Resumen')+statsTabs()+'<div class="h" style="margin-top:10px">'+weekTxt()+' · se reinicia cada lunes</div>';
 var canSh=D.top.length||D.plays.length||D.favs.length||D.tt.length||D.fv.length;
 function sb(id){return '<div class="btns"><button type="button" data-shs="'+id+'">Compartir esta sección</button></div>'}
 if(canSh)h+='<button class="p" id="mshr" style="width:100%;margin-top:12px">Compartir imagen del resumen</button>';
-h+='<div id="st" style="margin-top:14px">'+libInfo(ks.length,D.done,D.sum,rated.length)+'</div>';
+h+='<div id="st" style="margin-top:14px"><div class="sinfo">'+card(D.done,'Escuchados')+card(rated.length,'Puntuados')+card(D.favs.length,'Favoritos')+'</div></div>';
 h+='<div id="fos">';
 h+=fold('gen','▤','Resumen general',null,'<div class="sg">'+card(D.done,'Escuchados')+card(rated.length,'Puntuados')+card(rated.length?D.avg.toFixed(1):'–','Nota media')+card(D.revs.length,'Reseñas')+card(D.trN,'Canciones puntuadas')+card(D.tfN,'Canciones favoritas')+'</div>');
-if(!any){h+='<div class="empty">Aún no has puntuado ni reseñado nada.<br>Abre un álbum y toca las estrellas o escribe tu reseña.</div>'}
+if(!any){h+='<div class="empty">Esta semana aún no has escuchado nada.<br>Marca álbumes como escuchados y aparecerán aquí hasta el domingo.</div>'}
 else{
 var LS={};
 function lst(id,n,fn){var c=Math.min(n,5);LS[id]={n:n,fn:fn,c:c};var r='';for(var i=0;i<c;i++)r+=fn(i);return '<div class="vl" data-vl="'+id+'">'+r+'</div>'+(n>c?'<button type="button" class="more vmb" data-vm="'+id+'">Ver más</button>':'')}
@@ -1808,7 +1823,7 @@ meBg(x,W2,H,th);x.textAlign='left';
 var SC=meSecs(D).filter(function(s){return RS.s[s.id]&&s.l.length});SC.forEach(function(s){s.l=meChosen(s)});
 /* Nombre de la app arriba (más abajo que antes) y título de la sección más discreto */
 x.fillStyle=th.x;x.font='bold 96px '+F;try{x.letterSpacing='3px'}catch(e){}x.fillText('Digz',P,200);try{x.letterSpacing='0px'}catch(e){}
-var tt=SC.length==1?SC[0].n:'Mi resumen';
+var tt=SC.length==1?SC[0].n:'Mi semana';
 function mpill(X,Y,t,fs){x.font='bold '+fs+'px '+F;var w=x.measureText(t).width+fs*1.9,h=fs*2;x.save();x.globalAlpha=.2;x.fillStyle=th.a;rr(x,X,Y,w,h,h/2);x.fill();x.globalAlpha=.6;x.lineWidth=2;x.strokeStyle=th.a;rr(x,X,Y,w,h,h/2);x.stroke();x.restore();x.fillStyle=th.x;x.textAlign='left';x.fillText(t,X+fs*.95,Y+h/2+fs*.35);return w}
 if(MT=='pill'){mpill(P,252,tt,30)}
 else if(MT=='bar'){x.fillStyle=th.x;x.font='bold 44px '+F;x.fillText(tt,P,290)}
@@ -3563,7 +3578,7 @@ function plMap(){var m={};Object.keys(S.a).forEach(function(k){var d=plDate(S.a[
 function plSet(k,d,t){var a=S.a[k];if(!a)return;if(d){a.plan=d;if(t)a.plt=t}else{delete a.plan;delete a.plt}save();render();try{pushSync()}catch(e){}if(document.body.classList.contains('calo'))calRender()}
 function plFmt(d){return new Date(dts(d)).toLocaleDateString('es',{day:'numeric',month:'long'})}
 function plDlg(k){var a=S.a[k];if(!a)return;var t=dkey(Date.now()),cu=plDate(a),w=document.createElement('div');w.id='cpk';w.className='cedw dzmod';
-w.innerHTML='<div class="cpp"><div class="cph"><span style="text-transform:none;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Programar · '+esc(a.al)+'</span><button data-x="1" aria-label="Cerrar">'+ICX+'</button></div><input id="cdi" type="date" min="'+t+'" value="'+(cu||dkey(Date.now()+864e5))+'"><div style="display:flex;align-items:center;gap:10px;margin:10px 2px 0;font-size:14px;color:var(--mut)"><span style="flex:1">Avisarme a las</span><input id="cdh" type="time" value="'+(a.plt||'09:00')+'" style="width:auto"></div><button class="cgo" data-go="1">'+(cu?'Cambiar día':'Programar')+'</button>'+(cu?'<button class="cgo" data-rm="1" style="background:var(--gl);color:var(--tx)">Quitar programación</button>':'')+'</div>';
+w.innerHTML='<div class="cpp"><div class="cph"><span style="text-transform:none;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Programar · '+esc(a.al)+'</span></div><input id="cdi" type="date" min="'+t+'" value="'+(cu||dkey(Date.now()+864e5))+'"><div style="display:flex;align-items:center;gap:10px;margin:10px 2px 0;font-size:14px;color:var(--mut)"><span style="flex:1">Avisarme a las</span><input id="cdh" type="time" value="'+(a.plt||'09:00')+'" style="width:auto"></div><button class="cgo" data-go="1">'+(cu?'Cambiar día':'Programar')+'</button>'+(cu?'<button class="cgo" data-rm="1" style="background:var(--gl);color:var(--tx)">Quitar programación</button>':'')+'</div>';
 document.body.appendChild(w);w.onclick=function(e){if(e.target===w||e.target.closest('[data-x]')){w.remove();return}if(e.target.closest('[data-rm]')){w.remove();plSet(k,'');toast('Programación quitada');if(cur==k)sheet(k);return}
 if(e.target.closest('[data-go]')){var v=w.querySelector('#cdi').value;if(!v||v<t){toast('Elige hoy o un día futuro');return}var hh=(w.querySelector('#cdh').value||'09:00');w.remove();plSet(k,v,hh);pushHint();toast('Programado para el '+plFmt(v));if(cur==k)sheet(k)}}}
 function plBanner(){var b=$('plb');if(!b){var l=$('list');if(!l||!l.parentNode)return;b=document.createElement('div');b.id='plb';l.parentNode.insertBefore(b,l);b.onclick=function(){var d=b.dataset.d;var t=new Date(dts(d));CAL.y=t.getFullYear();CAL.m=t.getMonth();CAL.sel=d;openCal()}}
@@ -3573,7 +3588,7 @@ b.dataset.d=d0<t&&!hoy?d0:t;b.innerHTML=PLSVG+'<span>'+(ks.length==1?(S.a[ks[0]]
 
 /* ---------- Avisos push de álbumes programados (servidor propio en Cloudflare Workers) ----------
    La app envía al servidor tu lista de programados; el servidor manda el aviso a la hora elegida aunque la app esté cerrada. */
-var PUSH_PUB='BCIqESZpOCfiQjEhw9vdp4dQ8VipGJ1GzFQHqpADRfAAkypnDrOyCgofJcU_CKSh84cC9LbCM3xjdSRgzyVuWCY';
+var PUSH_PUB='BMB-VFG_Goci-E6st2Syakj-OxNS1rC0b-25kmkZiQISIfs8Cs5pwu5Mg_BCgykHlL-I3UyAFwQqUrnvxnXaWN4';
 function pushUrl(){try{return (localStorage.getItem('digz-pushurl')||'').replace(/\/+$/,'')}catch(e){return ''}}
 function pushOn(){try{return localStorage.getItem('digz-push')=='1'&&!!pushUrl()&&'Notification' in window&&Notification.permission=='granted'}catch(e){return false}}
 function pushOk(){return 'serviceWorker' in navigator&&'PushManager' in window&&'Notification' in window}
@@ -3594,7 +3609,7 @@ await pushSyncNow()}
 async function pushDisable(){try{var u=pushUrl(),reg=await navigator.serviceWorker.ready,sub=await reg.pushManager.getSubscription();if(sub){try{await fetch(u+'/unsub',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({endpoint:sub.endpoint})})}catch(e){}await sub.unsubscribe()}}catch(e){}try{localStorage.setItem('digz-push','0')}catch(e){}}
 function pushHint(){try{if(pushOn()||localStorage.getItem('digz-pushhint'))return;localStorage.setItem('digz-pushhint','1');setTimeout(function(){toast('Para recibir aviso ese día, activa los avisos en Ajustes')},2600)}catch(e){}}
 function pushDlg(){var w=document.createElement('div');w.id='cpk';w.className='cedw dzmod';var on=pushOn();
-w.innerHTML='<div class="cpp"><div class="cph"><span style="text-transform:none">Avisos de álbumes programados</span><button data-x="1" aria-label="Cerrar">'+ICX+'</button></div><div style="padding:4px 4px 10px;font-size:14px;color:var(--mut);line-height:1.45">'+(on?'Activados. Te avisaremos el día y la hora que elijas, aunque la app esté cerrada.':'Necesitas tu servidor de avisos (Cloudflare). Pega aquí su dirección y toca Activar.')+'</div><input id="pnu" type="url" placeholder="https://digz-push.TU-USUARIO.workers.dev" value="'+esc(pushUrl())+'" autocomplete="off" style="width:100%"><div id="pne" style="color:#e5484d;font-size:13px;margin:6px 2px 0;min-height:4px"></div>'+(on?'<button class="cgo" data-t="test">Enviar aviso de prueba</button><button class="cgo" data-t="off" style="background:var(--gl);color:var(--tx)">Desactivar</button>':'<button class="cgo" data-t="on">Activar avisos</button>')+'</div>';
+w.innerHTML='<div class="cpp"><div class="cph"><span style="text-transform:none">Avisos de álbumes programados</span></div><div style="padding:4px 4px 10px;font-size:14px;color:var(--mut);line-height:1.45">'+(on?'Activados. Te avisaremos el día y la hora que elijas, aunque la app esté cerrada.':'Necesitas tu servidor de avisos (Cloudflare). Pega aquí su dirección y toca Activar.')+'</div><input id="pnu" type="url" placeholder="https://digz-push.TU-USUARIO.workers.dev" value="'+esc(pushUrl())+'" autocomplete="off" style="width:100%"><div id="pne" style="color:#e5484d;font-size:13px;margin:6px 2px 0;min-height:4px"></div>'+(on?'<button class="cgo" data-t="test">Enviar aviso de prueba</button><button class="cgo" data-t="off" style="background:var(--gl);color:var(--tx)">Desactivar</button>':'<button class="cgo" data-t="on">Activar avisos</button>')+'</div>';
 document.body.appendChild(w);var er=w.querySelector('#pne');
 w.onclick=async function(e){if(e.target===w||e.target.closest('[data-x]')){w.remove();return}var b=e.target.closest('[data-t]');if(!b)return;var t=b.dataset.t;er.textContent='';b.disabled=true;
 try{if(t=='on'){await pushEnable(w.querySelector('#pnu').value);w.remove();toast('Avisos activados');var sh=$('sh');if(sh&&typeof settings=='function')try{settings()}catch(x){}}
@@ -3636,7 +3651,7 @@ function openCal(){var d=calEnsure();if(!CAL.y){var t=new Date();CAL.y=t.getFull
 d.style.display='';document.body.classList.add('calo');[].forEach.call(document.querySelectorAll('#nav button'),function(b){b.classList.toggle('on',b.id=='cal')});calRender()}
 function closeCal(){var d=document.getElementById('calv');if(d&&document.body.classList.contains('calo')){d.style.display='none';document.body.classList.remove('calo');var b=$('cal');if(b)b.classList.remove('on');var nl=$('nl'),fv=$('fv');if(nl)nl.classList.toggle('on',ui.f!='fav');if(fv)fv.classList.toggle('on',ui.f=='fav')}}
 function calPick(date,plan){var w=document.createElement('div');w.id='cpk';w.className='cedw dzmod';
-w.innerHTML='<div class="cpp"><div class="cph"><span>'+esc(new Date(dts(date)).toLocaleDateString('es',{day:'numeric',month:'long'}))+'</span><button data-x="1" aria-label="Cerrar">'+ICX+'</button></div><input id="cpq" type="search" placeholder="Buscar en tu biblioteca y en todo el catálogo" autocomplete="off"><div class="cpl"></div></div>';
+w.innerHTML='<div class="cpp"><div class="cph"><span>'+esc(new Date(dts(date)).toLocaleDateString('es',{day:'numeric',month:'long'}))+'</span></div><input id="cpq" type="search" placeholder="Buscar en biblioteca o global" autocomplete="off"><div class="cpl"></div></div>';
 document.body.appendChild(w);var inp=w.querySelector('#cpq'),lst=w.querySelector('.cpl'),GL=[],gt=0,gm=0,gb=0;
 function rowL(k){var a=S.a[k];return '<div class="crow"><button class="tp" data-k="'+esc(k)+'">'+cv(a,'sm',k,0,1)+'<span class="ct"><b>'+esc(a.al)+'</b><span>'+esc(a.ar)+(a.done?' · Escuchado':'')+'</span></span></button></div>'}
 function rowG(x,i){var ar=acs(x)[0]||'Desconocido',y=(x['first-release-date']||'').slice(0,4),h=hue(x.title+ar);return '<div class="crow"><button class="tp" data-g="'+i+'"><div class="cv sm" style="background:linear-gradient(145deg,hsl('+h+',50%,42%),hsl('+((h+50)%360)+',55%,20%))"><span>'+esc(ini(x.title))+'</span>'+(x._cu?'<img alt="" src="'+esc(x._cu)+'" onerror="this.remove()">':(NC[x.id]?'':'<img loading="lazy" alt="" data-m="'+x.id+'" src="'+covurl(x.id,250)+'" onerror="ncv(this)">'))+'</div><span class="ct"><b>'+esc(x.title)+'</b><span>'+esc(ar)+(y?' · '+y:'')+tyl(x)+'</span></span></button></div>'}
@@ -3653,13 +3668,20 @@ var g=e.target.closest('[data-g]');if(g){var x=GL[g.dataset.g];if(!x)return;var 
 if(!S.a[k]){add(ar,ttl(x),x._did||'',x.id);if(!S.a[k])return;S.a[k].ty=tyOf(x);S.a[k].cu=x._cu||'';if(x._iid)S.a[k].iid=String(x._iid);if(x.id)M[k]=pickM(x)}
 delete S.a[k].tmp;save();try{saveM()}catch(e2){}pick(k);return}
 var b=e.target.closest('[data-k]');if(b)pick(b.dataset.k)}}
+/* v214: sin parpadeo al repintar: las portadas ya vistas se muestran al instante (sin fundido desde transparente) */
+(function(){function fix(i){try{if(i.classList.contains('ld'))return;var u=i.getAttribute('src');if((i.complete&&i.naturalWidth>0)||(u&&(LDS[u]||LDU[u])))i.classList.add('ld')}catch(e){}}
+new MutationObserver(function(ms){for(var a=0;a<ms.length;a++){var ad=ms[a].addedNodes;for(var b=0;b<ad.length;b++){var n=ad[b];if(n.nodeType!=1)continue;if(n.tagName=='IMG')fix(n);else if(n.querySelectorAll){var l=n.querySelectorAll('.cv img,.ap img,.hbg img');for(var c=0;c<l.length;c++)fix(l[c])}}}}).observe(document.body,{childList:true,subtree:true})})();
+/* v213: las hojas con teclado se ajustan al espacio visible (el teclado ya no tapa botones) */
+function kbFit(w){var vv=window.visualViewport;if(!vv)return;function f(){var b=Math.max(0,innerHeight-vv.height-vv.offsetTop);w.style.paddingBottom='calc('+b+'px + 12px)'}
+vv.addEventListener('resize',f);vv.addEventListener('scroll',f);f();var ob=new MutationObserver(function(){if(!document.body.contains(w)){vv.removeEventListener('resize',f);vv.removeEventListener('scroll',f);ob.disconnect()}});ob.observe(document.body,{childList:true})}
+(function(){var ap=document.body.appendChild;document.body.appendChild=function(n){var r=ap.call(this,n);try{if(n&&n.id=='cpk'&&n.classList.contains('cedw'))kbFit(n)}catch(e){}return r}})();
 /* ---------- Nota exacta: cualquier valor, con decimales ---------- */
 function rxDlg(k){var a=S.a[k];if(!a)return;var w=document.createElement('div'),sc=5;w.id='cpk';w.className='cedw dzmod';
-w.innerHTML='<div class="cpp"><div class="cph"><span style="text-transform:none">Nota exacta</span><button data-x="1" aria-label="Cerrar">'+ICX+'</button></div><div class="rxs"><button data-s="5" class="on">de 5</button><button data-s="10">de 10</button><button data-s="100">de 100</button></div><input id="rxi" type="text" inputmode="decimal" placeholder="Ej. 3,7" autocomplete="off" value="'+(a.rate?fr(a.rate):'')+'"><div class="cnote" id="rxh">Escribe la nota que quieras, con decimales (de 0 a 5).</div><button class="cgo" data-go="1">Guardar</button>'+(a.rate?'<button class="cgo" data-rm="1" style="background:var(--gl);color:var(--tx)">Quitar nota</button>':'')+'</div>';
+w.innerHTML='<div class="cpp"><div class="cph"><span style="text-transform:none">Nota exacta</span></div><div class="rxs"><button data-s="5" class="on">de 5</button><button data-s="10">de 10</button><button data-s="100">de 100</button></div><input id="rxi" type="text" inputmode="decimal" placeholder="Ej. 3,7" autocomplete="off" value="'+(a.rate?fr(a.rate):'')+'"><button class="cgo" data-go="1">Guardar</button>'+(a.rate?'<button class="cgo" data-rm="1" style="background:var(--gl);color:var(--tx)">Quitar nota</button>':'')+'</div>';
 document.body.appendChild(w);var inp=w.querySelector('#rxi');setTimeout(function(){try{inp.focus();inp.select()}catch(e){}},60);
 function apply(r){var pr=a.rate;a.rate=r;if(a.rate&&!a.done){a.done=true;a.t=Date.now()}else if(!a.rate&&pr&&a.done){a.done=false;a.fav=false;a.t=0}save();render();if(cur==k)sheet(k)}
 w.onclick=function(e){if(e.target===w||e.target.closest('[data-x]')){w.remove();return}
-var sb=e.target.closest('[data-s]');if(sb){var ns=+sb.dataset.s,v=parseFloat(inp.value.replace(',','.'));if(v>0)inp.value=String(Math.round(v*ns/sc*100)/100).replace('.',',');sc=ns;[].forEach.call(w.querySelectorAll('.rxs button'),function(x){x.classList.toggle('on',x===sb)});inp.placeholder='Ej. '+(sc==5?'3,7':sc==10?'7,4':'74');w.querySelector('#rxh').textContent='Escribe la nota que quieras, con decimales (de 0 a '+sc+').';return}
+var sb=e.target.closest('[data-s]');if(sb){var ns=+sb.dataset.s,v=parseFloat(inp.value.replace(',','.'));if(v>0)inp.value=String(Math.round(v*ns/sc*100)/100).replace('.',',');sc=ns;[].forEach.call(w.querySelectorAll('.rxs button'),function(x){x.classList.toggle('on',x===sb)});inp.placeholder='Ej. '+(sc==5?'3,7':sc==10?'7,4':'74');inp.focus();return}
 if(e.target.closest('[data-rm]')){w.remove();apply(0);toast('Nota quitada');return}
 if(e.target.closest('[data-go]')){var v2=parseFloat(inp.value.replace(',','.'));if(!(v2>0)||v2>sc){toast('Pon una nota entre 0 y '+sc);return}var r=Math.max(.01,Math.min(5,Math.round(v2/sc*5*100)/100));w.remove();apply(r);toast('Nota guardada: '+fr(r)+' / 5')}}}
 $('sh').addEventListener('contextmenu',function(e){if(e.target.closest&&e.target.closest('.sr'))e.preventDefault()});
@@ -3667,11 +3689,11 @@ function rxHint(){try{if(localStorage.getItem('digz-rxh'))return;localStorage.se
 
 /* ---------- Menú ⋯ de cada álbum del calendario ---------- */
 function calMenu(k,date){var a=S.a[k];if(!a)return;var w=document.createElement('div');w.id='cpk';w.className='cedw dzmod';
-w.innerHTML='<div class="cpp"><div class="cph"><span style="text-transform:none;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(a.al)+'</span><button data-x="1" aria-label="Cerrar">'+ICX+'</button></div><button class="cmb" data-m="add"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4M16 3v4M4 10h16M12 13v4M10 15h4"/></svg>Añadir a otro día</button><button class="cmb dg" data-m="rm"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 7h14M10 7V5h4v2M7 7l1 12h8l1-12"/></svg>Quitar de este día</button></div>';
+w.innerHTML='<div class="cpp"><div class="cph"><span style="text-transform:none;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(a.al)+'</span></div><button class="cmb" data-m="add"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4M16 3v4M4 10h16M12 13v4M10 15h4"/></svg>Añadir a otro día</button><button class="cmb dg" data-m="rm"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 7h14M10 7V5h4v2M7 7l1 12h8l1-12"/></svg>Quitar de este día</button></div>';
 document.body.appendChild(w);
 w.onclick=function(e){if(e.target===w||e.target.closest('[data-x]')){w.remove();return}var b=e.target.closest('[data-m]');if(!b)return;
 if(b.dataset.m=='rm'){w.remove();clDel(k,date);return}
-var pp=w.querySelector('.cpp'),t=dkey(Date.now());pp.innerHTML='<div class="cph"><span style="text-transform:none">¿Qué día lo escuchaste?</span><button data-x="1" aria-label="Cerrar">'+ICX+'</button></div><input id="cdi" type="date" max="'+t+'" value="'+t+'"><button class="cgo" data-go="1">Añadir</button>';
+var pp=w.querySelector('.cpp'),t=dkey(Date.now());pp.innerHTML='<div class="cph"><span style="text-transform:none">¿Qué día lo escuchaste?</span></div><input id="cdi" type="date" max="'+t+'" value="'+t+'"><button class="cgo" data-go="1">Añadir</button>';
 w.onclick=function(e2){if(e2.target===w||e2.target.closest('[data-x]')){w.remove();return}if(e2.target.closest('[data-go]')){var v=pp.querySelector('#cdi').value;if(!v){toast('Elige un día');return}w.remove();clAdd(k,v)}}}}
 
 /* ---------- Reconocer el mismo álbum aunque cambie el formato del nombre ---------- */
