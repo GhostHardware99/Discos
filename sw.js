@@ -1,5 +1,5 @@
 /* Service worker — cambia VERSION cada vez que subas un index.html nuevo */
-var VERSION = 'v205-2026-10-26';
+var VERSION = 'v210-2026-10-27';
 var CACHE = 'app-' + VERSION;
 /* Portadas: caché propia que NO se borra al actualizar la app */
 var IMG = 'covers-v1', IMGMAX = 5000, BAD = {};
@@ -165,4 +165,37 @@ self.addEventListener('fetch', function (e) {
       return hit || net;
     })
   );
+});
+
+/* ---------- Avisos push de álbumes programados ----------
+   El servidor manda un push SIN contenido; aquí se pide al servidor qué álbumes tocan hoy y se muestra el aviso. */
+function pushSha(t) {
+  return crypto.subtle.digest('SHA-256', new TextEncoder().encode(t)).then(function (b) {
+    return Array.prototype.map.call(new Uint8Array(b), function (x) { return ('0' + x.toString(16)).slice(-2); }).join('').slice(0, 32);
+  });
+}
+self.addEventListener('push', function (e) {
+  e.waitUntil((async function () {
+    var items = [];
+    try {
+      var c = await caches.open('digz-cfg'), r = await c.match('push-url'), url = r ? await r.text() : '';
+      var sub = await self.registration.pushManager.getSubscription();
+      if (url && sub) {
+        var id = await pushSha(sub.endpoint), j = await (await fetch(url + '/last?id=' + id)).json();
+        items = (j && j.items) || [];
+      }
+    } catch (x) {}
+    var title = 'Hoy toca escuchar', body;
+    if (!items.length) body = 'Tienes un álbum programado para hoy';
+    else if (items.length == 1) body = items[0].al + (items[0].ar ? ' · ' + items[0].ar : '');
+    else { title = 'Hoy tienes ' + items.length + ' álbumes programados'; body = items.slice(0, 3).map(function (i) { return i.al; }).join(' · ') + (items.length > 3 ? '…' : ''); }
+    await self.registration.showNotification(title, { body: body, icon: 'icon-192.png', badge: 'icon-192.png', tag: 'digz-plan', renotify: true, data: { d: items[0] && items[0].d } });
+  })());
+});
+self.addEventListener('notificationclick', function (e) {
+  e.notification.close();
+  e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (cl) {
+    for (var i = 0; i < cl.length; i++) { if ('focus' in cl[i]) return cl[i].focus(); }
+    return self.clients.openWindow('./');
+  }));
 });
