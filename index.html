@@ -884,6 +884,21 @@ body.calo #hd,body.calo #list{display:none}
 #cpk .cmb.dg{color:#d6336c}
 #cpk input[type=date]{min-height:48px}
 #cpk .cgo{width:100%;margin:10px 0 8px;padding:14px;border-radius:16px;border:0;background:rgb(var(--acr));color:var(--onac);font:inherit;font-size:16px;font-weight:700}
+
+/* selector de hora propio (reemplaza el reloj nativo) */
+#cpk .tpk{margin:12px 2px 0}#cpk .tpl{font-size:14px;color:var(--mut);margin:0 2px 8px}
+#cpk .tpr{display:flex;align-items:center;justify-content:center;gap:6px}
+#cpk .tps{display:flex;flex-direction:column;align-items:center;gap:4px}
+#cpk .tps button{width:46px;height:30px;border-radius:12px;border:1px solid rgba(var(--acr),.3);background:rgba(var(--acr),.12);color:var(--tx);font-size:0;display:flex;align-items:center;justify-content:center;padding:0}
+#cpk .tps button svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+#cpk .tps b{min-width:62px;text-align:center;font-size:34px;font-weight:800;line-height:1.15;padding:4px 0;border-radius:14px;background:rgba(var(--acr),.1);font-variant-numeric:tabular-nums}
+#cpk .tpc{font-size:30px;font-weight:800;padding-bottom:2px}
+#cpk .tpa{display:flex;flex-direction:column;gap:6px;margin-left:8px}
+#cpk .tpa button{padding:8px 12px;border-radius:12px;border:1px solid rgba(var(--acr),.3);background:transparent;color:var(--tx);font:inherit;font-size:14px;font-weight:700}
+#cpk .tpa button.on{background:rgb(var(--acr));color:var(--onac);border-color:transparent}
+#cpk .tpp{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:12px}
+#cpk .tpp button{padding:7px 13px;border-radius:99px;border:1px solid rgba(var(--acr),.3);background:rgba(var(--acr),.08);color:var(--tx);font:inherit;font-size:13px;font-weight:600}
+#cpk .tpp button.on{background:rgba(var(--acr),.28);border-color:rgb(var(--acr))}
 </style>
 <script>
 /* Tema: modo claro/oscuro y color. Se aplica antes de pintar para evitar parpadeos */
@@ -3593,9 +3608,14 @@ function plDate(a){if(!a||a.tmp||!a.plan)return '';if(a.done&&a.t>1e11&&a.t>=dts
 function plMap(){var m={};Object.keys(S.a).forEach(function(k){var d=plDate(S.a[k]);if(d)(m[d]=m[d]||[]).push(k)});return m}
 function plSet(k,d,t){var a=S.a[k];if(!a)return;if(d){a.plan=d;if(t)a.plt=t}else{delete a.plan;delete a.plt}save();render();try{pushSync()}catch(e){}if(document.body.classList.contains('calo'))calRender()}
 function plFmt(d){return new Date(dts(d)).toLocaleDateString('es',{day:'numeric',month:'long'})}
+var TPUP='<svg viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg>',TPDN='<svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>';
+function tpInit(w){var inp=w.querySelector('#cdh'),H=w.querySelector('#tph'),M=w.querySelector('#tpm');if(!inp)return;var v=(inp.value||'09:00').split(':'),h=+v[0]||0,m=+v[1]||0;
+function paint(){inp.value=cp2(h)+':'+cp2(m);H.textContent=(h%12)||12;M.textContent=cp2(m);var pm=h>=12;[].forEach.call(w.querySelectorAll('[data-tp=am],[data-tp=pm]'),function(b){b.classList.toggle('on',(b.dataset.tp=='pm')==pm)});[].forEach.call(w.querySelectorAll('[data-tpp]'),function(b){b.classList.toggle('on',b.dataset.tpp==inp.value)})}
+w.querySelector('.tpk').addEventListener('click',function(e){var b=e.target.closest('[data-tp],[data-tpp]');if(!b)return;e.stopPropagation();var a=b.dataset.tp,q=b.dataset.tpp;
+if(q){var z=q.split(':');h=+z[0];m=+z[1]}else if(a=='h+')h=(h+1)%24;else if(a=='h-')h=(h+23)%24;else if(a=='m+'){m+=5;if(m>=60){m=0;h=(h+1)%24}}else if(a=='m-'){m-=5;if(m<0){m=55;h=(h+23)%24}}else if(a=='am'&&h>=12)h-=12;else if(a=='pm'&&h<12)h+=12;paint()});paint()}
 function plDlg(k,dt){var a=S.a[k];if(!a)return;var t=dkey(Date.now()),cu=plDate(a),w=document.createElement('div');w.id='cpk';w.className='cedw dzmod';
-w.innerHTML='<div class="cpp"><div class="cph"><span style="text-transform:none;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Programar · '+esc(a.al)+'</span></div><input id="cdi" type="date" min="'+t+'" value="'+(dt||cu||dkey(Date.now()+864e5))+'"><div style="display:flex;align-items:center;gap:10px;margin:10px 2px 0;font-size:14px;color:var(--mut)"><span style="flex:1">Avisarme a las</span><input id="cdh" type="time" value="'+(a.plt||'09:00')+'" style="width:auto"></div><button class="cgo" data-go="1">'+(cu?'Cambiar día':'Programar')+'</button>'+(cu?'<button class="cgo" data-rm="1" style="background:var(--gl);color:var(--tx)">Quitar programación</button>':'')+'</div>';
-document.body.appendChild(w);w.onclick=function(e){if(e.target===w||e.target.closest('[data-x]')){w.remove();return}if(e.target.closest('[data-rm]')){w.remove();plSet(k,'');toast('Programación quitada');if(cur==k)sheet(k);return}
+w.innerHTML='<div class="cpp"><div class="cph"><span style="text-transform:none;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Programar · '+esc(a.al)+'</span></div><input id="cdi" type="date" min="'+t+'" value="'+(dt||cu||dkey(Date.now()+864e5))+'"><div class="tpk"><div class="tpl">Avisarme a las</div><input id="cdh" type="hidden" value="'+(a.plt||'09:00')+'"><div class="tpr"><div class="tps"><button data-tp="h+" aria-label="Más horas">'+TPUP+'</button><b id="tph">9</b><button data-tp="h-" aria-label="Menos horas">'+TPDN+'</button></div><span class="tpc">:</span><div class="tps"><button data-tp="m+" aria-label="Más minutos">'+TPUP+'</button><b id="tpm">00</b><button data-tp="m-" aria-label="Menos minutos">'+TPDN+'</button></div><div class="tpa"><button data-tp="am">a.m.</button><button data-tp="pm">p.m.</button></div></div><div class="tpp"><button data-tpp="08:00">8:00</button><button data-tpp="09:00">9:00</button><button data-tpp="12:00">12:00</button><button data-tpp="18:00">6:00 p.m.</button><button data-tpp="21:00">9:00 p.m.</button></div></div><button class="cgo" data-go="1">'+(cu?'Cambiar día':'Programar')+'</button>'+(cu?'<button class="cgo" data-rm="1" style="background:var(--gl);color:var(--tx)">Quitar programación</button>':'')+'</div>';
+document.body.appendChild(w);tpInit(w);w.onclick=function(e){if(e.target===w||e.target.closest('[data-x]')){w.remove();return}if(e.target.closest('[data-rm]')){w.remove();plSet(k,'');toast('Programación quitada');if(cur==k)sheet(k);return}
 if(e.target.closest('[data-go]')){var v=w.querySelector('#cdi').value;if(!v||v<t){toast('Elige hoy o un día futuro');return}var hh=(w.querySelector('#cdh').value||'09:00');w.remove();plSet(k,v,hh);pushAuto();toast('Programado para el '+plFmt(v));if(cur==k)sheet(k)}}}
 function plBanner(){var b0=$('plb');if(b0){b0.remove()}return;var b=$('plb');if(!b){var l=$('list');if(!l||!l.parentNode)return;b=document.createElement('div');b.id='plb';l.parentNode.insertBefore(b,l);b.onclick=function(){var d=b.dataset.d;var t=new Date(dts(d));CAL.y=t.getFullYear();CAL.m=t.getMonth();CAL.sel=d;openCal()}}
 var t=dkey(Date.now()),ks=[],d0='';Object.keys(S.a).forEach(function(k){var d=plDate(S.a[k]);if(d&&d<=t){ks.push(k);if(!d0||d<d0)d0=d}});
@@ -3606,19 +3626,19 @@ b.dataset.d=d0<t&&!hoy?d0:t;b.innerHTML=PLSVG+'<span>'+(ks.length==1?(S.a[ks[0]]
    La app envía al servidor tu lista de programados; el servidor manda el aviso a la hora elegida aunque la app esté cerrada. */
 var PUSH_PUB='BMB-VFG_Goci-E6st2Syakj-OxNS1rC0b-25kmkZiQISIfs8Cs5pwu5Mg_BCgykHlL-I3UyAFwQqUrnvxnXaWN4';
 var DEF_PUSH='https://digz-push.blancocory35.workers.dev';
-function pushUrl(){try{return (localStorage.getItem('digz-pushurl')||DEF_PUSH||'').replace(/\/+$/,'')}catch(e){return DEF_PUSH||''}}
+function pushUrl(){return DEF_PUSH.replace(/\/+$/,'')}
 function pushOn(){try{return localStorage.getItem('digz-push')!='0'&&!!pushUrl()&&'Notification' in window&&Notification.permission=='granted'}catch(e){return false}}
 function pushOk(){return 'serviceWorker' in navigator&&'PushManager' in window&&'Notification' in window}
 function b64u8(b){b=(b+'===').slice(0,b.length+(4-b.length%4)%4).replace(/-/g,'+').replace(/_/g,'/');var r=atob(b),u=new Uint8Array(r.length);for(var i=0;i<r.length;i++)u[i]=r.charCodeAt(i);return u}
 async function pushSub(reg){var s=await reg.pushManager.getSubscription();try{if(s&&s.options&&s.options.applicationServerKey){var a=new Uint8Array(s.options.applicationServerKey),b=b64u8(PUSH_PUB),same=a.length==b.length;for(var i=0;same&&i<a.length;i++)if(a[i]!=b[i])same=false;if(!same){await s.unsubscribe();s=null}}}catch(e){}
 if(!s)s=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u8(PUSH_PUB)});return s}
-function pushAuto(){try{if(!pushOk()||localStorage.getItem('digz-push')=='0')return;if(Notification.permission=='granted'){pushSync(1);return}if(Notification.permission=='default'){pushEnable(pushUrl()).then(function(){toast('Avisos activados')},function(){})}}catch(e){}}
+function pushAuto(){try{if(!pushOk()||localStorage.getItem('digz-push')=='0')return;if(Notification.permission=='granted'){pushSync(1);return}if(Notification.permission=='default'){pushEnable().then(function(){toast('Avisos activados')},function(){})}}catch(e){}}
 var _psT=0;
 function pushSync(now){if(!pushOn())return;clearTimeout(_psT);_psT=setTimeout(pushSyncNow,now?0:1500)}
 async function pushSyncNow(){if(!pushOn())return;try{var reg=await navigator.serviceWorker.ready,sub=await pushSub(reg);if(!sub)return;try{var cc=await caches.open('digz-cfg');await cc.put('push-url',new Response(pushUrl()))}catch(e){}
 var pl=[];Object.keys(S.a).forEach(function(k){var a=S.a[k],d=plDate(a);if(d)pl.push({k:k,ar:a.ar,al:a.al,d:d,t:a.plt||'09:00'})});
 await fetch(pushUrl()+'/sync',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sub:sub.toJSON(),off:-new Date().getTimezoneOffset(),plans:pl})})}catch(e){}}
-async function pushEnable(url){url=(url||'').trim().replace(/\/+$/,'');if(!/^https:\/\//.test(url))throw new Error('Pon la dirección de tu servidor (empieza por https://)');
+async function pushEnable(){var url=pushUrl();
 if(!pushOk())throw new Error('Este navegador no permite avisos push. En iPhone hay que añadir la app a la pantalla de inicio.');
 var pm=await Notification.requestPermission();if(pm!='granted')throw new Error('Debes permitir las notificaciones');
 var reg=await navigator.serviceWorker.ready,sub=await pushSub(reg);
@@ -3628,10 +3648,10 @@ await pushSyncNow()}
 async function pushDisable(){try{var u=pushUrl(),reg=await navigator.serviceWorker.ready,sub=await reg.pushManager.getSubscription();if(sub){try{await fetch(u+'/unsub',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({endpoint:sub.endpoint})})}catch(e){}await sub.unsubscribe()}}catch(e){}try{localStorage.setItem('digz-push','0')}catch(e){}}
 function pushHint(){try{if(pushOn()||localStorage.getItem('digz-pushhint'))return;localStorage.setItem('digz-pushhint','1');setTimeout(function(){toast('Para recibir aviso ese día, activa los avisos en Ajustes')},2600)}catch(e){}}
 function pushDlg(){var w=document.createElement('div');w.id='cpk';w.className='cedw dzmod';var on=pushOn();
-w.innerHTML='<div class="cpp"><div class="cph"><span style="text-transform:none">Avisos de álbumes programados</span></div><div style="padding:4px 4px 10px;font-size:14px;color:var(--mut);line-height:1.45">'+(on?'Activados. Te avisaremos el día y la hora que elijas, aunque la app esté cerrada.':'Toca Activar y permite las notificaciones. Te avisaremos el día y la hora que elijas, aunque la app esté cerrada.')+'</div><input id="pnu" type="'+(DEF_PUSH?'hidden':'url')+'" placeholder="https://digz-push.TU-USUARIO.workers.dev" value="'+esc(pushUrl())+'" autocomplete="off" style="width:100%"><div id="pne" style="color:#e5484d;font-size:13px;margin:6px 2px 0;min-height:4px"></div>'+(on?'<button class="cgo" data-t="test">Enviar aviso de prueba</button><button class="cgo" data-t="off" style="background:var(--gl);color:var(--tx)">Desactivar</button>':'<button class="cgo" data-t="on">Activar avisos</button>')+'</div>';
+w.innerHTML='<div class="cpp"><div class="cph"><span style="text-transform:none">Avisos de álbumes programados</span></div><div style="padding:4px 4px 10px;font-size:14px;color:var(--mut);line-height:1.45">'+(on?'Activados. Te avisaremos el día y la hora que elijas, aunque la app esté cerrada.':'Toca Activar y permite las notificaciones. No necesitas configurar nada más: te avisaremos el día y la hora que elijas, aunque la app esté cerrada.')+'</div><div id="pne" style="color:#e5484d;font-size:13px;margin:6px 2px 0;min-height:4px"></div>'+(on?'<button class="cgo" data-t="test">Enviar aviso de prueba</button><button class="cgo" data-t="off" style="background:var(--gl);color:var(--tx)">Desactivar</button>':'<button class="cgo" data-t="on">Activar avisos</button>')+'</div>';
 document.body.appendChild(w);var er=w.querySelector('#pne');
 w.onclick=async function(e){if(e.target===w||e.target.closest('[data-x]')){w.remove();return}var b=e.target.closest('[data-t]');if(!b)return;var t=b.dataset.t;er.textContent='';b.disabled=true;
-try{if(t=='on'){await pushEnable(w.querySelector('#pnu').value);w.remove();toast('Avisos activados');var sh=$('sh');if(sh&&typeof settings=='function')try{settings()}catch(x){}}
+try{if(t=='on'){await pushEnable();w.remove();toast('Avisos activados');var sh=$('sh');if(sh&&typeof settings=='function')try{settings()}catch(x){}}
 else if(t=='off'){await pushDisable();w.remove();toast('Avisos desactivados')}
 else if(t=='test'){var reg=await navigator.serviceWorker.ready,sub=await reg.pushManager.getSubscription();if(!sub)throw new Error('No hay suscripción, vuelve a activar');await pushSyncNow();var r=await fetch(pushUrl()+'/test',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({endpoint:sub.endpoint})});if(!r.ok)throw new Error('El servidor respondió '+r.status);toast('Aviso de prueba enviado')}}
 catch(x){er.textContent=(x&&x.message)||'No se pudo'}b.disabled=false}}

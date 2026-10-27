@@ -1,11 +1,11 @@
 /* Service worker — cambia VERSION cada vez que subas un index.html nuevo */
-var VERSION = 'v216-2026-10-27';
+var VERSION = 'v217-2026-10-27';
 var CACHE = 'app-' + VERSION;
 /* Portadas: caché propia que NO se borra al actualizar la app */
 var IMG = 'covers-v1', IMGMAX = 5000, BAD = {};
 /* Portadas «opacas» (sitios sin CORS cuando no hay proxy): se guardan aparte con tope bajo, porque el navegador cuenta cada una como ~7 MB de cuota */
 var OPQ = 'covers-opq-v1', OPQMAX = 200;
-var CORE = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png'];
+var CORE = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'badge-96.png'];
 
 self.addEventListener('install', function (e) {
   e.waitUntil(
@@ -185,11 +185,12 @@ self.addEventListener('push', function (e) {
         items = (j && j.items) || [];
       }
     } catch (x) {}
-    var title = 'Hoy toca escuchar', body;
-    if (!items.length) body = 'Tienes un álbum programado para hoy';
-    else if (items.length == 1) body = items[0].al + (items[0].ar ? ' · ' + items[0].ar : '');
-    else { title = 'Hoy tienes ' + items.length + ' álbumes programados'; body = items.slice(0, 3).map(function (i) { return i.al; }).join(' · ') + (items.length > 3 ? '…' : ''); }
-    await self.registration.showNotification(title, { body: body, icon: 'icon-192.png', badge: 'icon-192.png', tag: 'digz-plan', renotify: true, data: { d: items[0] && items[0].d } });
+    var title = 'Digz', body;
+    function nm(i) { return i.al + (i.ar ? ' · ' + i.ar : ''); }
+    if (!items.length) body = 'Hoy toca escuchar un álbum que tienes programado';
+    else if (items.length == 1) body = 'Hoy toca escuchar: ' + nm(items[0]);
+    else body = 'Hoy tienes ' + items.length + ' álbumes programados: ' + items.slice(0, 3).map(function (i) { return i.al; }).join(' · ') + (items.length > 3 ? '…' : '');
+    await self.registration.showNotification(title, { body: body, badge: 'badge-96.png', tag: 'digz-plan', renotify: true, data: { d: items[0] && items[0].d } });
   })());
 });
 self.addEventListener('notificationclick', function (e) {
