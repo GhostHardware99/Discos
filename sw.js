@@ -1,5 +1,5 @@
 /* Service worker — cambia VERSION cada vez que subas un index.html nuevo */
-var VERSION = 'v210-2026-10-27';
+var VERSION = 'v212-2026-10-27';
 var CACHE = 'app-' + VERSION;
 /* Portadas: caché propia que NO se borra al actualizar la app */
 var IMG = 'covers-v1', IMGMAX = 5000, BAD = {};

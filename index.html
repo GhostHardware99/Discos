@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
 <meta name="theme-color" content="#0d0d0f">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -917,6 +917,25 @@ dzApply(dzLoad());
 try{var vv=window.visualViewport;if(vv){var vf=function(){document.documentElement.style.setProperty('--vvt',(vv.offsetTop||0)+'px')};vv.addEventListener('resize',vf);vv.addEventListener('scroll',vf);window.addEventListener('scroll',vf,{passive:true});var vk=function(){vf();[80,200,400,700,1100].forEach(function(t){setTimeout(vf,t)})};document.addEventListener('focusin',vk);document.addEventListener('focusout',vk);vf()}}catch(e){}
 try{matchMedia('(prefers-color-scheme:dark)').addListener(function(){var t=dzLoad();if(t.m=='sys')dzApply(t)})}catch(e){}
 </script>
+<style id="v197">
+/* v197: sin zoom de página al pellizcar ni con doble toque */
+*{touch-action:pan-x pan-y}
+.sr,.sr *{touch-action:none}
+/* v197: botones redondos del calendario y de los diálogos con el mismo diseño que el resto de la app */
+#calv .cmh button,#cpk .cph button{width:42px;height:42px;padding:0;border-radius:50%;flex:none;background:linear-gradient(180deg,rgba(var(--acr),.28),rgba(var(--acr),.12));border:1px solid rgba(var(--acr),.3);color:var(--tx);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;font-size:0}
+#calv .cmh button svg,#cpk .cph button svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+/* v197: tarjetas del calendario y de los diálogos con aire por dentro (antes la portada tocaba la esquina) */
+#calv .crow,#cpk .crow{display:flex;align-items:center;gap:12px;padding:10px 12px;margin:0 0 10px;border:1px solid var(--bd);border-radius:16px}
+#calv .crow .cv,#cpk .crow .cv{border-radius:11px}
+#cpk .cpl{padding:2px 0 8px}
+#cpk .cps{margin:12px 2px 8px;font-size:12px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:var(--mut)}
+#cpk .cph{margin-bottom:12px}
+/* v197: nota exacta */
+.sr{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+#cpk .rxs{display:flex;gap:6px;margin:2px 0 8px}
+#cpk .rxs button{flex:1;padding:10px;border-radius:12px;border:1px solid var(--bd);background:var(--gl);color:var(--tx);font:inherit;font-weight:600}
+#cpk .rxs button.on{background:rgba(var(--acr),.2);border-color:rgba(var(--acr),.5)}
+</style>
 </head>
 <body>
 <header id="hd">
@@ -1527,7 +1546,7 @@ return '<a class="lr'+(d?' d':'')+'" href="'+esc(svUrl(q,a))+'" target="_blank" 
 /* ---------- Estrellas con media nota ---------- */
 function stars(v,act,extra,sm){var h='<div class="sr'+(sm?' sm':'')+'" data-a="'+act+'" '+(extra||'')+'>';
 for(var i=0;i<5;i++){var w=Math.max(0,Math.min(1,v-i))*100;h+='<span class="st"><span style="width:'+w+'%"></span></span>'}return h+'</div>'}
-function starVal(el,e){var r=el.getBoundingClientRect(),x=(e.clientX-r.left)/r.width;return Math.max(.5,Math.min(5,Math.ceil(x*10)/2))}
+function starVal(el,e){var r=el.getBoundingClientRect(),x=(e.clientX-r.left)/r.width;return Math.max(.1,Math.min(5,Math.round(x*50)/10))}
 
 /* ---------- Compartir ---------- */
 function shareTxt(title,text,url){var d={title:title,text:text};if(url)d.url=url;
@@ -2640,10 +2659,11 @@ function closeSheet(){ovBack()}
 var SD=null;
 function setSt(el,v){[].forEach.call(el.querySelectorAll('.st>span'),function(sp,i){sp.style.width=Math.max(0,Math.min(1,v-i))*100+'%'})}
 $('sh').addEventListener('pointerdown',function(e){var el=e.target.closest('.sr[data-a="rate"],.sr[data-a="trr"]');if(!el||!cur)return;
-SD={el:el,id:e.pointerId,x:e.clientX,mv:false,v:starVal(el,e)};try{el.setPointerCapture(e.pointerId)}catch(_){}setSt(el,SD.v)});
+SD={el:el,id:e.pointerId,x:e.clientX,mv:false,v:starVal(el,e)};try{el.setPointerCapture(e.pointerId)}catch(_){}setSt(el,SD.v);
+if(el.dataset.a=='rate')SD.lp=setTimeout(function(){if(!SD||SD.mv)return;var d=SD;SD=null;var a=S.a[cur];setSt(d.el,a&&a.rate||0);try{d.el.releasePointerCapture(d.id)}catch(_){}try{if(navigator.vibrate)navigator.vibrate(15)}catch(_){}rxDlg(cur)},450)});
 $('sh').addEventListener('pointermove',function(e){if(!SD||e.pointerId!=SD.id)return;if(Math.abs(e.clientX-SD.x)>4)SD.mv=true;SD.v=starVal(SD.el,e);setSt(SD.el,SD.v)});
-$('sh').addEventListener('pointerup',function(e){if(!SD||e.pointerId!=SD.id)return;var d=SD;SD=null;var k=cur,a=k&&S.a[k];if(!a)return;var v=d.v;
-if(d.el.dataset.a=='rate'){if(!d.mv&&a.rate==v)v=0;var pr=a.rate;a.rate=v;if(a.rate&&!a.done){a.done=true;a.t=Date.now()}else if(!a.rate&&pr&&a.done){a.done=false;a.fav=false;a.t=0}save();render();sheet(k)}
+$('sh').addEventListener('pointerup',function(e){if(!SD||e.pointerId!=SD.id)return;var d=SD;SD=null;clearTimeout(d.lp);var k=cur,a=k&&S.a[k];if(!a)return;var v=d.v;
+if(d.el.dataset.a=='rate'){rxHint();if(!d.mv&&a.rate==v)v=0;var pr=a.rate;a.rate=v;if(a.rate&&!a.done){a.done=true;a.t=Date.now()}else if(!a.rate&&pr&&a.done){a.done=false;a.fav=false;a.t=0}save();render();sheet(k)}
 else{var i=d.el.dataset.i;a.tr=a.tr||{};if(!d.mv&&a.tr[i]==v)delete a.tr[i];else a.tr[i]=v;save();sheet(k)}});
 $('sh').addEventListener('pointercancel',function(e){if(!SD)return;SD=null;if(cur)sheet(cur)});
 $('sh').addEventListener('click',function(e){var t=e.target.closest('[data-a]');if(!t||!cur)return;var k=cur,a=S.a[k],ac=t.dataset.a;if(!a)return;
@@ -3535,6 +3555,7 @@ document.addEventListener('selectstart',function(e){var t=e.target&&e.target.nod
 /* ---------- Calendario de escuchas ----------
    Fecha base de cada álbum escuchado = a.t (momento en que se marcó). Escuchas extra = a.ld (lista 'AAAA-MM-DD'). */
 var CAL={y:0,m:0,sel:''};
+var ICX='<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>',ICNX='<svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>';
 var PLSVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
 /* Programados: a.plan = 'AAAA-MM-DD'. Deja de estar activo al escucharlo (clAdd) o si se marca escuchado a partir de ese día. */
 function plDate(a){if(!a||a.tmp||!a.plan)return '';if(a.done&&a.t>1e11&&a.t>=dts(a.plan)-43200000)return '';return a.plan}
@@ -3542,7 +3563,7 @@ function plMap(){var m={};Object.keys(S.a).forEach(function(k){var d=plDate(S.a[
 function plSet(k,d,t){var a=S.a[k];if(!a)return;if(d){a.plan=d;if(t)a.plt=t}else{delete a.plan;delete a.plt}save();render();try{pushSync()}catch(e){}if(document.body.classList.contains('calo'))calRender()}
 function plFmt(d){return new Date(dts(d)).toLocaleDateString('es',{day:'numeric',month:'long'})}
 function plDlg(k){var a=S.a[k];if(!a)return;var t=dkey(Date.now()),cu=plDate(a),w=document.createElement('div');w.id='cpk';w.className='cedw dzmod';
-w.innerHTML='<div class="cpp"><div class="cph"><span style="text-transform:none;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Programar · '+esc(a.al)+'</span><button data-x="1" aria-label="Cerrar">✕</button></div><input id="cdi" type="date" min="'+t+'" value="'+(cu||dkey(Date.now()+864e5))+'"><div style="display:flex;align-items:center;gap:10px;margin:10px 2px 0;font-size:14px;color:var(--mut)"><span style="flex:1">Avisarme a las</span><input id="cdh" type="time" value="'+(a.plt||'09:00')+'" style="width:auto"></div><button class="cgo" data-go="1">'+(cu?'Cambiar día':'Programar')+'</button>'+(cu?'<button class="cgo" data-rm="1" style="background:var(--gl);color:var(--tx)">Quitar programación</button>':'')+'</div>';
+w.innerHTML='<div class="cpp"><div class="cph"><span style="text-transform:none;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Programar · '+esc(a.al)+'</span><button data-x="1" aria-label="Cerrar">'+ICX+'</button></div><input id="cdi" type="date" min="'+t+'" value="'+(cu||dkey(Date.now()+864e5))+'"><div style="display:flex;align-items:center;gap:10px;margin:10px 2px 0;font-size:14px;color:var(--mut)"><span style="flex:1">Avisarme a las</span><input id="cdh" type="time" value="'+(a.plt||'09:00')+'" style="width:auto"></div><button class="cgo" data-go="1">'+(cu?'Cambiar día':'Programar')+'</button>'+(cu?'<button class="cgo" data-rm="1" style="background:var(--gl);color:var(--tx)">Quitar programación</button>':'')+'</div>';
 document.body.appendChild(w);w.onclick=function(e){if(e.target===w||e.target.closest('[data-x]')){w.remove();return}if(e.target.closest('[data-rm]')){w.remove();plSet(k,'');toast('Programación quitada');if(cur==k)sheet(k);return}
 if(e.target.closest('[data-go]')){var v=w.querySelector('#cdi').value;if(!v||v<t){toast('Elige hoy o un día futuro');return}var hh=(w.querySelector('#cdh').value||'09:00');w.remove();plSet(k,v,hh);pushHint();toast('Programado para el '+plFmt(v));if(cur==k)sheet(k)}}}
 function plBanner(){var b=$('plb');if(!b){var l=$('list');if(!l||!l.parentNode)return;b=document.createElement('div');b.id='plb';l.parentNode.insertBefore(b,l);b.onclick=function(){var d=b.dataset.d;var t=new Date(dts(d));CAL.y=t.getFullYear();CAL.m=t.getMonth();CAL.sel=d;openCal()}}
@@ -3573,7 +3594,7 @@ await pushSyncNow()}
 async function pushDisable(){try{var u=pushUrl(),reg=await navigator.serviceWorker.ready,sub=await reg.pushManager.getSubscription();if(sub){try{await fetch(u+'/unsub',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({endpoint:sub.endpoint})})}catch(e){}await sub.unsubscribe()}}catch(e){}try{localStorage.setItem('digz-push','0')}catch(e){}}
 function pushHint(){try{if(pushOn()||localStorage.getItem('digz-pushhint'))return;localStorage.setItem('digz-pushhint','1');setTimeout(function(){toast('Para recibir aviso ese día, activa los avisos en Ajustes')},2600)}catch(e){}}
 function pushDlg(){var w=document.createElement('div');w.id='cpk';w.className='cedw dzmod';var on=pushOn();
-w.innerHTML='<div class="cpp"><div class="cph"><span style="text-transform:none">Avisos de álbumes programados</span><button data-x="1" aria-label="Cerrar">✕</button></div><div style="padding:4px 4px 10px;font-size:14px;color:var(--mut);line-height:1.45">'+(on?'Activados. Te avisaremos el día y la hora que elijas, aunque la app esté cerrada.':'Necesitas tu servidor de avisos (Cloudflare). Pega aquí su dirección y toca Activar.')+'</div><input id="pnu" type="url" placeholder="https://digz-push.TU-USUARIO.workers.dev" value="'+esc(pushUrl())+'" autocomplete="off" style="width:100%"><div id="pne" style="color:#e5484d;font-size:13px;margin:6px 2px 0;min-height:4px"></div>'+(on?'<button class="cgo" data-t="test">Enviar aviso de prueba</button><button class="cgo" data-t="off" style="background:var(--gl);color:var(--tx)">Desactivar</button>':'<button class="cgo" data-t="on">Activar avisos</button>')+'</div>';
+w.innerHTML='<div class="cpp"><div class="cph"><span style="text-transform:none">Avisos de álbumes programados</span><button data-x="1" aria-label="Cerrar">'+ICX+'</button></div><div style="padding:4px 4px 10px;font-size:14px;color:var(--mut);line-height:1.45">'+(on?'Activados. Te avisaremos el día y la hora que elijas, aunque la app esté cerrada.':'Necesitas tu servidor de avisos (Cloudflare). Pega aquí su dirección y toca Activar.')+'</div><input id="pnu" type="url" placeholder="https://digz-push.TU-USUARIO.workers.dev" value="'+esc(pushUrl())+'" autocomplete="off" style="width:100%"><div id="pne" style="color:#e5484d;font-size:13px;margin:6px 2px 0;min-height:4px"></div>'+(on?'<button class="cgo" data-t="test">Enviar aviso de prueba</button><button class="cgo" data-t="off" style="background:var(--gl);color:var(--tx)">Desactivar</button>':'<button class="cgo" data-t="on">Activar avisos</button>')+'</div>';
 document.body.appendChild(w);var er=w.querySelector('#pne');
 w.onclick=async function(e){if(e.target===w||e.target.closest('[data-x]')){w.remove();return}var b=e.target.closest('[data-t]');if(!b)return;var t=b.dataset.t;er.textContent='';b.disabled=true;
 try{if(t=='on'){await pushEnable(w.querySelector('#pnu').value);w.remove();toast('Avisos activados');var sh=$('sh');if(sh&&typeof settings=='function')try{settings()}catch(x){}}
@@ -3599,7 +3620,7 @@ else if(a=='open'){if(S.a[b.dataset.k])sheet(b.dataset.k)}
 else if(a=='menu'){calMenu(b.dataset.k,b.dataset.d)}
 else if(a=='add')calPick(CAL.sel);else if(a=='plan')calPick(CAL.sel,1);else if(a=='unplan'){plSet(b.dataset.k,'');toast('Programación quitada')}else if(a=='done'){var kk=b.dataset.k;if(S.a[kk]){clAdd(kk,dkey(Date.now()))}}};return d}
 function calRender(){var d=document.getElementById('calv');if(!d)return;var box=d.querySelector('.cbody'),sy=d.scrollTop,m=clMap(),pm=plMap(),today=dkey(Date.now()),first=new Date(CAL.y,CAL.m,1),off=(first.getDay()+6)%7,dim=new Date(CAL.y,CAL.m+1,0).getDate(),h='',cnt=0;
-h+='<div class="cmh"><button data-ca="prev" aria-label="Mes anterior">‹</button><b>'+esc(first.toLocaleDateString('es',{month:'long',year:'numeric'}))+'</b><button data-ca="next" aria-label="Mes siguiente">›</button></div>';
+h+='<div class="cmh"><button data-ca="prev" aria-label="Mes anterior">'+ICBK+'</button><b>'+esc(first.toLocaleDateString('es',{month:'long',year:'numeric'}))+'</b><button data-ca="next" aria-label="Mes siguiente">'+ICNX+'</button></div>';
 h+='<div class="cwk"><span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span><span>D</span></div><div class="cgrid">';
 for(var i=0;i<off;i++)h+='<span></span>';
 for(var n=1;n<=dim;n++){var k=CAL.y+'-'+cp2(CAL.m+1)+'-'+cp2(n),l=m[k]||[],pl=pm[k]||[];cnt+=l.length;h+='<button class="cd'+(l.length?' has':'')+(k==today?' td':'')+(k==CAL.sel?' sel':'')+'" data-ca="day" data-d="'+k+'">'+n+'<span class="dt">'+(l.length?'<i></i>':'')+(l.length>1?'<i></i>':'')+(l.length>2?'<i></i>':'')+(pl.length?'<i class="pi"></i>':'')+'</span></button>'}
@@ -3615,21 +3636,42 @@ function openCal(){var d=calEnsure();if(!CAL.y){var t=new Date();CAL.y=t.getFull
 d.style.display='';document.body.classList.add('calo');[].forEach.call(document.querySelectorAll('#nav button'),function(b){b.classList.toggle('on',b.id=='cal')});calRender()}
 function closeCal(){var d=document.getElementById('calv');if(d&&document.body.classList.contains('calo')){d.style.display='none';document.body.classList.remove('calo');var b=$('cal');if(b)b.classList.remove('on');var nl=$('nl'),fv=$('fv');if(nl)nl.classList.toggle('on',ui.f!='fav');if(fv)fv.classList.toggle('on',ui.f=='fav')}}
 function calPick(date,plan){var w=document.createElement('div');w.id='cpk';w.className='cedw dzmod';
-w.innerHTML='<div class="cpp"><div class="cph"><span>'+esc(new Date(dts(date)).toLocaleDateString('es',{day:'numeric',month:'long'}))+'</span><button data-x="1" aria-label="Cerrar">✕</button></div><input id="cpq" type="search" placeholder="Buscar en tu biblioteca" autocomplete="off"><div class="cpl"></div></div>';
-document.body.appendChild(w);var inp=w.querySelector('#cpq'),lst=w.querySelector('.cpl');
-function fill(){var q=nrm(inp.value),ks=Object.keys(S.a).filter(function(k){var a=S.a[k];return a&&!a.tmp&&(!q||nrm(a.al+a.ar).indexOf(q)>-1)}).sort(function(x,y){return (S.a[y].ad||0)-(S.a[x].ad||0)}).slice(0,50),h='';
-ks.forEach(function(k){var a=S.a[k];h+='<div class="crow"><button class="tp" data-k="'+esc(k)+'">'+cv(a,'sm',k,0,1)+'<span class="ct"><b>'+esc(a.al)+'</b><span>'+esc(a.ar)+'</span></span></button></div>'});
-if(!ks.length)h='<div class="cnote">No hay álbumes así en tu biblioteca. Añádelo primero desde Buscar.</div>';lst.innerHTML=h}
-inp.oninput=fill;fill();
-w.onclick=function(e){if(e.target===w||e.target.closest('[data-x]')){w.remove();return}var b=e.target.closest('[data-k]');if(b){var k=b.dataset.k;w.remove();if(plan){plSet(k,date);toast('Programado para el '+plFmt(date))}else clAdd(k,date)}}}
+w.innerHTML='<div class="cpp"><div class="cph"><span>'+esc(new Date(dts(date)).toLocaleDateString('es',{day:'numeric',month:'long'}))+'</span><button data-x="1" aria-label="Cerrar">'+ICX+'</button></div><input id="cpq" type="search" placeholder="Buscar en tu biblioteca y en todo el catálogo" autocomplete="off"><div class="cpl"></div></div>';
+document.body.appendChild(w);var inp=w.querySelector('#cpq'),lst=w.querySelector('.cpl'),GL=[],gt=0,gm=0,gb=0;
+function rowL(k){var a=S.a[k];return '<div class="crow"><button class="tp" data-k="'+esc(k)+'">'+cv(a,'sm',k,0,1)+'<span class="ct"><b>'+esc(a.al)+'</b><span>'+esc(a.ar)+(a.done?' · Escuchado':'')+'</span></span></button></div>'}
+function rowG(x,i){var ar=acs(x)[0]||'Desconocido',y=(x['first-release-date']||'').slice(0,4),h=hue(x.title+ar);return '<div class="crow"><button class="tp" data-g="'+i+'"><div class="cv sm" style="background:linear-gradient(145deg,hsl('+h+',50%,42%),hsl('+((h+50)%360)+',55%,20%))"><span>'+esc(ini(x.title))+'</span>'+(x._cu?'<img alt="" src="'+esc(x._cu)+'" onerror="this.remove()">':(NC[x.id]?'':'<img loading="lazy" alt="" data-m="'+x.id+'" src="'+covurl(x.id,250)+'" onerror="ncv(this)">'))+'</div><span class="ct"><b>'+esc(x.title)+'</b><span>'+esc(ar)+(y?' · '+y:'')+tyl(x)+'</span></span></button></div>'}
+function fill(){var v=inp.value.trim(),q=nrm(v),all=Object.keys(S.a).filter(function(k){var a=S.a[k];return a&&!a.tmp&&(!q||nrm(a.al+a.ar).indexOf(q)>-1)}).sort(function(x,y){return (S.a[x].done?1:0)-(S.a[y].done?1:0)||(S.a[y].ad||0)-(S.a[x].ad||0)}),h='';
+if(q){if(all.length)h+='<div class="cps">En tu biblioteca</div>'+all.slice(0,60).map(rowL).join('')}
+else{var pend=all.filter(function(k){return !S.a[k].done}),dn=all.filter(function(k){return S.a[k].done});if(pend.length)h+='<div class="cps">Por escuchar</div>'+pend.slice(0,60).map(rowL).join('');if(dn.length)h+='<div class="cps">Ya escuchados</div>'+dn.slice(0,25).map(rowL).join('')}
+if(v.length>=2){h+='<div class="cps">Búsqueda global</div>'+(GL.length?GL.map(rowG).join(''):'<div class="cnote">'+(gb?'Buscando…':'Sin resultados en el catálogo.')+'</div>')}
+if(!h)h='<div class="cnote">Tu biblioteca está vacía. Escribe para buscar en todo el catálogo.</div>';lst.innerHTML=h}
+inp.oninput=function(){clearTimeout(gm);var v=inp.value.trim();GL=[];if(v.length<2){gb=0;fill();return}gb=1;fill();gm=setTimeout(function(){var my=++gt;buscarMB(v).then(function(d){if(my!=gt)return;GL=(d['release-groups']||[]).slice(0,25);gb=0;fill()},function(){if(my==gt){gb=0;fill()}})},350)};
+fill();
+function pick(k){w.remove();if(plan){plSet(k,date);toast('Programado para el '+plFmt(date))}else clAdd(k,date)}
+w.onclick=function(e){if(e.target===w||e.target.closest('[data-x]')){w.remove();return}
+var g=e.target.closest('[data-g]');if(g){var x=GL[g.dataset.g];if(!x)return;var ar=acs(x)[0]||'Desconocido',k=kof(ar,ttl(x));
+if(!S.a[k]){add(ar,ttl(x),x._did||'',x.id);if(!S.a[k])return;S.a[k].ty=tyOf(x);S.a[k].cu=x._cu||'';if(x._iid)S.a[k].iid=String(x._iid);if(x.id)M[k]=pickM(x)}
+delete S.a[k].tmp;save();try{saveM()}catch(e2){}pick(k);return}
+var b=e.target.closest('[data-k]');if(b)pick(b.dataset.k)}}
+/* ---------- Nota exacta: cualquier valor, con decimales ---------- */
+function rxDlg(k){var a=S.a[k];if(!a)return;var w=document.createElement('div'),sc=5;w.id='cpk';w.className='cedw dzmod';
+w.innerHTML='<div class="cpp"><div class="cph"><span style="text-transform:none">Nota exacta</span><button data-x="1" aria-label="Cerrar">'+ICX+'</button></div><div class="rxs"><button data-s="5" class="on">de 5</button><button data-s="10">de 10</button><button data-s="100">de 100</button></div><input id="rxi" type="text" inputmode="decimal" placeholder="Ej. 3,7" autocomplete="off" value="'+(a.rate?fr(a.rate):'')+'"><div class="cnote" id="rxh">Escribe la nota que quieras, con decimales (de 0 a 5).</div><button class="cgo" data-go="1">Guardar</button>'+(a.rate?'<button class="cgo" data-rm="1" style="background:var(--gl);color:var(--tx)">Quitar nota</button>':'')+'</div>';
+document.body.appendChild(w);var inp=w.querySelector('#rxi');setTimeout(function(){try{inp.focus();inp.select()}catch(e){}},60);
+function apply(r){var pr=a.rate;a.rate=r;if(a.rate&&!a.done){a.done=true;a.t=Date.now()}else if(!a.rate&&pr&&a.done){a.done=false;a.fav=false;a.t=0}save();render();if(cur==k)sheet(k)}
+w.onclick=function(e){if(e.target===w||e.target.closest('[data-x]')){w.remove();return}
+var sb=e.target.closest('[data-s]');if(sb){var ns=+sb.dataset.s,v=parseFloat(inp.value.replace(',','.'));if(v>0)inp.value=String(Math.round(v*ns/sc*100)/100).replace('.',',');sc=ns;[].forEach.call(w.querySelectorAll('.rxs button'),function(x){x.classList.toggle('on',x===sb)});inp.placeholder='Ej. '+(sc==5?'3,7':sc==10?'7,4':'74');w.querySelector('#rxh').textContent='Escribe la nota que quieras, con decimales (de 0 a '+sc+').';return}
+if(e.target.closest('[data-rm]')){w.remove();apply(0);toast('Nota quitada');return}
+if(e.target.closest('[data-go]')){var v2=parseFloat(inp.value.replace(',','.'));if(!(v2>0)||v2>sc){toast('Pon una nota entre 0 y '+sc);return}var r=Math.max(.01,Math.min(5,Math.round(v2/sc*5*100)/100));w.remove();apply(r);toast('Nota guardada: '+fr(r)+' / 5')}}}
+$('sh').addEventListener('contextmenu',function(e){if(e.target.closest&&e.target.closest('.sr'))e.preventDefault()});
+function rxHint(){try{if(localStorage.getItem('digz-rxh'))return;localStorage.setItem('digz-rxh','1');setTimeout(function(){toast('Mantén pulsadas las estrellas para poner una nota exacta')},700)}catch(e){}}
 
 /* ---------- Menú ⋯ de cada álbum del calendario ---------- */
 function calMenu(k,date){var a=S.a[k];if(!a)return;var w=document.createElement('div');w.id='cpk';w.className='cedw dzmod';
-w.innerHTML='<div class="cpp"><div class="cph"><span style="text-transform:none;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(a.al)+'</span><button data-x="1" aria-label="Cerrar">✕</button></div><button class="cmb" data-m="add"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4M16 3v4M4 10h16M12 13v4M10 15h4"/></svg>Añadir a otro día</button><button class="cmb dg" data-m="rm"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 7h14M10 7V5h4v2M7 7l1 12h8l1-12"/></svg>Quitar de este día</button></div>';
+w.innerHTML='<div class="cpp"><div class="cph"><span style="text-transform:none;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(a.al)+'</span><button data-x="1" aria-label="Cerrar">'+ICX+'</button></div><button class="cmb" data-m="add"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4M16 3v4M4 10h16M12 13v4M10 15h4"/></svg>Añadir a otro día</button><button class="cmb dg" data-m="rm"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 7h14M10 7V5h4v2M7 7l1 12h8l1-12"/></svg>Quitar de este día</button></div>';
 document.body.appendChild(w);
 w.onclick=function(e){if(e.target===w||e.target.closest('[data-x]')){w.remove();return}var b=e.target.closest('[data-m]');if(!b)return;
 if(b.dataset.m=='rm'){w.remove();clDel(k,date);return}
-var pp=w.querySelector('.cpp'),t=dkey(Date.now());pp.innerHTML='<div class="cph"><span style="text-transform:none">¿Qué día lo escuchaste?</span><button data-x="1" aria-label="Cerrar">✕</button></div><input id="cdi" type="date" max="'+t+'" value="'+t+'"><button class="cgo" data-go="1">Añadir</button>';
+var pp=w.querySelector('.cpp'),t=dkey(Date.now());pp.innerHTML='<div class="cph"><span style="text-transform:none">¿Qué día lo escuchaste?</span><button data-x="1" aria-label="Cerrar">'+ICX+'</button></div><input id="cdi" type="date" max="'+t+'" value="'+t+'"><button class="cgo" data-go="1">Añadir</button>';
 w.onclick=function(e2){if(e2.target===w||e2.target.closest('[data-x]')){w.remove();return}if(e2.target.closest('[data-go]')){var v=pp.querySelector('#cdi').value;if(!v){toast('Elige un día');return}w.remove();clAdd(k,v)}}}}
 
 /* ---------- Reconocer el mismo álbum aunque cambie el formato del nombre ---------- */
@@ -3659,6 +3701,8 @@ return n}
 (function(){var b=$('cal');if(b)b.onclick=function(){navTrack(function(){hide();ui.o=null;openCal()})};
 var h0=hide;hide=function(kd){if(!kd)closeCal();return h0.apply(this,arguments)};
 var r0=render;render=function(){var r=r0.apply(this,arguments);if(document.body.classList.contains('calo'))try{calRender()}catch(e){}return r}})();
+document.addEventListener('touchmove',function(e){if(e.touches&&e.touches.length>1)e.preventDefault()},{passive:false});
+['gesturestart','gesturechange','gestureend'].forEach(function(t){document.addEventListener(t,function(e){e.preventDefault()})});
 </script>
 </body>
 </html>
