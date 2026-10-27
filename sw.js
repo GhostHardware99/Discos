@@ -1,5 +1,5 @@
 /* Service worker — cambia VERSION cada vez que subas un index.html nuevo */
-var VERSION = 'v221-2026-10-27';
+var VERSION = 'v224-2026-10-27';
 var CACHE = 'app-' + VERSION;
 /* Portadas: caché propia que NO se borra al actualizar la app */
 var IMG = 'covers-v1', IMGMAX = 5000, BAD = {};
@@ -179,11 +179,15 @@ var BADGE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4A
 function pushToday() { var n = new Date(); return n.getFullYear() + '-' + ('0' + (n.getMonth() + 1)).slice(-2) + '-' + ('0' + n.getDate()).slice(-2); }
 function pushNow() { var n = new Date(); return ('0' + n.getHours()).slice(-2) + ':' + ('0' + n.getMinutes()).slice(-2); }
 async function pushShow(items) {
-  var title, body, opt = { badge: BADGE, tag: 'digz-plan', renotify: true, data: { d: items[0] && items[0].d } };
+  var title, body, opt = { badge: BADGE, tag: 'digz-plan-' + (items[0] ? items[0].d + '-' + (items[0].t || '') : 'x'), renotify: true, data: { d: items[0] && items[0].d } };
   title = 'Digz';
   if (!items.length) body = 'Tienes un álbum programado\nProgramado para hoy';
-  else if (items.length == 1) { body = (items[0].ar ? items[0].ar + ' · ' : '') + items[0].al + '\nProgramado para hoy'; if (items[0].c) opt.icon = items[0].c; }
+  else if (items.length == 1) { body = (items[0].ar ? items[0].ar + ' · ' : '') + items[0].al + '\nProgramado para hoy'; }
   else body = items.length + ' álbumes programados para hoy\n' + items.slice(0, 3).map(function (i) { return i.al; }).join(' · ') + (items.length > 3 ? '…' : '');
+  opt.icon = (items.length == 1 && items[0].c) ? items[0].c : 'icon-192.png';
+  if (items.length > 1) {
+    try { var cs = await caches.open('digz-cfg'), rs = await cs.match('stacks'); if (rs) { var sm = await rs.json(), sk = items[0].d + '|' + items[0].t; if (sm[sk]) opt.icon = sm[sk]; } } catch (x) {}
+  }
   opt.body = body;
   await self.registration.showNotification(title, opt);
 }
