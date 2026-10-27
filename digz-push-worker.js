@@ -22,7 +22,7 @@ async function vapid(env, endpoint) {
 async function push(env, endpoint) {
   return fetch(endpoint, { method: 'POST', headers: { Authorization: await vapid(env, endpoint), TTL: '86400', Urgency: 'high', 'Content-Length': '0' } });
 }
-const LEAD = 45000; // avisa como mucho 45 s antes de la hora programada
+const LEAD = 1000; // nunca antes de la hora: solo 1 s de margen sobre el minuto exacto del cron
 const dueAt = (p, off) => { const m = /^(\d{4})-(\d\d)-(\d\d)$/.exec(p.d || ''), t = /^(\d\d):(\d\d)$/.exec(p.t || '09:00'); return m && t ? Date.UTC(+m[1], +m[2] - 1, +m[3], +t[1], +t[2]) - (off || 0) * 60000 : Infinity; };
 const todayOf = (now, off) => new Date(now + (off || 0) * 60000).toISOString().slice(0, 10);
 const skey = (p) => p.k + '|' + p.d + '|' + p.t;
@@ -57,7 +57,7 @@ export default {
     return J({ error: 'not found' }, 404);
   },
   async scheduled(ev, env) {
-    const now = Date.now();
+    const now = ev.scheduledTime || Date.now();
     let idx = await env.PUSH.get('idx', 'json'), changed = false;
     // Reconstruye el índice si no existe y cada 30 min (por si algo quedó desfasado)
     if (!idx || new Date(now).getUTCMinutes() % 30 === 0) {
