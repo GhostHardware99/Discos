@@ -1,5 +1,5 @@
 /* Service worker — cambia VERSION cada vez que subas un index.html nuevo */
-var VERSION = 'v224-2026-10-27';
+var VERSION = 'v225-2026-10-27';
 var CACHE = 'app-' + VERSION;
 /* Portadas: caché propia que NO se borra al actualizar la app */
 var IMG = 'covers-v1', IMGMAX = 5000, BAD = {};
@@ -189,7 +189,8 @@ async function pushShow(items) {
     try { var cs = await caches.open('digz-cfg'), rs = await cs.match('stacks'); if (rs) { var sm = await rs.json(), sk = items[0].d + '|' + items[0].t; if (sm[sk]) opt.icon = sm[sk]; } } catch (x) {}
   }
   opt.body = body;
-  await self.registration.showNotification(title, opt);
+  try { await self.registration.showNotification(title, opt); }
+  catch (x) { delete opt.icon; delete opt.badge; await self.registration.showNotification(title, opt); }
 }
 function pushKey(i) { return i.al + '|' + i.d + '|' + (i.t || ''); }
 async function pushDue(c) {
@@ -231,7 +232,8 @@ self.addEventListener('push', function (e) {
         }
       } catch (x) {}
     } else await pushMark(c, items);
-    await pushShow(items);
+    try { await pushShow(items); }
+    catch (x) { await self.registration.showNotification('Digz', { body: 'Tienes un álbum programado para hoy', tag: 'digz-plan-x' }); }
   })());
 });
 self.addEventListener('notificationclick', function (e) {
