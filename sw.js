@@ -1,5 +1,5 @@
 /* Service worker — cambia VERSION cada vez que subas un index.html nuevo */
-var VERSION = 'v230-2026-11-10';
+var VERSION = 'v231-2026-11-10';
 var CACHE = 'app-' + VERSION;
 /* Portadas: caché propia que NO se borra al actualizar la app */
 var IMG = 'covers-v1', IMGMAX = 5000, BAD = {};
@@ -242,4 +242,18 @@ self.addEventListener('notificationclick', function (e) {
     for (var i = 0; i < cl.length; i++) { if ('focus' in cl[i]) return cl[i].focus(); }
     return self.clients.openWindow('./');
   }));
+});
+
+/* Si el navegador renueva la suscripción push, se vuelve a suscribir y se avisa al servidor sin abrir la app */
+self.addEventListener('pushsubscriptionchange', function (e) {
+  e.waitUntil((async function () {
+    try {
+      var c = await caches.open('digz-cfg'), r = await c.match('push-url'), url = (r ? await r.text() : '') || PUSH_DEF;
+      var old = e.oldSubscription, key = old && old.options && old.options.applicationServerKey;
+      var sub = e.newSubscription || (key ? await self.registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key }) : null);
+      if (!sub) return;
+      var rp = await c.match('plans'), pl = rp ? await rp.json() : [];
+      await fetch(url + '/sync', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sub: sub.toJSON(), off: -new Date().getTimezoneOffset(), plans: pl.map(function (i) { return { k: i.ar + '|' + i.al, ar: i.ar, al: i.al, d: i.d, t: i.t }; }) }) });
+    } catch (x) {}
+  })());
 });

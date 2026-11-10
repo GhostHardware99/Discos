@@ -1060,6 +1060,8 @@ function nf(s){return String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').
 function amatch(q,a){var qs=q.split(/[^\p{L}\p{N}]+/u).filter(Boolean);if(!qs.length)return true;var W=function(t){return nf(t).split(/[^\p{L}\p{N}]+/u).filter(Boolean)},wa=W(a.al),wt=W(a.ar+' '+a.al),st=function(ws,x){return ws.some(function(w){return w.indexOf(x)===0})};return qs.every(function(x){return st(wt,x)})&&qs.some(function(x){return st(wa,x)})}
 /* Búsqueda por inicio de palabra: «char» encuentra Charli, pero no 2charm ni Richard */
 function qmatch(q,t){var qs=q.split(/[^\p{L}\p{N}]+/u).filter(Boolean);if(!qs.length)return true;var ws=nf(t).split(/[^\p{L}\p{N}]+/u).filter(Boolean);return qs.every(function(x){return ws.some(function(w){return w.indexOf(x)===0})})}
+/* Clave que distingue ediciones: «X» y «X (Deluxe Edition)» son álbumes distintos */
+function edk(s){s=String(s);var m=s.match(/[\(\[]([^\)\]]*(deluxe|remaster|edition|expanded|bonus|version|anniversary|special|extended|complete)[^\)\]]*)[\)\]]/i)||s.match(/[-–]\s*([^-–]*(deluxe|remaster|edition|expanded|bonus|version|anniversary)[^-–]*)$/i);return cln(s)+(m?'|'+nrm(m[1].replace(/\b(edition|version)\b/ig,'')):'')}
 function cln(s){return nrm(nf(String(s).replace(/\(.*?\)|\[.*?\]/g,'').replace(/\b(deluxe|remaster(ed)?|edition|expanded|bonus|version)\b.*$/i,'')))}
 function isDz(u){return /dzcdn\.net/.test(String(u||''))}
 function ups(u,n,dz){u=String(u||'');if(!u)return [];var o=[];
@@ -2364,7 +2366,7 @@ return Promise.all([t(seDzAlb('artist:"'+ar+'" album:"'+al+'"'),5000),t(seItAlb(
 /* ¿Es un sencillo lo que hay en la biblioteca? (por el título «(Sencillo)» o porque tiene 3 canciones o menos) */
 function isSgK(k){var a=S.a[k];if(!a)return false;if(a.ty)return a.ty=='single';if(/\((sencillo|single)\)\s*$/i.test(a.al))return true;var m=M[k];return !!(m&&m.t&&m.t.length&&m.t.length<=3)}
 function sepRel(e,x){if(!e||!x)return false;var ty=x.ty||'';if(e.ty&&ty&&((e.ty=='single')!=(ty=='single')))return true;if(e.id&&x.id&&String(e.id)!=String(x.id))return true;if(e.iid&&x.iid&&String(e.iid)!=String(x.iid))return true;return false}
-function ttk(ar,t,ty,x){var k0=kof(ar,t),e0=S.a[k0];if(ty=='single'){var s2=t+' (Sencillo)';return S.a[kof(ar,s2)]?s2:(e0&&isSgK(k0)?t:s2)}return e0&&(isSgK(k0)||sepRel(e0,x))?t+' (Álbum)':t}
+function ttk(ar,t,ty,x){var k0=kof(ar,t),e0=S.a[k0];if(ty=='single'){var s2=t+' (Sencillo)';return S.a[kof(ar,s2)]?s2:(e0&&isSgK(k0)?t:s2)}return e0&&(isSgK(k0)||sepRel(e0,x))?t+(ty=='ep'?' (EP)':' (Álbum)'):t}
 function tyOf(x){var t=String(x['primary-type']||x.type||x.ty||'').toLowerCase();return t=='single'?'single':t=='ep'?'ep':'album'}
 function ttl(x){var t=tyOf(x);return ttk(acs(x)[0]||'Desconocido',x.title,t,{ty:t,id:x._did||'',iid:x._iid||''})}
 /* Etiqueta de tipo (LP = álbum) */
@@ -2441,8 +2443,8 @@ if(my!=apTok)return;paint(d);
 window.aaLate=function(k,m){if(my==apTok&&k.indexOf('aa3:'+nrm(n))==0&&m&&m.length>d.length){d=m;paint(m)}};
 artistSup(n,d).then(function(d2){if(d2&&d2!==d&&my==apTok)paint(d2)},function(){});
 function paint(d){var el=$('dg');if(!el)return;
-var seen={};allK.forEach(function(q){seen[cln(S.a[q].al)+(isSgK(q)?'|s':'')]=1});
-var more=[];d.sort(function(x,y){return String(y.d||'').localeCompare(String(x.d||''))}).forEach(function(x){var c=cln(x.al)+(x.ty=='single'?'|s':'');if(!cln(x.al)||seen[c])return;seen[c]=1;more.push({al:x.al,ar:x.ar,y:String(x.d||'').slice(0,4),ty:x.ty||'album',img:x.img,cu:x.cu,id:x.id,iid:x.iid||'',k:''})});
+var seen={};allK.forEach(function(q){seen[edk(S.a[q].al)+(isSgK(q)?'|s':'')]=1});
+var more=[];d.sort(function(x,y){return String(y.d||'').localeCompare(String(x.d||''))}).forEach(function(x){var c=edk(x.al)+(x.ty=='single'?'|s':'');if(!cln(x.al)||seen[c])return;seen[c]=1;more.push({al:x.al,ar:x.ar,y:String(x.d||'').slice(0,4),ty:x.ty||'album',img:x.img,cu:x.cu,id:x.id,iid:x.iid||'',k:''})});
 $('tg').textContent='Búsqueda global · '+more.length;
 if(!more.length){el.innerHTML='<div class="h">'+(d.length?'No encontré más álbumes de este artista.':'No pude cargar los álbumes. Revisa tu conexión.')+'</div><button class="more eb" id="rtb">Reintentar</button>';$('rtb').onclick=function(){artistPage(n)};return}
 items=items.slice(0,nl).concat(more);el.innerHTML=grid(more,nl);bind(el);el.insertAdjacentHTML('beforeend','<button class="more eb" id="rfb">Actualizar lista</button>');$('rfb').onclick=function(){idbPut('aa3:'+nrm(n),{d:null,t:0});artistPage(n)}}
@@ -3675,7 +3677,7 @@ var CAL={y:0,m:0,sel:''};
 var ICX='<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>',ICNX='<svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>';
 var PLSVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
 /* Programados: a.plan = 'AAAA-MM-DD'. Deja de estar activo al escucharlo (clAdd) o si se marca escuchado a partir de ese día. */
-function plDate(a){if(!a||a.tmp||!a.plan)return '';if(a.done&&a.t>1e11&&a.t>=dts(a.plan)-43200000)return '';return a.plan}
+function plDate(a){if(!a||a.tmp||!a.plan)return '';if(a.plan<dkey(Date.now()))return '';if(a.done&&a.t>1e11&&a.t>=dts(a.plan)-43200000)return '';return a.plan}
 function plMap(){var m={};Object.keys(S.a).forEach(function(k){var d=plDate(S.a[k]);if(d)(m[d]=m[d]||[]).push(k)});return m}
 function plSet(k,d,t){var a=S.a[k];if(!a)return;if(d){a.plan=d;if(t)a.plt=t}else{delete a.plan;delete a.plt}save();render();try{pushSync()}catch(e){}if(document.body.classList.contains('calo'))calRender()}
 function plTm(t){var f=false;try{f=localStorage.getItem('digz-h24')=='1'}catch(e){}var v=(t||'09:00').split(':'),H=+v[0]||0,M=cp2(+v[1]||0);return f?'a las '+cp2(H)+':'+M:((H%12)==1?'a la ':'a las ')+((H%12)||12)+':'+M+' '+(H>=12?'p. m.':'a. m.')}
@@ -3746,7 +3748,7 @@ try{if(t=='on'){await pushEnable();w.remove();toast('Avisos activados');var sh=$
 else if(t=='off'){await pushDisable();w.remove();toast('Avisos desactivados')}
 else if(t=='test'){var reg=await navigator.serviceWorker.ready,sub=await reg.pushManager.getSubscription();if(!sub)throw new Error('No hay suscripción, vuelve a activar');await pushSyncNow();var r=await fetch(pushUrl()+'/test',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({endpoint:sub.endpoint})});if(!r.ok)throw new Error('El servidor respondió '+r.status);toast('Aviso de prueba enviado')}}
 catch(x){er.textContent=(x&&x.message)||'No se pudo'}b.disabled=false}}
-setTimeout(function(){pushSync()},4000);
+setTimeout(function(){try{var td=dkey(Date.now()),ch=0;Object.keys(S.a).forEach(function(k){var a=S.a[k];if(a&&a.plan&&a.plan<td){delete a.plan;delete a.plt;ch=1}});if(ch){save();render()}}catch(e){}pushSync()},4000);
 (function(){var r0=render;render=function(){var r=r0.apply(this,arguments);try{plBanner()}catch(e){}return r};document.addEventListener('visibilitychange',function(){if(!document.hidden)try{plBanner()}catch(e){}});try{plBanner()}catch(e){}
 setTimeout(function(){try{var t=dkey(Date.now()),n=Object.keys(S.a).filter(function(k){return plDate(S.a[k])==t}).length;if(n)toast(n==1?'Hoy tienes 1 álbum programado':'Hoy tienes '+n+' álbumes programados')}catch(e){}},1500)})();
 function cp2(n){return n<10?'0'+n:''+n}
