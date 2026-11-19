@@ -1024,6 +1024,12 @@ try{matchMedia('(prefers-color-scheme:dark)').addListener(function(){var t=dzLoa
 .eb,.cgo,.rtb,#sh .eb{border-radius:99px;padding:13px 16px;font-weight:700;color:var(--tx)!important;background:linear-gradient(rgba(var(--acr),.20),rgba(var(--acr),.20)),var(--navbg)!important;border:1px solid rgba(var(--acr),.5)!important;box-shadow:0 4px 14px rgba(0,0,0,.12);-webkit-backdrop-filter:blur(14px) saturate(1.4);backdrop-filter:blur(14px) saturate(1.4)}
 .eb:active,.cgo:active{background:linear-gradient(rgba(var(--acr),.34),rgba(var(--acr),.34)),var(--navbg)!important}
 </style>
+<style id="v229">
+/* v229: corazón, compartir y flecha de atrás: fondo con el color del tema (el mismo de los chips) e iconos en gris */
+.btns .hb,.btns .hb.on,.btns .hb:hover,.btns .hb:focus,.btns .hb:active,.btns .shb,.btns .shb:hover,.btns .shb:focus,.btns .shb:active,.rb,.bk,.cfg-bk{background:color-mix(in srgb,var(--ac2) 94%,transparent)!important;border:1px solid rgba(var(--acr),.34)!important;box-shadow:0 1px 6px rgba(0,0,0,.10)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+.btns .hb,.btns .shb,.rb,.bk,.cfg-bk{color:var(--mut)!important}
+.btns .hb.on{color:#ff4d6d!important}
+</style>
 </head>
 <body>
 <header id="hd">
@@ -1512,7 +1518,9 @@ function refreshView(){if(cur)rs2(cur);else if(ui.o)render()}
 function aiOf(ks){for(var i=0;i<ks.length;i++){var m=M[ks[i]];if(m&&m.ai)return m.ai}return ''}
 function qe(s){return encodeURIComponent(s)}
 /* Enlaces al álbum concreto: se abre el primer resultado de la búsqueda en ese sitio (DuckDuckGo «!ducky»), no la página de búsqueda */
-function lucky(site,a,x){return 'https://duckduckgo.com/?q='+qe('!ducky site:'+site+' '+a.ar+' '+a.al+(x?' '+x:''))}
+/* Enlace normal al álbum en cada sitio: pasa por tu Worker, que lo redirige a la página exacta (o a la búsqueda del sitio si no la encuentra). Se abre fuera de la app, como cualquier enlace. */
+function lkPx(){return (typeof PXC!='undefined'&&PXC)||DEF_PROXY||''}
+function lucky(site,a,x){var P=lkPx();if(!P)return lkFb(site,a,x);return P+(P.slice(-1)=='/'?'':'/')+'?go='+qe(site)+'&q='+qe(a.ar+' '+a.al+(x?' '+x:''))}
 function albumLinks(k){var a=S.a[k];
 return [['Metacritic','metacritic',lucky('metacritic.com/music',a)],['Album of the Year','aoty',lucky('albumoftheyear.org/album',a)],['RYM','rym',lucky('rateyourmusic.com/release',a)],['Pitchfork','pitchfork',lucky('pitchfork.com/reviews/albums',a)],['AllMusic','allmusic',lucky('allmusic.com/album',a)],['Rolling Stone','rstone',lucky('rollingstone.com',a,'review')],['NME','nme',lucky('nme.com',a,'review')],['Sputnikmusic','sputnik',lucky('sputnikmusic.com/review',a)],['Stereogum','stereogum',lucky('stereogum.com',a,'review')],['Consequence','consequence',lucky('consequence.net',a,'review')],['The Needle Drop','needle',lucky('youtube.com',a,'theneedledrop review')],['Discogs','discogs',lucky('discogs.com/master',a)],['Genius','genius',lucky('genius.com/albums',a)],['Wikipedia','wiki',lucky('en.wikipedia.org',a,'album')]]}
 function artistLinks(n){var q=qe(n);
@@ -1522,6 +1530,9 @@ function siteList(L,u){u=u||{};return '<div class="sl">'+L.map(function(x){var d
 function alSets(k){var a=S.a[k],m=M[k],u=(m&&m.u)||{},u2={};for(var z in u)u2[z]=u[z];if(a.mb)u2.mb='https://musicbrainz.org/release-group/'+a.mb;var AL=albumLinks(k);AL.splice(AL.length-1,0,['MusicBrainz','mb','']);if(!a.mb)AL=AL.filter(function(x){return x[1]!='mb'});
 var CRK=['metacritic','aoty','rym','pitchfork','allmusic','rstone','nme','sputnik','stereogum','consequence','needle'];return {u:u2,cr:AL.filter(function(x){return CRK.indexOf(x[1])>-1}),inf:AL.filter(function(x){return CRK.indexOf(x[1])<0})}}
 function lkRow(L,u){return '<div class="lk">'+L.map(function(x){var d=u[x[1]];return '<a class="'+(d?'d':'')+'" href="'+esc(d||x[2])+'" target="_blank" rel="noopener">'+esc(x[0])+'</a>'}).join('')+'</div>'}
+/* Búsqueda propia del sitio, solo como último recurso si no se encuentra la página exacta */
+function lkFb(site,al,x){var host=site.split('/')[0],Q=qe(al.ar+' '+al.al+(x?' '+x:'')),m={'metacritic.com':'https://www.metacritic.com/search/'+qe(al.al+' '+al.ar)+'/','albumoftheyear.org':'https://www.albumoftheyear.org/search/?q='+Q,'rateyourmusic.com':'https://rateyourmusic.com/search?searchterm='+Q+'&searchtype=l','pitchfork.com':'https://pitchfork.com/search/?query='+Q,'allmusic.com':'https://www.allmusic.com/search/albums/'+Q,'sputnikmusic.com':'https://www.sputnikmusic.com/search_results.php?search_in=Album&search_text='+Q,'youtube.com':'https://www.youtube.com/results?search_query='+Q,'discogs.com':'https://www.discogs.com/search/?type=master&q='+Q,'genius.com':'https://genius.com/search?q='+Q,'en.wikipedia.org':'https://en.wikipedia.org/w/index.php?search='+Q};
+return m[host]||('https://www.google.com/search?q='+qe('site:'+host+' '+al.ar+' '+al.al+(x?' '+x:'')))}
 
 /* ---------- Wikipedia (secundaria) ---------- */
 var W={},wq={};try{localStorage.removeItem('digz-wiki')}catch(e){}
