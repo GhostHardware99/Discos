@@ -1035,7 +1035,7 @@ try{matchMedia('(prefers-color-scheme:dark)').addListener(function(){var t=dzLoa
 /* v233: UN solo estilo para (a) botones de icono (atrás, corazón, compartir, menú, cerrar) y (b) campos/botones secundarios */
 :root{--ib:46px;--ibr:14px}
 .rb,.bk,.cfg-bk,#ov .rb,#ov .htop .rb,.hero .rb,.hero.colpg>.htop .rb,#ov .hero.colpg.cs-full>.htop .rb,#ov .hero.colpg.cs-band>.htop .rb,#sh .hd.bh .rb,.cadd .bk,#dsc .dh .dback,.btns .hb,.btns .hb.on,.btns .shb,.hd>#x:not([class]),.cmh>button{
-width:var(--ib)!important;height:var(--ib)!important;min-width:0!important;padding:0!important;border-radius:var(--ibr)!important;display:inline-flex!important;align-items:center;justify-content:center;flex:none;
+width:var(--ib)!important;height:var(--ib)!important;min-width:0!important;padding:0!important;border-radius:50%!important;display:inline-flex!important;align-items:center;justify-content:center;flex:none;
 background:color-mix(in srgb,var(--ac2) 94%,transparent)!important;border:1px solid rgba(var(--acr),.45)!important;box-shadow:0 1px 6px rgba(var(--acr),.18)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;color:var(--mut)!important;font-size:18px;line-height:1}
 .rb svg,.bk svg,.cfg-bk svg,.btns .hb svg,.btns .shb svg,.cmh>button svg,.hero.colpg.cs-full>.htop .rb svg,.hero.colpg.cs-band>.htop .rb svg{width:22px;height:22px;filter:none!important}
 .btns .hb.on,.btns .hb.on svg{color:#ff4d6d!important}
@@ -1049,8 +1049,11 @@ background:color-mix(in srgb,var(--ac2) 94%,transparent)!important;border:1px so
 .card>button:not(.p):not(.dg):not(.dgb),.row>button:not(.p):not(.dg):not(.dgb),.card .row>button:not(.p){background:rgba(var(--acr),.12)!important;border:1px solid rgba(var(--acr),.3)!important;border-radius:var(--ibr)!important;color:var(--tx)!important;font-weight:700;box-shadow:none!important}
 .card>button:not(.p):not(.dg):not(.dgb):active,.row>button:not(.p):active{background:rgba(var(--acr),.24)!important}
 .card>button.p,.row>button.p{border-radius:var(--ibr)}
-#nav .sbx button{border-radius:10px!important}
+#nav .sbx button{border-radius:50%!important}
 .cmh>button svg{fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+#list .tl{content-visibility:auto;contain-intrinsic-size:auto 176px}
+.hbg img{filter:blur(26px) saturate(1.3)!important}
+.btns .hb,.btns .hb.on,.btns .shb{border-radius:var(--ibr)!important}
 </style>
 </head>
 <body>
@@ -2439,6 +2442,8 @@ return seRace([function(){return seDzArt(v)},function(){return seItArt(v)},lazy(
 /* Mantiene el formato que ya usa la interfaz (objetos tipo «release-group») */
 function buscarMB(v){return seAlbums(v).then(function(l){return {'release-groups':l.map(function(x){return {title:x.al,'artist-credit':[{name:x.ar}],'first-release-date':x.y||'',id:x.mb||'','primary-type':x.type=='ep'?'EP':x.type=='single'?'Single':'Album',_cu:x.cu||x.img||'',_did:x.id,_iid:x.iid}})}})}
 
+function buscarArtX(v){var sp=seSplit(v);return Promise.all([buscarArt(v).catch(function(){return []}),sp?buscarArt(sp.ar).catch(function(){return []}):[]]).then(function(r){var o=[],z={};r[0].concat(r[1]).forEach(function(n){var q=nrm(n);if(n&&!z[q]){z[q]=1;o.push(n)}});return o.slice(0,4)})}
+function seArtFromAlb(ars,l,v){var o=ars.slice(),z={},tk=seToks(v);o.forEach(function(n){z[nrm(n)]=1});if(tk.length)l.slice(0,20).forEach(function(x){var n=((x['artist-credit']||[{}])[0]||{}).name;if(!n||z[nrm(n)]||o.length>=4)return;var h=' '+seW(n)+' ';if(tk.every(function(w){return h.indexOf(' '+w+' ')>-1})){z[nrm(n)]=1;o.push(n)}});return o}
 function ahtml(ars){return ars.length?'<div class="sec">Artistas</div>'+ars.map(function(n,i){var c=hue(n);return '<div class="li" data-ar="'+i+'"><div class="cv sm" style="background:linear-gradient(145deg,hsl('+c+',50%,42%),hsl('+((c+50)%360)+',55%,20%));border-radius:50%"><span>'+esc(ini(n))+'</span></div><div class="in"><div class="t">'+esc(n)+'</div><div class="a">Artista</div></div><b>›</b></div>'}).join(''):''}
 var apTok=0;
 function dzArtAlb(n,aid){return jsonp('https://api.deezer.com/artist/'+aid+'/albums?limit=100',6000).then(function(d){var ix={},out=[];(d.data||[]).filter(function(x){return x.title}).forEach(function(x){var q={al:x.title,ar:n,ty:dty(x.record_type),d:String(x.release_date||''),img:x.cover_big||x.cover_medium||'',cu:'',id:String(x.id||''),iid:''},c=cln(q.al)+(q.ty=='single'?'|s':'');if(!cln(q.al)||ix[c])return;ix[c]=1;out.push(q)});return out.sort(function(a,b){return String(b.d).localeCompare(String(a.d))})},function(){return []})}
@@ -3018,7 +3023,7 @@ show('<div class="hd"><div class="t">Añadir álbum</div><button id="x">✕</but
 $('x').onclick=ovBack;var tm,tok=0;
 $('cq').oninput=function(){var qt=window.seQuiet;clearTimeout(tm);if(mbAb)mbAb.abort();ui.cqv=this.value;var v=this.value.trim();if(v.length<2){tok++;$('cr').innerHTML='';return}
 tm=setTimeout(function(){var my=++tok;if(!qt)$('cr').innerHTML='<div class="h">Buscando…</div>';
-Promise.all([buscarMB(v),buscarArt(v).catch(function(){return []})]).then(function(rs){var d=rs[0],ars=rs[1];if(my!=tok)return;var l=d['release-groups']||[];
+Promise.all([buscarMB(v),buscarArtX(v)]).then(function(rs){var d=rs[0],ars=seArtFromAlb(rs[1],d['release-groups']||[],v);if(my!=tok)return;var l=d['release-groups']||[];
 $('cr').innerHTML=ahtml(ars)+(l.length?'<div class="sec">Álbumes, EP y sencillos</div>':'')+l.map(function(x,i){var ar=acs(x)[0]||'Desconocido',y=(x['first-release-date']||'').slice(0,4),h=hue(x.title+ar),ty=tyl(x,l);
 return '<div class="li" data-i="'+i+'" data-gk="'+esc(kof(ar,ttl(x)))+'"><div class="cv sm" style="background:linear-gradient(145deg,hsl('+h+',50%,42%),hsl('+((h+50)%360)+',55%,20%))"><span>'+esc(ini(x.title))+'</span>'+(x._cu?'<img alt="" src="'+esc(x._cu)+'" onerror="this.remove()">':(NC[x.id]?'':'<img loading="lazy" alt="" data-m="'+x.id+'" src="'+covurl(x.id,250)+'" onerror="ncv(this)">'))+'</div><div class="in"><div class="t">'+esc(x.title)+'</div><div class="a">'+esc(ar)+(y?' · '+y:'')+ty+'</div></div><b>'+(S.a[kof(ar,ttl(x))]?'✓':'＋')+'</b></div>'}).join('')||(ars.length?'':'<div class="empty">Sin resultados</div>');
 [].forEach.call($('cr').querySelectorAll('[data-ar]'),function(r){r.onclick=function(){artistPage(ars[r.dataset.ar])}});
@@ -3451,7 +3456,7 @@ document.addEventListener('selate',function(e){var q=$('cq');if(q&&q.offsetParen
 var gLastAuto=false;
 function gsearch(now,auto){gLastAuto=auto;var qt=window.seQuiet,T=function(){return auto?$('gauto'):$('list')},OK=function(){return $('nav').classList.contains('qs')};clearTimeout(gTm);if(mbAb)mbAb.abort();var v=(ui.q||'').trim();if(v.length<2){gTok++;T().innerHTML='';return}
 gTm=setTimeout(function(){var my=++gTok;if(!qt)T().innerHTML='<div class="h">Buscando…</div>';
-Promise.all([buscarMB(v),buscarArt(v).catch(function(){return []})]).then(function(rs){var d=rs[0],ars=rs[1];if(my!=gTok||!OK())return;var l=d['release-groups']||[];
+Promise.all([buscarMB(v),buscarArtX(v)]).then(function(rs){var d=rs[0],ars=seArtFromAlb(rs[1],d['release-groups']||[],v);if(my!=gTok||!OK())return;var l=d['release-groups']||[];
 var gens=gnMatch(v);T().innerHTML=(auto?'<div class="sch">Búsqueda global</div>':'')+ghtml(gens)+ahtml(ars)+(l.length?'<div class="sec">Álbumes, EP y sencillos</div>':'')+l.map(function(x,i){var ar=acs(x)[0]||'Desconocido',y=(x['first-release-date']||'').slice(0,4),h=hue(x.title+ar),ty=tyl(x,l);
 return '<div class="li" data-i="'+i+'" data-gk="'+esc(kof(ar,ttl(x)))+'"><div class="cv sm" style="background:linear-gradient(145deg,hsl('+h+',50%,42%),hsl('+((h+50)%360)+',55%,20%))"><span>'+esc(ini(x.title))+'</span>'+(x._cu?'<img alt="" src="'+esc(x._cu)+'" onerror="this.remove()">':(NC[x.id]?'':'<img loading="lazy" alt="" data-m="'+x.id+'" src="'+covurl(x.id,250)+'" onerror="ncv(this)">'))+'</div><div class="in"><div class="t">'+esc(x.title)+'</div><div class="a">'+esc(ar)+(y?' · '+y:'')+ty+'</div></div><b>'+(S.a[kof(ar,ttl(x))]&&!S.a[kof(ar,ttl(x))].tmp?'✓':'＋')+'</b></div>'}).join('')||(ars.length||gens.length?'':'<div class="empty">Sin resultados</div>');
 [].forEach.call(T().querySelectorAll('[data-gn]'),function(r){r.onclick=function(){var g=gens[r.dataset.gn];APT['genre:'+gNorm(g)]=1;genrePage(g)}});
